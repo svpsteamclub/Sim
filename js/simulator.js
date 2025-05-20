@@ -161,11 +161,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initial robot position for the rounded square track
         const margin = 40; // Margin from canvas edge to track
+        const trackBottomSegmentY = margin + (canvas.height - 2 * margin); // Y-coordinate of the bottom track segment's centerline
+
         robot.x = canvas.width / 2; // Start horizontally centered
-        robot.y = margin + (canvas.height - 2 * margin); // On the bottom segment of the track
         
-        // === ROBOT ORIENTED TO POINT LEFT INITIALLY ===
-        robot.angle = Math.PI; // Pointing LEFT (positive X is right, so PI is left)
+        // Adjust robot's center Y so sensors are on the line when robot points left
+        // robot.sensors[1] is the center sensor. Its y is typically -20 (local coord "forward").
+        // When robot.angle = Math.PI (pointing left), local -Y (forward) points DOWN in world coords.
+        // The offset from robot center to sensor in world Y is -robot.sensors[1].y (e.g., -(-20) = 20).
+        // So, we want robot_center_y + (-robot.sensors[1].y) = trackBottomSegmentY
+        // robot_center_y = trackBottomSegmentY + robot.sensors[1].y
+        // Since robot.sensors[1].y is negative, this moves the robot center UP from the track line.
+        robot.y = trackBottomSegmentY + robot.sensors[1].y; 
+
+        robot.angle = Math.PI; // Pointing LEFT
 
         robot.speedL = 0;
         robot.speedR = 0;
@@ -213,10 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
         robot.x += V * Math.cos(robot.angle) * dt * effectiveDtScaling;
         robot.y += V * Math.sin(robot.angle) * dt * effectiveDtScaling;
         robot.angle += omega * dt * effectiveDtScaling;
-
-        // Basic boundary collision (optional, robot should follow line)
-        // robot.x = Math.max(0, Math.min(canvas.width, robot.x));
-        // robot.y = Math.max(0, Math.min(canvas.height, robot.y));
 
         // Update sensors based on new position
         const offCtx = track.offscreenCanvas.getContext('2d');
