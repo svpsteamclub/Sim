@@ -23,79 +23,148 @@
             <div class="code-area">
                 <h2>Robot Code (Arduino-like JavaScript)</h2>
                 <textarea id="codeEditor" rows="20" cols="70">
-// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital
-const CENTER_SENSOR_PIN = 3; // Digital
-const RIGHT_SENSOR_PIN = 4;  // Digital
-
-const MOTOR_LEFT_PWM = 6;    // analogWrite for speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for speed
-// For simplicity, we assume motors always go forward.
-// Add direction pins if you want to control forward/backward.
-
-// Speeds
-const MAX_SPEED = 150; // Max motor speed (0-255)
-const TURN_SPEED = 80;
-const CORRECTION_SPEED = 100;
-
-function setup() {
-    Serial.begin(9600); // Just for show in simulator
-    pinMode(LEFT_SENSOR_PIN, INPUT);
-    pinMode(CENTER_SENSOR_PIN, INPUT);
-    pinMode(RIGHT_SENSOR_PIN, INPUT);
-
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-
-    Serial.println("Robot Setup Complete!");
-}
-
-async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);   // 1 if OFF line, 0 if ON line
-    let sC = digitalRead(CENTER_SENSOR_PIN); // (assuming black line on white background)
-    let sR = digitalRead(RIGHT_SENSOR_PIN);
-
-    // Serial.print("Sensors: L:");
-    // Serial.print(sL);
-    // Serial.print(" C:");
-    // Serial.print(sC);
-    // Serial.print(" R:");
-    // Serial.println(sR);
-
-    if (sL === 0 && sC === 1 && sR === 1) { // Only Left sensor on line
-        Serial.println("Hard Left Turn");
-        analogWrite(MOTOR_LEFT_PWM, 0);
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-    } else if (sL === 1 && sC === 0 && sR === 1) { // Only Center sensor on line
-        Serial.println("Straight");
-        analogWrite(MOTOR_LEFT_PWM, MAX_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, MAX_SPEED);
-    } else if (sL === 1 && sC === 1 && sR === 0) { // Only Right sensor on line
-        Serial.println("Hard Right Turn");
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, 0);
-    } else if (sL === 0 && sC === 0 && sR === 1) { // Left and Center on line
-        Serial.println("Gentle Left");
-        analogWrite(MOTOR_LEFT_PWM, CORRECTION_SPEED / 2);
-        analogWrite(MOTOR_RIGHT_PWM, CORRECTION_SPEED);
-    } else if (sL === 1 && sC === 0 && sR === 0) { // Right and Center on line
-        Serial.println("Gentle Right");
-        analogWrite(MOTOR_LEFT_PWM, CORRECTION_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, CORRECTION_SPEED / 2);
-    } else if (sL === 0 && sC === 0 && sR === 0) { // All on line (e.g., intersection or thick line)
-        Serial.println("All on line - Straight");
-        analogWrite(MOTOR_LEFT_PWM, MAX_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, MAX_SPEED);
-    }
-    else { // All off line (lost line)
-        Serial.println("Lost line - Stop or search");
-        // Simple stop for now
-        analogWrite(MOTOR_LEFT_PWM, 150);
-        analogWrite(MOTOR_RIGHT_PWM, 0);
-    }
-
-    await delay(20); // Run loop approx 50 times a second
-}
+                    // Pin Definitions (as used in the simulator)
+                    const LEFT_SENSOR_PIN = 2;   // Digital
+                    const CENTER_SENSOR_PIN = 3; // Digital
+                    const RIGHT_SENSOR_PIN = 4;  // Digital
+                    
+                    const MOTOR_LEFT_PWM = 6;    // analogWrite for speed
+                    const MOTOR_RIGHT_PWM = 5;   // analogWrite for speed
+                    
+                    // PID Constants - THESE WILL REQUIRE CAREFUL TUNING!
+                    let Kp = 40.0; // Proportional gain
+                    let Ki = 0.2;  // Integral gain
+                    let Kd = 30.0;  // Derivative gain
+                    
+                    // Speeds and Limits
+                    const BASE_SPEED = 120;      // Base speed for both motors when on line
+                    const MAX_MOTOR_SPEED = 255; // Max possible motor speed PWM value
+                    const MIN_MOTOR_SPEED = 0;   // Min possible motor speed (stop)
+                    
+                    // PID Variables
+                    let error = 0;
+                    let previousError = 0;
+                    let integral = 0;
+                    let derivative = 0;
+                    
+                    // Integral wind-up limits
+                    const INTEGRAL_MIN = -100;
+                    const INTEGRAL_MAX = 100;
+                    
+                    function setup() {
+                        Serial.begin(9600); // For debugging output
+                        pinMode(LEFT_SENSOR_PIN, INPUT);
+                        pinMode(CENTER_SENSOR_PIN, INPUT);
+                        pinMode(RIGHT_SENSOR_PIN, INPUT);
+                    
+                        pinMode(MOTOR_LEFT_PWM, OUTPUT);
+                        pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+                    
+                        Serial.println("Robot Setup Complete with PID Controller!");
+                        Serial.println("Ensure Kp, Ki, Kd, and BASE_SPEED are tuned for your robot.");
+                    }
+                    
+                    async function loop() {
+                        // Read sensor values (0 = ON line, 1 = OFF line for black line on white background)
+                        let sL = digitalRead(LEFT_SENSOR_PIN);
+                        let sC = digitalRead(CENTER_SENSOR_PIN);
+                        let sR = digitalRead(RIGHT_SENSOR_PIN);
+                    
+                        // Calculate error based on sensor readings.
+                        // Positive error: robot is to the left of the line (needs to turn right).
+                        // Negative error: robot is to the right of the line (needs to turn left).
+                        // Error = 0: robot is centered.
+                        if (sL === 1 && sC === 0 && sR === 1) { // Only Center sensor on line
+                            error = 0;
+                            Serial.println("Status: Center on line");
+                        } else if (sL === 0 && sC === 1 && sR === 1) { // Only Left sensor on line (robot is to the right of the line)
+                            error = -2; // Strong correction to the left needed
+                            Serial.println("Status: Robot right of line (Left sensor on line) -> Turn Left");
+                        } else if (sL === 1 && sC === 1 && sR === 0) { // Only Right sensor on line (robot is to the left of the line)
+                            error = 2;  // Strong correction to the right needed
+                            Serial.println("Status: Robot left of line (Right sensor on line) -> Turn Right");
+                        } else if (sL === 0 && sC === 0 && sR === 1) { // Left and Center on line (robot is slightly to the right)
+                            error = -1; // Gentle correction to the left needed
+                            Serial.println("Status: Robot slightly right (L+C sensors on line) -> Turn Left gently");
+                        } else if (sL === 1 && sC === 0 && sR === 0) { // Right and Center on line (robot is slightly to the left)
+                            error = 1;  // Gentle correction to the right needed
+                            Serial.println("Status: Robot slightly left (R+C sensors on line) -> Turn Right gently");
+                        } else if (sL === 0 && sC === 0 && sR === 0) { // All sensors on line (e.g., intersection or thick line)
+                            error = 0; // Treat as centered
+                            Serial.println("Status: All sensors on line - Straight");
+                        } else if (sL === 1 && sC === 1 && sR === 1) { // All sensors off line (lost line)
+                            // When the line is lost, the PID controller will use the 'previousError'.
+                            // This means it will continue the last corrective action.
+                            // For example, if it was turning left when it lost the line, it will continue turning left.
+                            // 'error' variable retains its value from the previous loop if no new state is matched.
+                            // However, it's better to explicitly set error to previousError if no sensors are hit.
+                            // Or, for a more robust lost line behavior, you might implement a specific search pattern
+                            // or use the last known significant error to make a more decisive turn.
+                            // For this implementation, we let 'error' be the 'previousError' implicitly by not changing it.
+                            Serial.println("Status: Lost line - relying on previous error");
+                            // error = previousError; // Explicitly: continue last action.
+                                                   // If previousError was 0, it will try to go straight.
+                                                   // If Kp, Ki, Kd are tuned well, this might help it re-acquire.
+                        }
+                        // If no condition above is met (e.g. sL=1,sC=1,sR=1 and previousError was not handled),
+                        // error will retain its value from the last valid sensor reading.
+                    
+                        // PID Calculation
+                        integral = integral + error;
+                        // Anti-windup for integral term
+                        integral = constrain(integral, INTEGRAL_MIN, INTEGRAL_MAX);
+                    
+                        derivative = error - previousError;
+                    
+                        // The PID output determines the amount of correction.
+                        // Positive pidOutput means turn right. Negative pidOutput means turn left.
+                        let pidOutput = (Kp * error) + (Ki * integral) + (Kd * derivative);
+                    
+                        previousError = error; // Save current error for the next iteration's derivative calculation.
+                    
+                        // Calculate motor speeds
+                        // If pidOutput is positive (needs to turn right), left motor increases, right motor decreases.
+                        // If pidOutput is negative (needs to turn left), left motor decreases, right motor increases.
+                        let leftMotorSpeed = BASE_SPEED + pidOutput;
+                        let rightMotorSpeed = BASE_SPEED - pidOutput;
+                    
+                        // Constrain motor speeds to be within 0-MAX_MOTOR_SPEED
+                        leftMotorSpeed = constrain(leftMotorSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
+                        rightMotorSpeed = constrain(rightMotorSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
+                    
+                        // Apply speeds to motors
+                        analogWrite(MOTOR_LEFT_PWM, leftMotorSpeed);
+                        analogWrite(MOTOR_RIGHT_PWM, rightMotorSpeed);
+                    
+                        // Debugging output
+                        Serial.print("sL:"); Serial.print(sL);
+                        Serial.print(" sC:"); Serial.print(sC);
+                        Serial.print(" sR:"); Serial.print(sR);
+                        Serial.print(" | Error:"); Serial.print(error);
+                        Serial.print(" P:"); Serial.print(Kp * error, 2);
+                        Serial.print(" I:"); Serial.print(Ki * integral, 2);
+                        Serial.print(" D:"); Serial.print(Kd * derivative, 2);
+                        Serial.print(" PID_Out:"); Serial.print(pidOutput, 2);
+                        Serial.print(" | LSpeed:"); Serial.print(leftMotorSpeed);
+                        Serial.print(" RSpeed:"); Serial.println(rightMotorSpeed);
+                    
+                        await delay(20); // Run loop approximately 50 times a second
+                    }
+                    
+                    // Helper function to constrain a value within a range (standard in Arduino C++, needed for JS)
+                    function constrain(value, minVal, maxVal) {
+                        return Math.min(Math.max(value, minVal), maxVal);
+                    }
+                    
+                    // Note: If not using a simulator environment that predefines these,
+                    // you would need to implement dummy functions for pinMode, digitalRead, analogWrite, Serial.
+                    // For example:
+                    // function pinMode(pin, mode) { console.log(`Pin ${pin} set to ${mode}`); }
+                    // function digitalRead(pin) { console.log(`Reading pin ${pin}`); return 1; } // return 0 or 1
+                    // function analogWrite(pin, value) { console.log(`Pin ${pin} set to ${value}`); }
+                    // const Serial = { begin: (rate) => console.log(`Serial begin at ${rate}`), print: (msg) => console.log(msg), println: (msg) => console.log(msg) };
+                    // async function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+                    
                 </textarea>
             </div>
 
