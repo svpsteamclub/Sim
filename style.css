@@ -3,26 +3,39 @@ body {
     margin: 20px;
     background-color: #f4f4f4;
     color: #333;
+    display: flex; /* Use flex for centering the main content */
+    flex-direction: column; /* Stack title and container */
+    align-items: center; /* Center items horizontally */
 }
 
-h1, h2, h3 {
+h1 {
     color: #333;
+    text-align: center;
+    width: 100%; /* Make h1 take full width for centering */
 }
 
 .container {
     display: flex;
+    flex-direction: column; /* Stack simulation, code, and serial areas */
+    align-items: center; /* Center these stacked items */
     gap: 20px;
-    flex-wrap: wrap;
+    width: fit-content; /* Adjust width to content */
 }
 
 .simulation-area {
-    flex: 2;
-    min-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center canvas and controls */
+    min-width: 600px; /* Keep canvas area adequately sized */
 }
 
 #simulationCanvas {
     border: 1px solid #ccc;
     background-color: #fff;
+}
+
+.controls {
+    margin-top: 10px; /* Space between canvas and buttons */
 }
 
 .controls button {
@@ -39,29 +52,59 @@ h1, h2, h3 {
     background-color: #0056b3;
 }
 
-.code-area {
-    flex: 1;
-    min-width: 400px;
+.editor-monitor-container {
+    display: flex;
+    flex-direction: row; /* Place editor and monitor side-by-side */
+    gap: 20px;
+    width: 100%; /* Make this container take available width for children sizing */
+    justify-content: center; /* Center the editor and monitor if they don't fill width */
 }
 
+.code-area {
+    flex: 2; /* Give more space to code editor */
+    min-width: 450px; /* Minimum width for usability */
+}
+
+.serial-output-area {
+    flex: 1; /* Less space for serial output */
+    min-width: 300px; /* Minimum width */
+}
+
+
 #codeEditor {
-    width: 95%;
+    width: 100%; /* Fill the .code-area */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
     border: 1px solid #ccc;
     padding: 10px;
     font-family: monospace;
     font-size: 0.9em;
-    box-sizing: border-box;
+    min-height: 300px; /* Ensure a decent height */
 }
 
 #serialOutput {
-    width: 95%;
-    height: 150px;
+    width: 100%; /* Fill the .serial-output-area */
+    box-sizing: border-box;
+    height: 338px; /* Match editor height roughly (adjust as needed) */
     border: 1px solid #ccc;
     background-color: #e9e9e9;
     padding: 10px;
     overflow-y: auto;
     font-family: monospace;
     font-size: 0.8em;
-    white-space: pre-wrap; /* To wrap lines */
-    box-sizing: border-box;
+    white-space: pre-wrap;
+}
+
+/* Adjustments for smaller screens if needed */
+@media (max-width: 900px) {
+    .editor-monitor-container {
+        flex-direction: column; /* Stack editor and monitor on smaller screens */
+        align-items: center;
+    }
+    .code-area, .serial-output-area {
+        width: 90%; /* Or specify a max-width like 600px */
+        max-width: 600px;
+    }
+    #serialOutput {
+        height: 150px; /* Reduce height when stacked */
+    }
 }

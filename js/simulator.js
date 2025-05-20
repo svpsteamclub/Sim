@@ -18,14 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
         y: 0, // Will be set in resetSimulation
         width: 30,
         height: 40,
-        angle: 0, // Will be set in resetSimulation
+        angle: 0, // Will be set in resetSimulation to point UP
         color: 'blue',
         wheelBase: 28,
         speedL: 0,
         speedR: 0,
-        maxSpeedSim: 2,
+        maxSpeedSim: 2, // Max pixels per frame factor at 255 input
 
-        sensors: [
+        sensors: [ // Relative to robot center, {x, y} (y is "forward")
             { x: -12, y: -18, value: 1, color: 'gray' }, // Left
             { x: 0,   y: -20, value: 1, color: 'gray' }, // Center
             { x: 12,  y: -18, value: 1, color: 'gray' }  // Right
@@ -36,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Track properties
     const track = {
         lineColor: 'black',
-        lineWidth: 10, // Made thinner
+        lineWidth: 10, // Track line thickness
         // Rounded rectangle path
         path: (context) => {
-            const margin = 40;
+            const margin = 40; // Margin from canvas edge to the track
             const cornerRadius = 30;
             const rectX = margin;
             const rectY = margin;
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             context.strokeStyle = track.lineColor;
             context.lineWidth = track.lineWidth;
 
-            // Start at top-left after corner
+            // Start at top-left after corner (for drawing, actual robot start is different)
             context.moveTo(rectX + cornerRadius, rectY);
             // Top edge
             context.lineTo(rectX + rectWidth - cornerRadius, rectY);
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             context.stroke(); // Draw the path
         }
     };
-    track.offscreenCanvas = null; // Initialize offscreen canvas
+    track.offscreenCanvas = null; // Initialize offscreen canvas for pixel detection
 
     // --- Arduino API Shim ---
     let _pinModes = {};
@@ -88,16 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pin === 2) return robot.sensors[0].value; // Left
             if (pin === 3) return robot.sensors[1].value; // Center
             if (pin === 4) return robot.sensors[2].value; // Right
-            return arduinoAPI.LOW; // Default
+            return arduinoAPI.LOW; // Default if pin not mapped
         },
         analogWrite: (pin, value) => {
-            value = Math.max(0, Math.min(255, value));
+            value = Math.max(0, Math.min(255, value)); // Clamp value
             // User defines constants like MOTOR_LEFT_PWM = 5;
             if (pin === 5) robot.speedL = value;
             if (pin === 6) robot.speedR = value;
         },
         delay: async (ms) => {
-            if (!simulationRunning) return;
+            if (!simulationRunning) return; // Don't delay if simulation stopped
             return new Promise(resolve => setTimeout(resolve, ms));
         },
         Serial: {
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             print: function(msg) {
                 this._buffer += String(msg);
                 serialOutput.textContent += String(msg);
-                serialOutput.scrollTop = serialOutput.scrollHeight;
+                serialOutput.scrollTop = serialOutput.scrollHeight; // Auto-scroll
             },
             println: function(msg = "") {
                 this.print(String(msg) + '\n');
@@ -117,26 +117,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // Standard Arduino constants
         HIGH: 1,
         LOW: 0,
-        INPUT: 0, // Typically represented as strings "INPUT", "OUTPUT" but numbers are fine here
-        OUTPUT: 1,
-        // NOTE: Pin number constants like LEFT_SENSOR_PIN are NOT part of arduinoAPI.
-        // The user's code is expected to define them (e.g., const LEFT_SENSOR_PIN = 2;).
-        // This resolves the "already declared" error.
+        INPUT: "INPUT", // Using strings for pinMode clarity, could be numbers
+        OUTPUT: "OUTPUT",
     };
 
     let userSetupFunction = () => {};
-    let userLoopFunction = async () => {};
+    let userLoopFunction = async () => {}; // loop must be async for await delay()
 
     function loadUserCode() {
         const code = codeEditor.value;
-        serialOutput.textContent = "";
+        serialOutput.textContent = ""; // Clear serial output on new load
         arduinoAPI.Serial._buffer = "";
 
         try {
+            // Create a function with access to the Arduino API shims
+            // The user code defines 'setup' and 'loop' globally in its own scope
             const userScript = new Function(
-                ...Object.keys(arduinoAPI),
-                code + '; return { setup, loop };'
+                ...Object.keys(arduinoAPI), // Make API functions available as arguments
+                code + '; return { setup, loop };' // User code + return statement to get setup/loop
             );
+            // Call the function, passing the API objects/functions as arguments
             const { setup: loadedSetup, loop: loadedLoop } = userScript(...Object.values(arduinoAPI));
 
             if (typeof loadedSetup !== 'function') throw new Error("setup() function not found or not a function.");
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Error processing user code:", e);
             serialOutput.textContent = "Error in user code: " + e.message + "\n" + (e.stack || '');
-            userSetupFunction = () => {};
+            userSetupFunction = () => {}; // Reset to prevent running broken code
             userLoopFunction = async () => {};
             return false;
         }
@@ -160,104 +160,116 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSimulation();
 
         // Initial robot position for the rounded square track
-        const margin = 40;
-        robot.x = canvas.width / 2; // Start in the middle of the bottom edge
-        robot.y = margin + (canvas.height - 2 * margin); // Bottom edge Y
-        robot.angle = 0; // Pointing right
+        const margin = 40; // Margin from canvas edge to track
+        robot.x = canvas.width / 2; // Start horizontally centered
+        robot.y = margin + (canvas.height - 2 * margin); // On the bottom segment of the track
+        
+        // === ROBOT ROTATED 90 DEGREES TO POINT UPWARDS ===
+        robot.angle = -Math.PI / 2; // Pointing UPWARDS (negative Y direction in canvas coords)
 
         robot.speedL = 0;
         robot.speedR = 0;
-        robot.sensors.forEach(s => s.value = 1);
+        robot.sensors.forEach(s => s.value = 1); // Reset sensor values (1 = off line)
         _pinModes = {};
-        serialOutput.textContent = "";
+        serialOutput.textContent = ""; // Clear serial on reset
         arduinoAPI.Serial._buffer = "";
 
-        // Prepare offscreen canvas for track detection
-        if (!track.offscreenCanvas) {
+        // Prepare offscreen canvas for track detection (done once or on resize)
+        if (!track.offscreenCanvas || track.offscreenCanvas.width !== canvas.width || track.offscreenCanvas.height !== canvas.height) {
             track.offscreenCanvas = document.createElement('canvas');
             track.offscreenCanvas.width = canvas.width;
             track.offscreenCanvas.height = canvas.height;
+            const offCtx = track.offscreenCanvas.getContext('2d');
+            offCtx.fillStyle = 'white'; // Background
+            offCtx.fillRect(0, 0, canvas.width, canvas.height);
+            track.path(offCtx); // Draw the track onto the offscreen canvas
         }
-        const offCtx = track.offscreenCanvas.getContext('2d');
-        offCtx.fillStyle = 'white'; // Background
-        offCtx.fillRect(0, 0, canvas.width, canvas.height);
-        track.path(offCtx); // Draw the track onto the offscreen canvas
-
-        if (loadUserCode()) {
+        
+        if (loadUserCode()) { // Load code and then run setup
             try {
                 userSetupFunction(); // Call user's setup
                 serialOutput.textContent += "setup() executed.\n";
             } catch (e) {
                 console.error("Error in user setup():", e);
                 serialOutput.textContent += "Error in setup(): " + e.message + "\n";
-                stopSimulation();
+                stopSimulation(); // Stop if setup fails
                 return;
             }
         }
-        draw(); // Draw initial state
+        draw(); // Draw initial state after reset and setup
     }
 
-    function updateRobot(dt) {
+    function updateRobot(dt) { // dt is delta time in seconds
+        // Convert 0-255 speed from analogWrite to simulation movement units
         const vL = (robot.speedL / 255) * robot.maxSpeedSim;
         const vR = (robot.speedR / 255) * robot.maxSpeedSim;
 
-        const V = (vL + vR) / 2;
-        const omega = (vR - vL) / robot.wheelBase;
+        const V = (vL + vR) / 2; // Average linear speed
+        const omega = (vR - vL) / robot.wheelBase; // Angular speed
 
-        // dt is in seconds, scale movement appropriately
-        const effectiveDt = dt * 60; // Assuming target 60fps for scaling factor
+        // Scale dt to make movement speed reasonable. Adjust factor as needed.
+        const effectiveDtScaling = 60; // Arbitrary factor for speed control
 
-        robot.x += V * Math.cos(robot.angle) * effectiveDt;
-        robot.y += V * Math.sin(robot.angle) * effectiveDt;
-        robot.angle += omega * effectiveDt;
+        robot.x += V * Math.cos(robot.angle) * dt * effectiveDtScaling;
+        robot.y += V * Math.sin(robot.angle) * dt * effectiveDtScaling;
+        robot.angle += omega * dt * effectiveDtScaling;
 
+        // Basic boundary collision (optional, robot should follow line)
+        // robot.x = Math.max(0, Math.min(canvas.width, robot.x));
+        // robot.y = Math.max(0, Math.min(canvas.height, robot.y));
 
-        // Keep robot on canvas (very basic boundary, can be improved)
-        if (robot.x < 0) robot.x = 0;
-        if (robot.x > canvas.width) robot.x = canvas.width;
-        if (robot.y < 0) robot.y = 0;
-        if (robot.y > canvas.height) robot.y = canvas.height;
-
+        // Update sensors based on new position
         const offCtx = track.offscreenCanvas.getContext('2d');
         robot.sensors.forEach(sensor => {
+            // Calculate world position of sensor
             const cosA = Math.cos(robot.angle);
             const sinA = Math.sin(robot.angle);
+            // Sensor position relative to robot center, rotated by robot's angle
             const worldX = robot.x + (sensor.x * cosA - sensor.y * sinA);
             const worldY = robot.y + (sensor.x * sinA + sensor.y * cosA);
 
+            // Check pixel color under sensor
             if (worldX >= 0 && worldX < canvas.width && worldY >= 0 && worldY < canvas.height) {
                 const pixelData = offCtx.getImageData(Math.round(worldX), Math.round(worldY), 1, 1).data;
+                // Assuming black line (R,G,B < 128) on white background
                 const isBlack = pixelData[0] < 128 && pixelData[1] < 128 && pixelData[2] < 128;
-                sensor.value = isBlack ? arduinoAPI.LOW : arduinoAPI.HIGH;
+                sensor.value = isBlack ? arduinoAPI.LOW : arduinoAPI.HIGH; // LOW (0) on line, HIGH (1) off line
                 sensor.color = isBlack ? 'red' : 'lime';
             } else {
-                sensor.value = arduinoAPI.HIGH;
-                sensor.color = 'gray';
+                sensor.value = arduinoAPI.HIGH; // Off canvas, so off line
+                sensor.color = 'gray'; // Default color if off-canvas
             }
         });
     }
 
     function draw() {
+        // Clear main canvas
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        track.path(ctx); // Draw track on main canvas
+        // Draw track on main canvas
+        track.path(ctx);
 
-        ctx.save();
-        ctx.translate(robot.x, robot.y);
-        ctx.rotate(robot.angle);
+        // Draw robot
+        ctx.save(); // Save current transformation state
+        ctx.translate(robot.x, robot.y); // Move origin to robot's position
+        ctx.rotate(robot.angle); // Rotate coordinate system
 
+        // Robot body (origin is center of robot)
         ctx.fillStyle = robot.color;
         ctx.fillRect(-robot.width / 2, -robot.height / 2, robot.width, robot.height);
 
+        // Robot direction indicator (front - local negative Y)
         ctx.fillStyle = 'yellow';
         ctx.beginPath();
-        ctx.moveTo(0, -robot.height / 2 - 2); // Tip adjusted
-        ctx.lineTo(-5, -robot.height / 2 + 5); // Base of arrow head
-        ctx.lineTo(5, -robot.height / 2 + 5);  // Base of arrow head
+        ctx.moveTo(0, -robot.height / 2 - 2); // Tip of the arrow (slightly beyond body)
+        ctx.lineTo(-5, -robot.height / 2 + 5); // Left base of arrow head
+        ctx.lineTo(5, -robot.height / 2 + 5);  // Right base of arrow head
         ctx.closePath();
         ctx.fill();
 
+
+        // Draw sensors (in robot's local coordinate system)
         robot.sensors.forEach(sensor => {
             ctx.fillStyle = sensor.color;
             ctx.beginPath();
@@ -267,57 +279,60 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineWidth = 1;
             ctx.stroke();
         });
-        ctx.restore();
+
+        ctx.restore(); // Restore transformation state
     }
 
     let lastTime = 0;
     async function simulationLoop(timestamp) {
         if (!simulationRunning) return;
 
-        const deltaTime = (timestamp - (lastTime || timestamp)) / 1000; // Handle first frame
+        const deltaTime = (timestamp - (lastTime || timestamp)) / 1000; // Delta time in seconds (handle first frame)
         lastTime = timestamp;
 
         if (userLoopFunction) {
             try {
-                await userLoopFunction();
+                await userLoopFunction(); // Execute user's Arduino-like loop
             } catch (e) {
                 console.error("Error in user loop():", e);
                 serialOutput.textContent += "Error in loop(): " + e.message + "\n";
-                stopSimulation();
+                stopSimulation(); // Stop on error in user loop
             }
         }
 
-        updateRobot(deltaTime);
-        draw();
+        updateRobot(deltaTime || 0.016); // Update robot state (provide default dt if first frame issues)
+        draw(); // Redraw everything
 
-        animationFrameId = requestAnimationFrame(simulationLoop);
+        animationFrameId = requestAnimationFrame(simulationLoop); // Request next frame
     }
 
     function startSimulation() {
         if (simulationRunning) return;
         
         let codeLoadedAndSetupRun = false;
-        if (startButton.dataset.freshStart !== "false") { // If it's a true start or after reset
-            if (!loadUserCode()) {
+        // Check if this is a fresh start (not a resume from pause)
+        // `data-fresh-start` attribute helps manage this state
+        if (startButton.dataset.freshStart !== "false") { 
+            if (!loadUserCode()) { // Load or reload code
                  serialOutput.textContent += "Failed to load code. Cannot start.\n";
                  return;
             }
             try {
-                 userSetupFunction();
+                 userSetupFunction(); // Run user's setup
                  serialOutput.textContent += "setup() executed.\n";
                  codeLoadedAndSetupRun = true;
             } catch (e) {
                  console.error("Error in user setup():", e);
                  serialOutput.textContent += "Error in setup(): " + e.message + "\n";
-                 return; 
+                 return; // Don't start if setup fails
             }
-        } else { // Resuming
+        } else { // Resuming from pause
             codeLoadedAndSetupRun = true; // Assume code is fine and setup was run
             serialOutput.textContent += "Resuming...\n";
         }
         
-        if(!codeLoadedAndSetupRun && !startButton.dataset.freshStart) {
-            // This case might happen if trying to resume a failed load, ensure proper handling
+        // This block is a bit redundant with the one above but ensures setup runs if somehow skipped
+        if(!codeLoadedAndSetupRun && startButton.dataset.freshStart === "true") {
             if (!loadUserCode()) {
                  serialOutput.textContent += "Failed to load code. Cannot start.\n";
                  return;
@@ -332,16 +347,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-
         simulationRunning = true;
         startButton.disabled = true;
-        startButton.dataset.freshStart = "false"; // Mark that we are running/paused, not a fresh start
+        startButton.dataset.freshStart = "false"; // Mark that simulation is running or paused
         stopButton.disabled = false;
-        resetButton.disabled = true;
-        codeEditor.disabled = true;
+        resetButton.disabled = true; // Disable reset while running
+        codeEditor.disabled = true; // Disable code editing while running
         lastTime = performance.now(); // Reset lastTime for deltaTime calculation
         animationFrameId = requestAnimationFrame(simulationLoop);
-        serialOutput.textContent += "Simulation started/resumed.\n";
+        if (serialOutput.textContent.slice(-20).indexOf("started") === -1 && serialOutput.textContent.slice(-20).indexOf("resumed") === -1) {
+            serialOutput.textContent += "Simulation started.\n";
+        }
     }
 
     function stopSimulation() {
@@ -349,15 +365,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
-        startButton.disabled = false;
-        // stopButton.disabled = true; // Keep enabled to show it's paused state
-        resetButton.disabled = false;
+        startButton.disabled = false; // Enable start (to resume)
+        stopButton.disabled = true;   // Disable stop (it's already stopped)
+        resetButton.disabled = false; // Enable reset
         codeEditor.disabled = false; // Allow code editing when stopped
-        // Don't clear serial unless resetting.
-        if (userSetupFunction !== (() => {})) { // Only if code was loaded
-             if(serialOutput.textContent.slice(-20).indexOf("stopped") === -1 && serialOutput.textContent.slice(-20).indexOf("resumed") === -1 ){
-                serialOutput.textContent += "Simulation stopped.\n";
-             }
+        
+        // Only print "stopped" if it wasn't an error that stopped it or already printed
+        if (userSetupFunction !== (() => {}) && serialOutput.textContent.slice(-30).indexOf("Error") === -1) { 
+            if(serialOutput.textContent.slice(-20).indexOf("stopped") === -1 && serialOutput.textContent.slice(-20).indexOf("resumed") === -1 ){
+               serialOutput.textContent += "Simulation stopped (paused).\n";
+            }
         }
     }
 
@@ -366,17 +383,17 @@ document.addEventListener('DOMContentLoaded', () => {
     stopButton.addEventListener('click', stopSimulation);
     resetButton.addEventListener('click', () => {
         startButton.dataset.freshStart = "true"; // Mark that next start is fresh
-        resetSimulation();
+        resetSimulation(); // Full reset logic
         startButton.disabled = false;
         stopButton.disabled = true;
         resetButton.disabled = false;
         codeEditor.disabled = false;
-        serialOutput.textContent += "Simulation reset.\n";
+        serialOutput.textContent += "Simulation reset. Ready to start.\n";
     });
 
-    // Initial setup
-    startButton.dataset.freshStart = "true";
-    stopButton.disabled = true;
-    resetSimulation();
+    // Initial setup on page load
+    startButton.dataset.freshStart = "true"; // Initialize the state for the start button
+    stopButton.disabled = true; // Initially stopped
+    resetSimulation(); // Load code, run setup, draw initial state
     serialOutput.textContent += "Simulator ready. Press Start.\n";
 });

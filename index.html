@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arduino Line Follower Simulator</title>
     <link rel="stylesheet" href="style.css">
@@ -19,9 +19,10 @@
             </div>
         </div>
 
-        <div class="code-area">
-            <h2>Robot Code (Arduino-like JavaScript)</h2>
-            <textarea id="codeEditor" rows="25" cols="60">
+        <div class="editor-monitor-container">
+            <div class="code-area">
+                <h2>Robot Code (Arduino-like JavaScript)</h2>
+                <textarea id="codeEditor" rows="20" cols="70">
 // Pin Definitions (as used in the simulator)
 const LEFT_SENSOR_PIN = 2;   // Digital
 const CENTER_SENSOR_PIN = 3; // Digital
@@ -95,9 +96,13 @@ async function loop() {
 
     await delay(20); // Run loop approx 50 times a second
 }
-            </textarea>
-            <h3>Serial Output:</h3>
-            <pre id="serialOutput"></pre>
+                </textarea>
+            </div>
+
+            <div class="serial-output-area">
+                <h3>Serial Output:</h3>
+                <pre id="serialOutput"></pre>
+            </div>
         </div>
     </div>
 
