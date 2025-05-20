@@ -120,8 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             begin: function(baud) { this.println(`Serial.begin(${baud})`); },
             print: function(msg) {
                 this._buffer += String(msg);
-                serialOutput.textContent += String(msg);
-                serialOutput.scrollTop = serialOutput.scrollHeight; 
+                serialOutput.textContent = String(msg);
             },
             println: function(msg = "") { this.print(String(msg) + '\n'); }
         },
