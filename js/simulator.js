@@ -59,7 +59,42 @@ document.addEventListener('DOMContentLoaded', () => {
             context.stroke(); 
         }
     };
-    track.offscreenCanvas = null; 
+    track.offscreenCanvas = null;
+    track.sensorCache = new Map(); // Cache for sensor readings
+    track.cacheResolution = 5; // Cache grid resolution in pixels
+
+    // Performance settings
+    const performanceSettings = {
+        targetFPS: 60,
+        frameTime: 1000 / 60,
+        lastFrameTime: 0,
+        sensorUpdateThreshold: 0.5, // Update sensors if robot moved more than this distance
+        lastSensorUpdate: { x: 0, y: 0 }
+    };
+
+    // Helper function to get cache key for a position
+    function getCacheKey(x, y) {
+        const gridX = Math.floor(x / track.cacheResolution);
+        const gridY = Math.floor(y / track.cacheResolution);
+        return `${gridX},${gridY}`;
+    }
+
+    // Helper function to get sensor value from cache or calculate it
+    function getSensorValue(worldX, worldY, offCtx) {
+        const cacheKey = getCacheKey(worldX, worldY);
+        if (track.sensorCache.has(cacheKey)) {
+            return track.sensorCache.get(cacheKey);
+        }
+
+        if (worldX >= 0 && worldX < canvas.width && worldY >= 0 && worldY < canvas.height) {
+            const pixelData = offCtx.getImageData(Math.round(worldX), Math.round(worldY), 1, 1).data;
+            const isBlack = pixelData[0] < 128 && pixelData[1] < 128 && pixelData[2] < 128;
+            const value = isBlack ? arduinoAPI.LOW : arduinoAPI.HIGH;
+            track.sensorCache.set(cacheKey, value);
+            return value;
+        }
+        return arduinoAPI.HIGH;
+    }
 
     // --- Arduino API Shim ---
     let _pinModes = {};
@@ -119,16 +154,98 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function updateRobot(dt) {
+        const vL = (robot.speedL / 255) * robot.maxSpeedSim;
+        const vR = (robot.speedR / 255) * robot.maxSpeedSim;
+
+        const V = (vL + vR) / 2; 
+        const omega = (vR - vL) / robot.wheelBase; 
+        
+        const physicsMovementAngle = robot.angle - (Math.PI / 2);
+        const effectiveDtScaling = 60; 
+
+        robot.x += V * Math.cos(physicsMovementAngle) * dt * effectiveDtScaling;
+        robot.y += V * Math.sin(physicsMovementAngle) * dt * effectiveDtScaling;
+        robot.angle += omega * dt * effectiveDtScaling; 
+
+        // Check if we need to update sensors based on movement
+        const dx = robot.x - performanceSettings.lastSensorUpdate.x;
+        const dy = robot.y - performanceSettings.lastSensorUpdate.y;
+        const distanceMoved = Math.sqrt(dx * dx + dy * dy);
+
+        if (distanceMoved > performanceSettings.sensorUpdateThreshold) {
+            const offCtx = track.offscreenCanvas.getContext('2d');
+            const cosA = Math.cos(robot.angle);
+            const sinA = Math.sin(robot.angle);
+
+            robot.sensors.forEach(sensor => {
+                const worldX = robot.x + (sensor.x * cosA - sensor.y * sinA);
+                const worldY = robot.y + (sensor.x * sinA + sensor.y * cosA);
+
+                const value = getSensorValue(worldX, worldY, offCtx);
+                sensor.value = value;
+                sensor.color = value === arduinoAPI.LOW ? 'red' : 'lime';
+            });
+
+            performanceSettings.lastSensorUpdate.x = robot.x;
+            performanceSettings.lastSensorUpdate.y = robot.y;
+        }
+    }
+
+    function draw() {
+        // Only redraw if enough time has passed since last frame
+        const now = performance.now();
+        const elapsed = now - performanceSettings.lastFrameTime;
+        
+        if (elapsed < performanceSettings.frameTime) {
+            return;
+        }
+        
+        performanceSettings.lastFrameTime = now;
+
+        // Clear the canvas
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw the track from offscreen canvas
+        ctx.drawImage(track.offscreenCanvas, 0, 0);
+        
+        // Draw the robot
+        ctx.save(); 
+        ctx.translate(robot.x, robot.y); 
+        ctx.rotate(robot.angle); 
+        ctx.fillStyle = robot.color;
+        ctx.fillRect(-robot.width / 2, -robot.height / 2, robot.width, robot.height);
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.moveTo(0, -robot.height / 2 - 2); 
+        ctx.lineTo(-5, -robot.height / 2 + 5); 
+        ctx.lineTo(5, -robot.height / 2 + 5);  
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw sensors
+        robot.sensors.forEach(sensor => {
+            ctx.fillStyle = sensor.color;
+            ctx.beginPath();
+            ctx.arc(sensor.x, sensor.y, robot.sensorRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        });
+        ctx.restore(); 
+    }
+
     function resetSimulation() {
         stopSimulation();
 
         const margin = 40; 
         const trackBottomSegmentY = margin + (canvas.height - 2 * margin); 
 
-        robot.angle = -Math.PI / 2; // Visual front points LEFT
-
+        robot.angle = -Math.PI / 2;
         robot.y = trackBottomSegmentY; 
-        robot.x = (canvas.width / 2) - robot.sensors[1].y; // Since robot.sensors[1].y is negative
+        robot.x = (canvas.width / 2) - robot.sensors[1].y;
         
         robot.speedL = 0;
         robot.speedR = 0;
@@ -136,6 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
         _pinModes = {};
         serialOutput.textContent = ""; 
         arduinoAPI.Serial._buffer = "";
+        track.sensorCache.clear();
+        performanceSettings.lastSensorUpdate = { x: robot.x, y: robot.y };
 
         if (!track.offscreenCanvas || track.offscreenCanvas.width !== canvas.width || track.offscreenCanvas.height !== canvas.height) {
             track.offscreenCanvas = document.createElement('canvas');
@@ -159,74 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         draw(); 
-    }
-
-    function updateRobot(dt) { // dt is delta time in seconds
-        const vL = (robot.speedL / 255) * robot.maxSpeedSim;
-        const vR = (robot.speedR / 255) * robot.maxSpeedSim;
-
-        const V = (vL + vR) / 2; 
-        const omega = (vR - vL) / robot.wheelBase; 
-        
-        // robot.angle is the visual orientation (local -Y axis is front).
-        // To get the world direction of this front for movement:
-        const physicsMovementAngle = robot.angle - (Math.PI / 2);
-
-        const effectiveDtScaling = 60; 
-
-        robot.x += V * Math.cos(physicsMovementAngle) * dt * effectiveDtScaling;
-        robot.y += V * Math.sin(physicsMovementAngle) * dt * effectiveDtScaling;
-        
-        // Update the robot's visual/rotational angle based on omega
-        robot.angle += omega * dt * effectiveDtScaling; 
-
-        // Update sensors based on new position (uses robot.angle for sprite orientation)
-        const offCtx = track.offscreenCanvas.getContext('2d');
-        const cosA = Math.cos(robot.angle); // Use visual angle for sensor calculation
-        const sinA = Math.sin(robot.angle); // Use visual angle for sensor calculation
-
-        robot.sensors.forEach(sensor => {
-            const worldX = robot.x + (sensor.x * cosA - sensor.y * sinA);
-            const worldY = robot.y + (sensor.x * sinA + sensor.y * cosA);
-
-            if (worldX >= 0 && worldX < canvas.width && worldY >= 0 && worldY < canvas.height) {
-                const pixelData = offCtx.getImageData(Math.round(worldX), Math.round(worldY), 1, 1).data;
-                const isBlack = pixelData[0] < 128 && pixelData[1] < 128 && pixelData[2] < 128;
-                sensor.value = isBlack ? arduinoAPI.LOW : arduinoAPI.HIGH; 
-                sensor.color = isBlack ? 'red' : 'lime';
-            } else {
-                sensor.value = arduinoAPI.HIGH; 
-                sensor.color = 'gray'; 
-            }
-        });
-    }
-
-    function draw() {
-        ctx.fillStyle = 'white';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        track.path(ctx);
-        ctx.save(); 
-        ctx.translate(robot.x, robot.y); 
-        ctx.rotate(robot.angle); 
-        ctx.fillStyle = robot.color;
-        ctx.fillRect(-robot.width / 2, -robot.height / 2, robot.width, robot.height);
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        ctx.moveTo(0, -robot.height / 2 - 2); 
-        ctx.lineTo(-5, -robot.height / 2 + 5); 
-        ctx.lineTo(5, -robot.height / 2 + 5);  
-        ctx.closePath();
-        ctx.fill();
-        robot.sensors.forEach(sensor => {
-            ctx.fillStyle = sensor.color;
-            ctx.beginPath();
-            ctx.arc(sensor.x, sensor.y, robot.sensorRadius, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        });
-        ctx.restore(); 
     }
 
     let lastTime = 0;
