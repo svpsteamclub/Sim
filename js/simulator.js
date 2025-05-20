@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         y: 0, // Will be set in resetSimulation
         width: 30,
         height: 40,
-        angle: 0, // Will be set in resetSimulation to point UP
+        angle: 0, // Will be set in resetSimulation to point LEFT
         color: 'blue',
         wheelBase: 28,
         speedL: 0,
@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
         robot.x = canvas.width / 2; // Start horizontally centered
         robot.y = margin + (canvas.height - 2 * margin); // On the bottom segment of the track
         
-        // === ROBOT ROTATED 90 DEGREES TO POINT UPWARDS ===
-        robot.angle = -Math.PI / 2; // Pointing UPWARDS (negative Y direction in canvas coords)
+        // === ROBOT ORIENTED TO POINT LEFT INITIALLY ===
+        robot.angle = Math.PI; // Pointing LEFT (positive X is right, so PI is left)
 
         robot.speedL = 0;
         robot.speedR = 0;
