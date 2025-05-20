@@ -16,24 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const robot = {
         x: 0, 
         y: 0, 
-        width: 30, // This will be the dimension perpendicular to track when oriented for left travel
-        height: 40, // This will be the dimension parallel to track when oriented for left travel
+        width: 30, 
+        height: 40, 
         angle: 0, 
         color: 'blue',
-        wheelBase: 28, // This might need adjustment if apparent wheelbase changes with orientation
+        wheelBase: 28, 
         speedL: 0,
         speedR: 0,
         maxSpeedSim: 2,
 
         sensors: [ 
             { x: -12, y: -18, value: 1, color: 'gray' }, 
-            { x: 0,   y: -20, value: 1, color: 'gray' }, // y = -20 means 20px "in front" of center
+            { x: 0,   y: -20, value: 1, color: 'gray' }, 
             { x: 12,  y: -18, value: 1, color: 'gray' }  
         ],
         sensorRadius: 3
     };
 
-    // Track properties (same as before)
+    // Track properties
     const track = {
         lineColor: 'black',
         lineWidth: 10, 
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     track.offscreenCanvas = null; 
 
-    // --- Arduino API Shim (same as before) ---
+    // --- Arduino API Shim ---
     let _pinModes = {};
     const arduinoAPI = {
         pinMode: (pin, mode) => { _pinModes[pin] = mode; },
@@ -96,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let userSetupFunction = () => {};
     let userLoopFunction = async () => {};
 
-    // loadUserCode function (same as before)
     function loadUserCode() {
         const code = codeEditor.value;
         serialOutput.textContent = ""; 
@@ -126,22 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const margin = 40; 
         const trackBottomSegmentY = margin + (canvas.height - 2 * margin); 
 
-        // === NEW ORIENTATION AND POSITIONING LOGIC ===
-        robot.angle = -Math.PI / 2; // Pointing LEFT (local -Y axis points to world -X)
+        robot.angle = -Math.PI / 2; // Visual front points LEFT
 
-        // Robot's center Y is on the track line
         robot.y = trackBottomSegmentY; 
-
-        // Robot's center X is offset so sensors are at canvas.width / 2
-        // When angle = -PI/2:
-        // Sensor world X = robot.x + (sensor_local_x * cos(angle) - sensor_local_y * sin(angle))
-        //                = robot.x + (sensor_local_x * 0 - sensor_local_y * -1)
-        //                = robot.x + sensor_local_y
-        // For center sensor, sensor_local_x = 0. Let its local y be s_y (e.g., -20).
-        // We want: robot.x + s_y = canvas.width / 2
-        // So: robot.x = canvas.width / 2 - s_y
-        // Since robot.sensors[1].y is negative (-20), this effectively adds its magnitude.
-        robot.x = (canvas.width / 2) - robot.sensors[1].y; 
+        robot.x = (canvas.width / 2) - robot.sensors[1].y; // Since robot.sensors[1].y is negative
         
         robot.speedL = 0;
         robot.speedR = 0;
@@ -174,23 +161,34 @@ document.addEventListener('DOMContentLoaded', () => {
         draw(); 
     }
 
-    // updateRobot function (same as before)
-    function updateRobot(dt) { 
+    function updateRobot(dt) { // dt is delta time in seconds
         const vL = (robot.speedL / 255) * robot.maxSpeedSim;
         const vR = (robot.speedR / 255) * robot.maxSpeedSim;
+
         const V = (vL + vR) / 2; 
         const omega = (vR - vL) / robot.wheelBase; 
-        const effectiveDtScaling = 60; 
-        robot.x += V * Math.cos(robot.angle) * dt * effectiveDtScaling;
-        robot.y += V * Math.sin(robot.angle) * dt * effectiveDtScaling;
-        robot.angle += omega * dt * effectiveDtScaling;
+        
+        // robot.angle is the visual orientation (local -Y axis is front).
+        // To get the world direction of this front for movement:
+        const physicsMovementAngle = robot.angle - (Math.PI / 2);
 
+        const effectiveDtScaling = 60; 
+
+        robot.x += V * Math.cos(physicsMovementAngle) * dt * effectiveDtScaling;
+        robot.y += V * Math.sin(physicsMovementAngle) * dt * effectiveDtScaling;
+        
+        // Update the robot's visual/rotational angle based on omega
+        robot.angle += omega * dt * effectiveDtScaling; 
+
+        // Update sensors based on new position (uses robot.angle for sprite orientation)
         const offCtx = track.offscreenCanvas.getContext('2d');
+        const cosA = Math.cos(robot.angle); // Use visual angle for sensor calculation
+        const sinA = Math.sin(robot.angle); // Use visual angle for sensor calculation
+
         robot.sensors.forEach(sensor => {
-            const cosA = Math.cos(robot.angle);
-            const sinA = Math.sin(robot.angle);
             const worldX = robot.x + (sensor.x * cosA - sensor.y * sinA);
             const worldY = robot.y + (sensor.x * sinA + sensor.y * cosA);
+
             if (worldX >= 0 && worldX < canvas.width && worldY >= 0 && worldY < canvas.height) {
                 const pixelData = offCtx.getImageData(Math.round(worldX), Math.round(worldY), 1, 1).data;
                 const isBlack = pixelData[0] < 128 && pixelData[1] < 128 && pixelData[2] < 128;
@@ -203,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // draw function (same as before)
     function draw() {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -232,7 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore(); 
     }
 
-    // simulationLoop, startSimulation, stopSimulation functions (same as before)
     let lastTime = 0;
     async function simulationLoop(timestamp) {
         if (!simulationRunning) return;
@@ -270,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
             codeLoadedAndSetupRun = true; 
             serialOutput.textContent += "Resuming...\n";
         }
-        if(!codeLoadedAndSetupRun && startButton.dataset.freshStart === "true") { // Fallback
+        if(!codeLoadedAndSetupRun && startButton.dataset.freshStart === "true") { 
             if (!loadUserCode()) { serialOutput.textContent += "Failed to load code. Cannot start.\n"; return; }
              try { userSetupFunction(); serialOutput.textContent += "setup() executed.\n"; } 
              catch (e) { console.error("Error in user setup():", e); serialOutput.textContent += "Error in setup(): " + e.message + "\n"; return; }
@@ -302,7 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Event Listeners (same as before)
     startButton.addEventListener('click', startSimulation);
     stopButton.addEventListener('click', stopSimulation);
     resetButton.addEventListener('click', () => {
@@ -315,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
         serialOutput.textContent += "Simulation reset. Ready to start.\n";
     });
 
-    // Initial setup (same as before)
     startButton.dataset.freshStart = "true"; 
     stopButton.disabled = true; 
     resetSimulation(); 
