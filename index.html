@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Line Follower Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Arduino Line Follower Simulator</h1>
+
+    <div class="container">
+        <div class="simulation-area">
+            <canvas id="simulationCanvas" width="600" height="400"></canvas>
+            <div class="controls">
+                <button id="startButton">Start</button>
+                <button id="stopButton">Stop</button>
+                <button id="resetButton">Reset</button>
+            </div>
+        </div>
+
+        <div class="code-area">
+            <h2>Robot Code (Arduino-like JavaScript)</h2>
+            <textarea id="codeEditor" rows="25" cols="60">
+// Pin Definitions (as used in the simulator)
+const LEFT_SENSOR_PIN = 2;   // Digital
+const CENTER_SENSOR_PIN = 3; // Digital
+const RIGHT_SENSOR_PIN = 4;  // Digital
+
+const MOTOR_LEFT_PWM = 5;    // analogWrite for speed
+const MOTOR_RIGHT_PWM = 6;   // analogWrite for speed
+// For simplicity, we assume motors always go forward.
+// Add direction pins if you want to control forward/backward.
+
+// Speeds
+const MAX_SPEED = 150; // Max motor speed (0-255)
+const TURN_SPEED = 80;
+const CORRECTION_SPEED = 100;
+
+function setup() {
+    Serial.begin(9600); // Just for show in simulator
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+
+    Serial.println("Robot Setup Complete!");
+}
+
+async function loop() {
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 1 if OFF line, 0 if ON line
+    let sC = digitalRead(CENTER_SENSOR_PIN); // (assuming black line on white background)
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+
+    // Serial.print("Sensors: L:");
+    // Serial.print(sL);
+    // Serial.print(" C:");
+    // Serial.print(sC);
+    // Serial.print(" R:");
+    // Serial.println(sR);
+
+    if (sL === 0 && sC === 1 && sR === 1) { // Only Left sensor on line
+        Serial.println("Hard Left Turn");
+        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+    } else if (sL === 1 && sC === 0 && sR === 1) { // Only Center sensor on line
+        Serial.println("Straight");
+        analogWrite(MOTOR_LEFT_PWM, MAX_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, MAX_SPEED);
+    } else if (sL === 1 && sC === 1 && sR === 0) { // Only Right sensor on line
+        Serial.println("Hard Right Turn");
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, 0);
+    } else if (sL === 0 && sC === 0 && sR === 1) { // Left and Center on line
+        Serial.println("Gentle Left");
+        analogWrite(MOTOR_LEFT_PWM, CORRECTION_SPEED / 2);
+        analogWrite(MOTOR_RIGHT_PWM, CORRECTION_SPEED);
+    } else if (sL === 1 && sC === 0 && sR === 0) { // Right and Center on line
+        Serial.println("Gentle Right");
+        analogWrite(MOTOR_LEFT_PWM, CORRECTION_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, CORRECTION_SPEED / 2);
+    } else if (sL === 0 && sC === 0 && sR === 0) { // All on line (e.g., intersection or thick line)
+        Serial.println("All on line - Straight");
+        analogWrite(MOTOR_LEFT_PWM, MAX_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, MAX_SPEED);
+    }
+    else { // All off line (lost line)
+        Serial.println("Lost line - Stop or search");
+        // Simple stop for now
+        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, 0);
+    }
+
+    await delay(20); // Run loop approx 50 times a second
+}
+            </textarea>
+            <h3>Serial Output:</h3>
+            <pre id="serialOutput"></pre>
+        </div>
+    </div>
+
+    <script src="js/simulator.js"></script>
+</body>
+</html>
