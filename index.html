@@ -28,8 +28,8 @@ const LEFT_SENSOR_PIN = 2;   // Digital
 const CENTER_SENSOR_PIN = 3; // Digital
 const RIGHT_SENSOR_PIN = 4;  // Digital
 
-const MOTOR_LEFT_PWM = 5;    // analogWrite for speed
-const MOTOR_RIGHT_PWM = 6;   // analogWrite for speed
+const MOTOR_LEFT_PWM = 6;    // analogWrite for speed
+const MOTOR_RIGHT_PWM = 5;   // analogWrite for speed
 // For simplicity, we assume motors always go forward.
 // Add direction pins if you want to control forward/backward.
 
@@ -90,7 +90,7 @@ async function loop() {
     else { // All off line (lost line)
         Serial.println("Lost line - Stop or search");
         // Simple stop for now
-        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_LEFT_PWM, 150);
         analogWrite(MOTOR_RIGHT_PWM, 0);
     }
 
