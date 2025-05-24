@@ -43,7 +43,6 @@ export class Robot {
         if (!geometry) return;
 
         this.wheelbase_m = geometry.width_m;
-        this.length_m = geometry.length_m;
         this.sensorForwardProtrusion_m = geometry.sensorOffset_m;
         this.sensorSideSpread_m = geometry.sensorSpread_m;
         this.sensorDiameter_m = geometry.sensorDiameter_m;
@@ -160,7 +159,7 @@ export class Robot {
         ctx.rotate(this.angle_rad);
 
         const robotBodyWidthPx = this.wheelbase_m * PIXELS_PER_METER;
-        const robotBodyLengthPx = this.length_m * PIXELS_PER_METER;
+        const robotBodyLengthPx = robotBodyWidthPx * 1.2; // Usar un tamaño proporcional al ancho
 
         // Draw Body
         if (this.bodyImage && this.bodyImage.complete && this.bodyImage.naturalWidth > 0) {
@@ -200,7 +199,7 @@ export class Robot {
         ctx.closePath();
         ctx.fill();
 
-        ctx.restore(); // Restore transform for robot drawing
+        ctx.restore();
 
         // Draw Trails (outside robot's transformed context)
         const drawTrail = (trail, color, lineWidth) => {

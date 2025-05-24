@@ -9,7 +9,6 @@ export const TRACK_PART_SIZE_PX = 350; // Cada pieza PNG es 350x350 px
 // Geometría por defecto del robot (en metros)
 export const DEFAULT_ROBOT_GEOMETRY = {
     width_m: 0.10,    // Ancho del robot / Distancia entre centros de ruedas
-    length_m: 0.12,   // Largo del chasis del robot
     sensorOffset_m: 0.05, // Distancia desde el centro del robot al centro de la línea de sensores, hacia adelante
     sensorSpread_m: 0.03, // Distancia desde el sensor central a un sensor lateral
     sensorDiameter_m: 0.005 // Diámetro de cada punto sensor

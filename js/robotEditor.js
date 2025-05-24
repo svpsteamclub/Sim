@@ -68,7 +68,6 @@ function getFormValues() {
     const elems = getDOMElements();
     return {
         width_m: parseFloat(elems.robotWidthInput.value) || DEFAULT_ROBOT_GEOMETRY.width_m,
-        length_m: parseFloat(elems.robotLengthInput.value) || DEFAULT_ROBOT_GEOMETRY.length_m,
         sensorOffset_m: parseFloat(elems.sensorOffsetInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorOffset_m,
         sensorSpread_m: parseFloat(elems.sensorSpreadInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorSpread_m,
         sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorDiameter_m,
@@ -78,7 +77,6 @@ function getFormValues() {
 function setFormValues(geometry) {
     const elems = getDOMElements();
     elems.robotWidthInput.value = geometry.width_m.toFixed(3);
-    elems.robotLengthInput.value = geometry.length_m.toFixed(3);
     elems.sensorOffsetInput.value = geometry.sensorOffset_m.toFixed(3);
     elems.sensorSpreadInput.value = geometry.sensorSpread_m.toFixed(3);
     elems.sensorDiameterInput.value = geometry.sensorDiameter_m.toFixed(3);
@@ -172,27 +170,18 @@ function renderRobotPreview() {
     const wheelbaseStartX = -previewRobot.wheelbase_m/2;
     const wheelbaseEndX = previewRobot.wheelbase_m/2;
     drawDimensionLine(previewCtx, 
-        wheelbaseStartX, -previewRobot.length_m/2 - 0.02,
-        wheelbaseEndX, -previewRobot.length_m/2 - 0.02,
+        wheelbaseStartX, 0.02, // Línea horizontal arriba
+        wheelbaseEndX, 0.02,
         0.02, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
 
-    // Largo del robot
-    const lengthStartY = -previewRobot.length_m/2;
-    const lengthEndY = previewRobot.length_m/2;
-    drawDimensionLine(previewCtx,
-        previewRobot.wheelbase_m/2 + 0.02, lengthStartY,
-        previewRobot.wheelbase_m/2 + 0.02, lengthEndY,
-        0.02, `${(previewRobot.length_m * 100).toFixed(1)} cm`);
-
-    // Offset de sensores (desde el eje horizontal)
-    // En el sistema de coordenadas del robot, el offset es positivo hacia adelante (eje X)
+    // Offset de sensores (desde el eje vertical)
     const sensorLineX = previewRobot.sensorForwardProtrusion_m;
     drawDimensionLine(previewCtx,
         0, -previewRobot.wheelbase_m/2 - 0.02, // Comienza en el eje vertical
         sensorLineX, -previewRobot.wheelbase_m/2 - 0.02,
         0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
 
-    // Spread de sensores (ahora en la parte superior)
+    // Spread de sensores (en la posición de los sensores)
     const sensorSpreadStartY = -previewRobot.sensorSideSpread_m;
     const sensorSpreadEndY = previewRobot.sensorSideSpread_m;
     drawDimensionLine(previewCtx,
