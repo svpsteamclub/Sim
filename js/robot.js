@@ -30,12 +30,10 @@ export class Robot {
         this.rightWheelTrail = [];
         this.maxTrailLength = 300; // Shorter trail for performance
 
-        this.bodyImage = null;
         this.wheelImage = null;
     }
 
-    setImages(bodyImg, wheelImg) {
-        this.bodyImage = bodyImg;
+    setImages(wheelImg) {
         this.wheelImage = wheelImg;
     }
     
@@ -157,19 +155,6 @@ export class Robot {
         ctx.save();
         ctx.translate(this.x_m * PIXELS_PER_METER, this.y_m * PIXELS_PER_METER);
         ctx.rotate(this.angle_rad);
-
-        // Draw Body - usando las dimensiones reales en metros
-        if (this.bodyImage && this.bodyImage.complete && this.bodyImage.naturalWidth > 0) {
-            // Asumimos que la imagen del cuerpo está en escala 1px=1mm
-            const bodyWidthPx = this.wheelbase_m * PIXELS_PER_METER;
-            const bodyLengthPx = this.wheelbase_m * 1.2 * PIXELS_PER_METER; // Mantenemos la proporción 1.2 pero en escala correcta
-            ctx.drawImage(this.bodyImage, -bodyLengthPx / 2, -bodyWidthPx / 2, bodyLengthPx, bodyWidthPx);
-        } else {
-            ctx.fillStyle = 'rgba(0, 0, 200, 0.8)'; // Darker blue
-            const bodyWidthPx = this.wheelbase_m * PIXELS_PER_METER;
-            const bodyLengthPx = this.wheelbase_m * 1.2 * PIXELS_PER_METER;
-            ctx.fillRect(-bodyLengthPx / 2, -bodyWidthPx / 2, bodyLengthPx, bodyWidthPx);
-        }
 
         // Draw Wheels - usando las dimensiones reales en metros
         const wheelLengthPx = WHEEL_LENGTH_M * PIXELS_PER_METER;
