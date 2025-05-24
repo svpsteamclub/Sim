@@ -311,6 +311,7 @@ function onGridDoubleClick(event) {
         else nextRotation = 0; // Si por alguna razón no está en un ángulo válido, resetear a 0
         
         grid[r][c].rotation_deg = nextRotation;
+        console.log(`Rotando pieza en [${r},${c}] de ${currentRotation}° a ${nextRotation}°`); // Debug log
         renderEditor();
     }
     event.preventDefault(); // Prevent text selection on double click
@@ -319,16 +320,28 @@ function onGridDoubleClick(event) {
 function getRotatedConnections(part, rotation_deg) {
     if (!part || !part.connections) return { N: false, S: false, E: false, W: false };
     
+    // Normalizar la rotación a un valor entre 0 y 359
+    rotation_deg = ((rotation_deg % 360) + 360) % 360;
+    
+    // Calcular el número de rotaciones de 90 grados (0, 1, 2, o 3)
+    const numRotations = Math.round(rotation_deg / 90) % 4;
+    
     const rotated = { N: false, S: false, E: false, W: false };
-    const numRotations = Math.round(rotation_deg / 90) % 4; // Number of 90-degree clockwise rotations
-
-    for (const dirKey of ['N', 'E', 'S', 'W']) {
+    
+    // Mapear las conexiones originales a las rotadas
+    const directions = ['N', 'E', 'S', 'W'];
+    for (const dirKey of directions) {
         if (part.connections[dirKey]) {
-            let currentDirIndex = DIRECTIONS.findIndex(d => d.name === dirKey);
-            let newDirIndex = (currentDirIndex + numRotations) % 4;
-            rotated[DIRECTIONS[newDirIndex].name] = true;
+            // Encontrar el índice de la dirección actual
+            const currentIndex = directions.indexOf(dirKey);
+            // Calcular el nuevo índice después de la rotación
+            const newIndex = (currentIndex + numRotations) % 4;
+            // Establecer la conexión en la nueva dirección
+            rotated[directions[newIndex]] = true;
         }
     }
+    
+    console.log(`Rotando conexiones de ${rotation_deg}° (${numRotations} rotaciones):`, rotated); // Debug log
     return rotated;
 }
 
