@@ -353,7 +353,7 @@ function getDirectionFromTo(r1, c1, r2, c2) {
     return null;
 }
 
-function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 100 : 20)) {
+function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 1000 : 20)) {
     console.log(`Intentando generar pista aleatoria para grid ${currentGridSize.rows}x${currentGridSize.cols} con hasta ${maxRetries} intentos...`);
     for (let i = 0; i < maxRetries; i++) {
         const generationResult = generateRandomLoopTrackLogic();
