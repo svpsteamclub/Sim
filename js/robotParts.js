@@ -1,5 +1,6 @@
 import { getDOMElements } from './ui.js';
 import { loadAndScaleImage, getAssetPath } from './utils.js';
+import { PIXELS_PER_METER } from './config.js';
 
 const PARTS = [
     { id: 'antenna', name: 'Antena', src: 'parts/antenna.png' },
@@ -38,6 +39,22 @@ export function initRobotParts() {
             partElement.draggable = true;
             partElement.dataset.partId = part.id;
             partElement.title = part.name;
+            
+            // Add drag event listeners
+            partElement.addEventListener('dragstart', (e) => {
+                draggedPart = {
+                    id: part.id,
+                    name: part.name,
+                    img: img
+                };
+                e.dataTransfer.setData('text/plain', part.id);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+            
+            partElement.addEventListener('dragend', () => {
+                draggedPart = null;
+            });
+            
             partsPalette.appendChild(partElement);
         };
     });
@@ -45,6 +62,7 @@ export function initRobotParts() {
     // Drag and drop event listeners
     previewCanvas.addEventListener('dragover', (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
     });
 
     previewCanvas.addEventListener('drop', (e) => {
@@ -127,76 +145,13 @@ export function initRobotParts() {
     });
 }
 
-function handleDragStart(e) {
-    draggedPart = {
-        id: e.target.dataset.partId,
-        name: e.target.alt,
-        img: e.target
-    };
-    e.target.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', e.target.dataset.partId);
-    e.dataTransfer.effectAllowed = 'copy';
-}
-
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-    draggedPart = null;
-}
-
-function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-}
-
-function handleDrop(e) {
-    e.preventDefault();
-    if (!draggedPart) return;
-
-    const rect = previewCanvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / previewCanvas.width;
-    const y = (e.clientY - rect.top) / previewCanvas.height;
-
-    // Add the part to placed parts
-    placedParts.push({
-        id: draggedPart.id,
-        name: draggedPart.name,
-        x: x,
-        y: y,
-        img: draggedPart.img
-    });
-
-    // Redraw the preview
-    drawRobotPreview();
-}
-
-function handleCanvasClick(e) {
-    const rect = previewCanvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / previewCanvas.width;
-    const y = (e.clientY - rect.top) / previewCanvas.height;
-
-    // Check if clicked on a part to remove it
-    for (let i = placedParts.length - 1; i >= 0; i--) {
-        const part = placedParts[i];
-        const partX = part.x * previewCanvas.width;
-        const partY = part.y * previewCanvas.height;
-        const partSize = 40; // Size of the part in pixels
-
-        if (Math.abs(x * previewCanvas.width - partX) < partSize/2 &&
-            Math.abs(y * previewCanvas.height - partY) < partSize/2) {
-            placedParts.splice(i, 1);
-            drawRobotPreview();
-            break;
-        }
-    }
-}
-
 export function drawRobotPreview() {
     if (!previewCtx || !previewCanvas) return;
 
     // Draw placed parts
     placedParts.forEach(part => {
-        const x = part.x * previewCanvas.width;
-        const y = part.y * previewCanvas.height;
+        const x = part.x * PIXELS_PER_METER;
+        const y = part.y * PIXELS_PER_METER;
         const size = 40; // Size of the part in pixels
 
         previewCtx.save();
@@ -212,7 +167,7 @@ export function drawRobotPreview() {
 export function getPlacedParts() {
     return placedParts.map(part => ({
         ...part,
-        // Convert coordinates to be relative to robot center
+        // Keep coordinates in meters relative to robot center
         x: part.x,
         y: part.y
     }));
