@@ -36,6 +36,7 @@ export function getDOMElements() {
         sensorDiameterInput: document.getElementById('sensorDiameter'),
         applyRobotGeometryButton: document.getElementById('applyRobotGeometryButton'),
         resetRobotGeometryButton: document.getElementById('resetRobotGeometryButton'),
+        robotPartsPalette: document.getElementById('robotPartsPalette'),
 
         // Track Editor Tab
         trackEditorCanvas: document.getElementById('trackEditorCanvas'),

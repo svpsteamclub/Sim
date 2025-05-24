@@ -1,12 +1,13 @@
 // js/robotEditor.js
 import { getDOMElements } from './ui.js';
 import { DEFAULT_ROBOT_GEOMETRY, PIXELS_PER_METER } from './config.js';
-import { Robot } from './robot.js'; // To use Robot's drawing logic for preview
+import { Robot } from './robot.js';
+import { initRobotParts, drawRobotPreview } from './robotParts.js';
 
 let previewCanvas, previewCtx;
-let previewRobot; // A Robot instance for previewing
-let currentGeometry = { ...DEFAULT_ROBOT_GEOMETRY }; // Local copy of geometry
-let mainAppInterface; // To communicate geometry changes
+let previewRobot;
+let currentGeometry = { ...DEFAULT_ROBOT_GEOMETRY };
+let mainAppInterface;
 
 export function initRobotEditor(appInterface) {
     mainAppInterface = appInterface;
@@ -19,22 +20,21 @@ export function initRobotEditor(appInterface) {
     previewCtx = previewCanvas.getContext('2d');
 
     // Initialize preview robot with default geometry
-    // Scale geometry for preview drawing if needed, or draw 1:1 in meters and scale canvas view
-    // For simplicity, we'll draw the robot as if its dimensions are in pixels for the small preview.
-    // Or, use a fixed scale for the preview canvas.
-    previewRobot = new Robot(previewCanvas.width / 2 / PIXELS_PER_METER, previewCanvas.height / 2 / PIXELS_PER_METER, -Math.PI / 2); // Centered, facing up
+    previewRobot = new Robot(previewCanvas.width / 2 / PIXELS_PER_METER, previewCanvas.height / 2 / PIXELS_PER_METER, -Math.PI / 2);
     previewRobot.updateGeometry(DEFAULT_ROBOT_GEOMETRY);
-
 
     // Load default geometry into input fields
     setFormValues(DEFAULT_ROBOT_GEOMETRY);
+
+    // Initialize robot parts
+    initRobotParts();
 
     // Event listeners
     elems.applyRobotGeometryButton.addEventListener('click', () => {
         currentGeometry = getFormValues();
         previewRobot.updateGeometry(currentGeometry);
         renderRobotPreview();
-        mainAppInterface.updateRobotGeometry(currentGeometry); // Notify main app
+        mainAppInterface.updateRobotGeometry(currentGeometry);
         alert("Geometría del robot actualizada y aplicada a la simulación (requiere reinicio de sim).");
     });
 
@@ -47,13 +47,13 @@ export function initRobotEditor(appInterface) {
         alert("Geometría del robot restaurada a valores por defecto.");
     });
 
-    // Update preview dynamically as user types (optional, can be intensive)
+    // Update preview dynamically as user types
     const inputs = [elems.robotWidthInput, elems.sensorOffsetInput, elems.sensorSpreadInput, elems.sensorDiameterInput];
     inputs.forEach(input => {
         input.addEventListener('input', () => {
             currentGeometry = getFormValues();
-            previewRobot.updateGeometry(currentGeometry); // Update preview robot's geometry
-            renderRobotPreview(); // Re-render the preview
+            previewRobot.updateGeometry(currentGeometry);
+            renderRobotPreview();
         });
     });
     
@@ -134,11 +134,8 @@ function renderRobotPreview() {
     previewCtx.save();
 
     // Center the robot in the preview canvas
-    const previewArea_m = 0.3; 
+    const previewArea_m = 0.3;
     const scale = Math.min(previewCanvas.width, previewCanvas.height) / previewArea_m;
-
-    // Primero dibujamos el robot sin escala
-    previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
 
     // Draw robot
     const tempX = previewRobot.x_m;
@@ -149,7 +146,6 @@ function renderRobotPreview() {
     previewRobot.y_m = 0;
     previewRobot.angle_rad = -Math.PI / 2;
 
-    // Dibujar el robot sin escala
     previewRobot.draw(previewCtx, previewRobot.sensors);
 
     // Restore robot's original position
@@ -157,65 +153,10 @@ function renderRobotPreview() {
     previewRobot.y_m = tempY;
     previewRobot.angle_rad = tempAngle;
 
-    // Ahora aplicamos la escala para las líneas de cota
-    previewCtx.scale(scale, scale);
-
-    // Draw dimension lines
-    previewCtx.strokeStyle = 'black';
-    previewCtx.fillStyle = 'black';
-    previewCtx.lineWidth = 1 / scale; // Ajustar el grosor de línea para la escala
-    previewCtx.font = `${10 / scale}px Arial`; // Ajustar el tamaño de fuente para la escala
-
-    // Offset para desplazar las cotas fuera del robot
-    const wheelbaseOffset = previewRobot.wheelbase_m / 2 + 0.03; // 3cm extra fuera del robot
-    const sensorSpreadYOffset = -previewRobot.sensorForwardProtrusion_m - 0.03; // 3cm arriba de los sensores
-
-    // Ancho del robot (wheelbase)
-    const wheelbaseStartX = -previewRobot.wheelbase_m/2;
-    const wheelbaseEndX = previewRobot.wheelbase_m/2;
-    drawDimensionLine(previewCtx, 
-        wheelbaseStartX, 0.02, // Línea horizontal arriba
-        wheelbaseEndX, 0.02,
-        0.02, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
-
-    // Offset de sensores (cota vertical, desplazada a la izquierda)
-    const sensorLineY = 0;
-    const sensorLineYEnd = -previewRobot.sensorForwardProtrusion_m;
-    drawDimensionLine(previewCtx,
-        -wheelbaseOffset, sensorLineY, // Desplazada a la izquierda
-        -wheelbaseOffset, sensorLineYEnd,
-        0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
-
-    // Spread de sensores (cota horizontal, desplazada arriba de los sensores)
-    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m;
-    const sensorSpreadEndX = previewRobot.sensorSideSpread_m;
-    const sensorSpreadY = -previewRobot.sensorForwardProtrusion_m;
-    drawDimensionLine(previewCtx,
-        sensorSpreadStartX, sensorSpreadYOffset,
-        sensorSpreadEndX, sensorSpreadYOffset,
-        0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
-
     previewCtx.restore();
 
-    // Dibujar ejes y leyenda de escala en coordenadas de pantalla
-    previewCtx.save();
-    previewCtx.strokeStyle = "#aaa";
-    previewCtx.lineWidth = 0.5;
-    previewCtx.beginPath();
-    previewCtx.moveTo(previewCanvas.width / 2, 0); 
-    previewCtx.lineTo(previewCanvas.width / 2, previewCanvas.height);
-    previewCtx.moveTo(0, previewCanvas.height / 2); 
-    previewCtx.lineTo(previewCanvas.width, previewCanvas.height / 2);
-    previewCtx.stroke();
-
-    // Scale legend (e.g., 5cm line)
-    const legendLength_m = 0.05; // 5 cm
-    const legendLength_px = legendLength_m * scale;
-    previewCtx.fillStyle = "black";
-    previewCtx.fillRect(10, previewCanvas.height - 20, legendLength_px, 2);
-    previewCtx.font = "10px Arial";
-    previewCtx.fillText(`${legendLength_m*100} cm`, 10, previewCanvas.height - 25);
-    previewCtx.restore();
+    // Draw decorative parts
+    drawRobotPreview();
 }
 
 export function getCurrentRobotGeometry() {

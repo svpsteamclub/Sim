@@ -388,6 +388,9 @@ hr {
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
 }
 
 .robot-parameters {
@@ -418,4 +421,55 @@ hr {
 
 .robot-parameters button {
     margin-top: var(--spacing-md);
+}
+
+.robot-parts-palette {
+    background-color: var(--surface-color);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.robot-parts-palette h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+#robotPartsPalette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: var(--spacing-xs);
+    max-height: 120px;
+    overflow-y: auto;
+    padding: var(--spacing-xs);
+}
+
+#robotPartsPalette img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: move;
+    transition: all 0.2s ease;
+    object-fit: contain;
+    background-color: var(--surface-color);
+    padding: 2px;
+}
+
+#robotPartsPalette img:hover {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+#robotPartsPalette img.dragging {
+    opacity: 0.5;
+    transform: scale(1.1);
+}
+
+.robot-preview canvas {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: white;
 }
