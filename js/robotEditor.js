@@ -174,19 +174,21 @@ function renderRobotPreview() {
         wheelbaseEndX, 0.02,
         0.02, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
 
-    // Offset de sensores (desde el eje vertical)
-    const sensorLineX = previewRobot.sensorForwardProtrusion_m;
+    // Offset de sensores (cota vertical desde el eje horizontal de las ruedas)
+    const sensorLineY = 0;
+    const sensorLineYEnd = previewRobot.sensorForwardProtrusion_m;
     drawDimensionLine(previewCtx,
-        0, -previewRobot.wheelbase_m/2 - 0.02, // Comienza en el eje vertical
-        sensorLineX, -previewRobot.wheelbase_m/2 - 0.02,
+        0, sensorLineY, // Desde el eje horizontal
+        0, sensorLineYEnd, // Hasta la posición del offset
         0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
 
-    // Spread de sensores (en la posición de los sensores)
-    const sensorSpreadStartY = -previewRobot.sensorSideSpread_m;
-    const sensorSpreadEndY = previewRobot.sensorSideSpread_m;
+    // Spread de sensores (cota horizontal en la posición del offset)
+    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m;
+    const sensorSpreadEndX = previewRobot.sensorSideSpread_m;
+    const sensorSpreadY = previewRobot.sensorForwardProtrusion_m;
     drawDimensionLine(previewCtx,
-        previewRobot.sensorForwardProtrusion_m, sensorSpreadStartY,
-        previewRobot.sensorForwardProtrusion_m, sensorSpreadEndY,
+        sensorSpreadStartX, sensorSpreadY,
+        sensorSpreadEndX, sensorSpreadY,
         0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
 
     previewCtx.restore();
