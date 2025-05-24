@@ -48,7 +48,7 @@ export function initRobotEditor(appInterface) {
     });
 
     // Update preview dynamically as user types (optional, can be intensive)
-    const inputs = [elems.robotWidthInput, elems.robotLengthInput, elems.sensorOffsetInput, elems.sensorSpreadInput, elems.sensorDiameterInput];
+    const inputs = [elems.robotWidthInput, elems.sensorOffsetInput, elems.sensorSpreadInput, elems.sensorDiameterInput];
     inputs.forEach(input => {
         input.addEventListener('input', () => {
             currentGeometry = getFormValues();

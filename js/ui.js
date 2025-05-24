@@ -31,7 +31,6 @@ export function getDOMElements() {
         // Robot Editor Tab
         robotPreviewCanvas: document.getElementById('robotPreviewCanvas'),
         robotWidthInput: document.getElementById('robotWidth'),
-        robotLengthInput: document.getElementById('robotLength'),
         sensorOffsetInput: document.getElementById('sensorOffset'),
         sensorSpreadInput: document.getElementById('sensorSpread'),
         sensorDiameterInput: document.getElementById('sensorDiameter'),
