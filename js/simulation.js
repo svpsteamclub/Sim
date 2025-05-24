@@ -9,7 +9,7 @@ import { LapTimer } from './lapTimer.js';
 export class Simulation {
     constructor(robotImages, watermarkImage, initialGeometry = DEFAULT_ROBOT_GEOMETRY) {
         this.robot = new Robot(0, 0, 0, initialGeometry); // Initial position set by loadTrack
-        if (robotImages) this.robot.setImages(robotImages.body, robotImages.wheel);
+        if (robotImages) this.robot.setImages(robotImages.wheel);
         
         this.track = new Track();
         if (watermarkImage) this.track.setWatermark(watermarkImage);

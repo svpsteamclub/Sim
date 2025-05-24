@@ -58,8 +58,8 @@ export function initRobotEditor(appInterface) {
     });
     
     // Initial render
-    mainAppInterface.loadRobotAssets((bodyImg, wheelImg) => {
-        previewRobot.setImages(bodyImg, wheelImg);
+    mainAppInterface.loadRobotAssets((wheelImg) => {
+        previewRobot.setImages(wheelImg);
         renderRobotPreview();
     });
 }

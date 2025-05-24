@@ -66,16 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
         loadRobotAssets: (callback) => {
             // This assumes assets are already being loaded or are loaded by main init
             // Let's ensure they are loaded here if not already.
-            if (robotBodyImage && robotWheelImage) {
-                if (callback) callback(robotBodyImage, robotWheelImage);
+            if (robotWheelImage) {
+                if (callback) callback(robotWheelImage);
             } else {
-                // This is a simplified load, ideally use a Promise.all for multiple assets
-                loadAndScaleImage(getAssetPath('robot_body.png'), null, null, (bodyImg) => {
-                    robotBodyImage = bodyImg;
-                    loadAndScaleImage(getAssetPath('robot_wheel.png'), null, null, (wheelImg) => {
-                        robotWheelImage = wheelImg;
-                        if (callback) callback(robotBodyImage, robotWheelImage);
-                    });
+                // Load only wheel image
+                loadAndScaleImage(getAssetPath('robot_wheel.png'), null, null, (wheelImg) => {
+                    robotWheelImage = wheelImg;
+                    if (callback) callback(robotWheelImage);
                 });
             }
         },
@@ -103,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initialSimParams.robotGeometry = getCurrentRobotGeometry(); // Get from robot editor
         
         simulationInstance = new Simulation(
-            { body: robotBodyImage, wheel: robotWheelImage }, 
+            { wheel: robotWheelImage }, 
             watermarkTrackImage,
             initialSimParams.robotGeometry
         );
