@@ -84,77 +84,126 @@ function setFormValues(geometry) {
     elems.sensorDiameterInput.value = geometry.sensorDiameter_m.toFixed(3);
 }
 
+function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
+    const arrowSize = 5;
+    const textOffset = 10;
+    
+    // Dibujar línea principal
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+    
+    // Dibujar flechas
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const perpAngle = angle + Math.PI/2;
+    
+    // Flecha 1
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX + Math.cos(angle + Math.PI - Math.PI/6) * arrowSize, 
+               startY + Math.sin(angle + Math.PI - Math.PI/6) * arrowSize);
+    ctx.lineTo(startX + Math.cos(angle + Math.PI + Math.PI/6) * arrowSize,
+               startY + Math.sin(angle + Math.PI + Math.PI/6) * arrowSize);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Flecha 2
+    ctx.beginPath();
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(endX + Math.cos(angle - Math.PI/6) * arrowSize,
+               endY + Math.sin(angle - Math.PI/6) * arrowSize);
+    ctx.lineTo(endX + Math.cos(angle + Math.PI/6) * arrowSize,
+               endY + Math.sin(angle + Math.PI/6) * arrowSize);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Dibujar texto
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    ctx.save();
+    ctx.translate(midX, midY);
+    ctx.rotate(angle);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, -textOffset);
+    ctx.restore();
+}
+
 function renderRobotPreview() {
     if (!previewCtx || !previewRobot) return;
 
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewCtx.save();
 
-    // Center the robot in the preview canvas.
-    // The robot's draw method uses PIXELS_PER_METER, so we need to scale.
-    // Let's make the preview canvas represent a fixed area, e.g., 0.3m x 0.3m.
+    // Center the robot in the preview canvas
     const previewArea_m = 0.3; 
-    const scale = Math.min(previewCanvas.width, previewCanvas.height) / previewArea_m; // pixels per meter for preview
+    const scale = Math.min(previewCanvas.width, previewCanvas.height) / previewArea_m;
 
-    // Temporarily override PIXELS_PER_METER for this drawing context for Robot.draw()
-    // This is a bit hacky. A better Robot.draw() would take scale as a parameter.
-    // For now, we adjust the robot's own position to be in the center of its "world" (the preview canvas)
-    // and rely on its internal PIXELS_PER_METER for drawing its parts relative to its center.
-    
-    // To draw the robot, we can scale the context.
-    previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2); // Move origin to canvas center
-    previewCtx.scale(scale, scale); // Scale everything drawn from now on
+    previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
+    previewCtx.scale(scale, scale);
 
-    // The robot's internal x_m, y_m should be 0 for centered drawing after translation
+    // Draw robot
     const tempX = previewRobot.x_m;
     const tempY = previewRobot.y_m;
     const tempAngle = previewRobot.angle_rad;
 
     previewRobot.x_m = 0;
     previewRobot.y_m = 0;
-    previewRobot.angle_rad = -Math.PI / 2; // Face "up" in the preview
+    previewRobot.angle_rad = -Math.PI / 2;
 
-    // The Robot.draw method uses its own PIXELS_PER_METER for drawing.
-    // We need to ensure its internal PIXELS_PER_METER is effectively 1 for the pre-scaled context,
-    // or that its draw method is scale-aware.
-    // The easiest way: Robot.draw() uses PIXELS_PER_METER. Our context is already scaled.
-    // So, when Robot.draw calls `this.x_m * PIXELS_PER_METER`, if x_m is 0, it's fine.
-    // But for `this.length_m * PIXELS_PER_METER`, this will be scaled again.
-    // This needs careful thought.
+    previewRobot.draw(previewCtx, previewRobot.sensors);
 
-    // Let's assume Robot.draw() is not changed. It uses global PIXELS_PER_METER.
-    // We want to show the robot as if it's in a world where PIXELS_PER_METER applies.
-    // So, we don't scale the context by `scale`. Instead, we draw the robot at its actual size
-    // (using its m values * PIXELS_PER_METER) and just ensure it's centered.
-    previewCtx.restore(); // Clean slate
-    previewCtx.save();
-    
-    // Draw robot centered. Robot's internal draw uses PIXELS_PER_METER.
-    // The preview canvas is small (e.g. 300x300px).
-    // We need to draw the robot as if these 300px represent its actual size in mm.
-    // So, if robot is 0.1m (100mm) wide, it should take 100px on canvas.
-    // This means PIXELS_PER_METER is implicitly used by Robot.draw().
-
-    // Center the robot for drawing.
-    // Robot's (0,0) is its axle center. Preview Robot is already at world center.
-    // Adjust previewRobot position for drawing to be center of preview canvas
-    previewRobot.x_m = (previewCanvas.width / 2) / PIXELS_PER_METER;
-    previewRobot.y_m = (previewCanvas.height / 2) / PIXELS_PER_METER;
-    previewRobot.angle_rad = -Math.PI/2; // Pointing upwards
-
-    previewRobot.draw(previewCtx, previewRobot.sensors); // Pass current sensor state for visual consistency
-
-    // Restore robot's original position if it was changed for drawing
+    // Restore robot's original position
     previewRobot.x_m = tempX;
     previewRobot.y_m = tempY;
     previewRobot.angle_rad = tempAngle;
+
+    // Draw dimension lines
+    previewCtx.strokeStyle = 'black';
+    previewCtx.fillStyle = 'black';
+    previewCtx.lineWidth = 1;
+    previewCtx.font = '10px Arial';
+
+    // Ancho del robot (wheelbase)
+    const wheelbaseStartX = -previewRobot.wheelbase_m/2;
+    const wheelbaseEndX = previewRobot.wheelbase_m/2;
+    drawDimensionLine(previewCtx, 
+        wheelbaseStartX, -previewRobot.length_m/2 - 0.02,
+        wheelbaseEndX, -previewRobot.length_m/2 - 0.02,
+        0.02, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
+
+    // Largo del robot
+    const lengthStartY = -previewRobot.length_m/2;
+    const lengthEndY = previewRobot.length_m/2;
+    drawDimensionLine(previewCtx,
+        previewRobot.wheelbase_m/2 + 0.02, lengthStartY,
+        previewRobot.wheelbase_m/2 + 0.02, lengthEndY,
+        0.02, `${(previewRobot.length_m * 100).toFixed(1)} cm`);
+
+    // Offset de sensores
+    const sensorLineY = previewRobot.length_m/2 + previewRobot.sensorForwardProtrusion_m;
+    drawDimensionLine(previewCtx,
+        -previewRobot.wheelbase_m/2 - 0.02, previewRobot.length_m/2,
+        -previewRobot.wheelbase_m/2 - 0.02, sensorLineY,
+        0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
+
+    // Spread de sensores
+    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m;
+    const sensorSpreadEndX = previewRobot.sensorSideSpread_m;
+    drawDimensionLine(previewCtx,
+        sensorSpreadStartX, sensorLineY + 0.02,
+        sensorSpreadEndX, sensorLineY + 0.02,
+        0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
 
     // Draw axes or scale reference
     previewCtx.strokeStyle = "#aaa";
     previewCtx.lineWidth = 0.5;
     previewCtx.beginPath();
-    previewCtx.moveTo(previewCanvas.width / 2, 0); previewCtx.lineTo(previewCanvas.width / 2, previewCanvas.height);
-    previewCtx.moveTo(0, previewCanvas.height / 2); previewCtx.lineTo(previewCanvas.width, previewCanvas.height / 2);
+    previewCtx.moveTo(previewCanvas.width / 2, 0); 
+    previewCtx.lineTo(previewCanvas.width / 2, previewCanvas.height);
+    previewCtx.moveTo(0, previewCanvas.height / 2); 
+    previewCtx.lineTo(previewCanvas.width, previewCanvas.height / 2);
     previewCtx.stroke();
 
     // Scale legend (e.g., 5cm line)
