@@ -463,7 +463,13 @@ function generateRandomLoopTrackLogic() {
     
     const loopParts = AVAILABLE_TRACK_PARTS.filter(p => {
         if (!p.connections) return false;
-        return Object.values(p.connections).filter(conn => conn === true).length === 2;
+        const connCount = Object.values(p.connections).filter(conn => conn === true).length;
+        if (currentGridSize.rows * currentGridSize.cols <= 9) {
+            // En 3x3, permite piezas de 2, 3 o 4 conexiones
+            return connCount >= 2;
+        }
+        // En grids grandes, solo piezas de 2 conexiones
+        return connCount === 2;
     });
 
     if (loopParts.length === 0) {
