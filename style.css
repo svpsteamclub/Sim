@@ -266,6 +266,7 @@ button:disabled {
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     width: 100%;
+    order: 1;
 }
 
 .track-parts-palette-container {
@@ -274,6 +275,28 @@ button:disabled {
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     width: 100%;
+    order: 2;
+}
+
+.track-editor-grid {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: var(--background-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    order: 3;
+}
+
+#trackEditorCanvas {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    background-color: var(--surface-color);
+    box-shadow: var(--shadow-md);
+    object-fit: contain;
 }
 
 #trackPartsPalette {
@@ -299,23 +322,6 @@ button:disabled {
 #trackPartsPalette img.selected {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px var(--primary-color);
-}
-
-.track-editor-grid {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    background-color: var(--background-color);
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-}
-
-#trackEditorCanvas {
-    max-width: 100%;
-    height: auto;
-    border-radius: var(--radius-md);
-    background-color: var(--surface-color);
-    box-shadow: var(--shadow-md);
 }
 
 /* Remove the h2 from track editor */
