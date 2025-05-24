@@ -297,8 +297,19 @@ function onGridDoubleClick(event) {
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
         // Implementar ciclo completo de rotación: 0° → 90° → 180° → 270° → 0°
-        const currentRotation = grid[r][c].rotation_deg;
-        const nextRotation = (currentRotation + 90) % 360;
+        let currentRotation = grid[r][c].rotation_deg;
+        
+        // Asegurarse de que la rotación actual esté en el rango 0-359
+        currentRotation = ((currentRotation % 360) + 360) % 360;
+        
+        // Calcular la siguiente rotación en el ciclo
+        let nextRotation;
+        if (currentRotation === 0) nextRotation = 90;
+        else if (currentRotation === 90) nextRotation = 180;
+        else if (currentRotation === 180) nextRotation = 270;
+        else if (currentRotation === 270) nextRotation = 0;
+        else nextRotation = 0; // Si por alguna razón no está en un ángulo válido, resetear a 0
+        
         grid[r][c].rotation_deg = nextRotation;
         renderEditor();
     }
