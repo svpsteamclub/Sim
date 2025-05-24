@@ -191,12 +191,12 @@ function renderRobotPreview() {
         -previewRobot.wheelbase_m/2 - 0.02, sensorLineY,
         0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
 
-    // Spread de sensores
+    // Spread de sensores (ahora en la parte superior)
     const sensorSpreadStartX = -previewRobot.sensorSideSpread_m;
     const sensorSpreadEndX = previewRobot.sensorSideSpread_m;
     drawDimensionLine(previewCtx,
-        sensorSpreadStartX, sensorLineY + 0.02,
-        sensorSpreadEndX, sensorLineY + 0.02,
+        sensorSpreadStartX, -previewRobot.length_m/2 - 0.02,
+        sensorSpreadEndX, -previewRobot.length_m/2 - 0.02,
         0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
 
     previewCtx.restore();
