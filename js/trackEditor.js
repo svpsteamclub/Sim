@@ -55,21 +55,29 @@ export function initTrackEditor(appInterface) {
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
 
-    // Add tab visibility change handler
+    // Guardar estado cuando se cambia de sección
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            saveEditorState();
+        } else {
+            restoreEditorState();
+        }
+    });
+
+    // Guardar estado cuando se cambia entre pestañas
     const trackEditorTab = document.getElementById('track-editor');
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-            if (mutation.attributeName === 'class') {
-                if (trackEditorTab.classList.contains('active')) {
-                    // Tab became visible
-                    restoreEditorState();
-                } else {
-                    // Tab became hidden
+            if (mutation.attributeName === 'style') {
+                if (trackEditorTab.style.display === 'none') {
                     saveEditorState();
+                } else {
+                    restoreEditorState();
                 }
             }
         });
     });
+
     observer.observe(trackEditorTab, { attributes: true });
 
     // Store instance globally for simulation to access
