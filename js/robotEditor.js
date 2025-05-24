@@ -154,34 +154,34 @@ function renderRobotPreview() {
     previewCtx.lineWidth = 1;
     previewCtx.font = '10px Arial';
 
-    // Offset para desplazar las cotas fuera del robot
-    const wheelbaseOffset = previewRobot.wheelbase_m / 2 + 0.03; // 3cm extra fuera del robot
-    const sensorSpreadYOffset = -previewRobot.sensorForwardProtrusion_m - 0.03; // 3cm arriba de los sensores
+    // Convertir metros a píxeles
+    const wheelbaseOffset = (previewRobot.wheelbase_m / 2 + 0.03) * PIXELS_PER_METER; // 3cm extra fuera del robot
+    const sensorSpreadYOffset = (-previewRobot.sensorForwardProtrusion_m - 0.03) * PIXELS_PER_METER; // 3cm arriba de los sensores
 
     // Ancho del robot (wheelbase)
-    const wheelbaseStartX = -previewRobot.wheelbase_m/2;
-    const wheelbaseEndX = previewRobot.wheelbase_m/2;
+    const wheelbaseStartX = -previewRobot.wheelbase_m/2 * PIXELS_PER_METER;
+    const wheelbaseEndX = previewRobot.wheelbase_m/2 * PIXELS_PER_METER;
     drawDimensionLine(previewCtx, 
-        wheelbaseStartX, 0.02, // Línea horizontal arriba
-        wheelbaseEndX, 0.02,
-        0.02, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
+        wheelbaseStartX, 20, // Línea horizontal arriba
+        wheelbaseEndX, 20,
+        20, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
 
     // Offset de sensores (cota vertical, desplazada a la izquierda)
     const sensorLineY = 0;
-    const sensorLineYEnd = -previewRobot.sensorForwardProtrusion_m;
+    const sensorLineYEnd = -previewRobot.sensorForwardProtrusion_m * PIXELS_PER_METER;
     drawDimensionLine(previewCtx,
         -wheelbaseOffset, sensorLineY, // Desplazada a la izquierda
         -wheelbaseOffset, sensorLineYEnd,
-        0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
+        20, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
 
     // Spread de sensores (cota horizontal, desplazada arriba de los sensores)
-    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m;
-    const sensorSpreadEndX = previewRobot.sensorSideSpread_m;
-    const sensorSpreadY = -previewRobot.sensorForwardProtrusion_m;
+    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m * PIXELS_PER_METER;
+    const sensorSpreadEndX = previewRobot.sensorSideSpread_m * PIXELS_PER_METER;
+    const sensorSpreadY = -previewRobot.sensorForwardProtrusion_m * PIXELS_PER_METER;
     drawDimensionLine(previewCtx,
         sensorSpreadStartX, sensorSpreadYOffset,
         sensorSpreadEndX, sensorSpreadYOffset,
-        0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
+        20, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
 
     // Restore robot's original position
     previewRobot.x_m = tempX;
