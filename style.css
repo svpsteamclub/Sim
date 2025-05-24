@@ -251,15 +251,13 @@ button:disabled {
 }
 
 /* Track Editor specific styles */
-.track-editor-grid {
+.track-editor-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 1200px;
+    margin: 0 auto;
     width: 100%;
-}
-
-#trackEditorCanvas {
-    width: 100%;
-    height: auto;
-    border-radius: var(--radius-md);
-    background-color: var(--surface-color);
 }
 
 .track-editor-controls {
@@ -267,6 +265,7 @@ button:disabled {
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    width: 100%;
 }
 
 .track-parts-palette-container {
@@ -274,14 +273,16 @@ button:disabled {
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
+    width: 100%;
 }
 
 #trackPartsPalette {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: var(--spacing-xs);
-    max-height: 400px;
+    max-height: 200px;
     overflow-y: auto;
+    padding: var(--spacing-xs);
 }
 
 #trackPartsPalette img {
@@ -292,11 +293,51 @@ button:disabled {
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
+    object-fit: contain;
 }
 
 #trackPartsPalette img.selected {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.track-editor-grid {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: var(--background-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+}
+
+#trackEditorCanvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    background-color: var(--surface-color);
+    box-shadow: var(--shadow-md);
+}
+
+/* Remove the h2 from track editor */
+.track-editor-layout h2 {
+    display: none;
+}
+
+/* Mobile optimizations for track editor */
+@media (max-width: 768px) {
+    .track-editor-layout {
+        padding: var(--spacing-xs);
+    }
+    
+    #trackPartsPalette {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        max-height: 150px;
+    }
+    
+    .track-editor-controls,
+    .track-parts-palette-container {
+        padding: var(--spacing-sm);
+    }
 }
 
 footer {
