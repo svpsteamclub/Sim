@@ -292,7 +292,7 @@ button:disabled {
     display: flex;
     justify-content: center;
     background-color: var(--background-color);
-    padding: var(--spacing-md);
+    padding: 0;
     border-radius: var(--radius-md);
     order: 3;
 }
@@ -305,7 +305,8 @@ button:disabled {
     border-radius: var(--radius-md);
     background-color: var(--surface-color);
     box-shadow: var(--shadow-md);
-    object-fit: contain;
+    display: block;
+    margin: 0;
 }
 
 #trackPartsPalette {
