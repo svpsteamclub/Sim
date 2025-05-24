@@ -127,7 +127,8 @@ export class Robot {
     // Sensors are typically at the "front" of the robot.
     getSensorPositions_world_m() {
         // Sensor line center in robot's local frame (x positive forward)
-        const localSensorLineCenterX = this.length_m / 2 + this.sensorForwardProtrusion_m;
+        // Solo usamos el offset hacia adelante, sin considerar el largo del robot
+        const localSensorLineCenterX = this.sensorForwardProtrusion_m;
         
         // Transform to world coordinates
         const cosA = Math.cos(this.angle_rad);
