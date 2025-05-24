@@ -354,6 +354,7 @@ function getDirectionFromTo(r1, c1, r2, c2) {
 }
 
 function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 100 : 20)) {
+    console.log(`Intentando generar pista aleatoria para grid ${currentGridSize.rows}x${currentGridSize.cols} con hasta ${maxRetries} intentos...`);
     for (let i = 0; i < maxRetries; i++) {
         const generationResult = generateRandomLoopTrackLogic();
         if (generationResult.success) {
@@ -363,6 +364,7 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
             return;
         }
     }
+    console.warn(`No se pudo generar una pista en bucle válida después de ${maxRetries} intentos para grid ${currentGridSize.rows}x${currentGridSize.cols}.`);
     alert("No se pudo generar una pista en bucle válida después de varios intentos. Prueba un grid más grande o revisa las piezas.");
     lastGeneratedTrackStartPosition = null;
     setupGrid(); // Clear grid on failure
