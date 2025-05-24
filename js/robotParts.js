@@ -115,19 +115,16 @@ function handleCanvasClick(e) {
 export function drawRobotPreview() {
     if (!previewCtx || !previewCanvas) return;
 
-    // Clear the canvas
-    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-
-    // Draw the robot (this will be handled by the robot editor)
-    // The robot editor will call this function after drawing the robot
-
     // Draw placed parts
     placedParts.forEach(part => {
         const x = part.x * previewCanvas.width;
         const y = part.y * previewCanvas.height;
         const size = 40; // Size of the part in pixels
 
+        previewCtx.save();
+        previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
         previewCtx.drawImage(part.img, x - size/2, y - size/2, size, size);
+        previewCtx.restore();
     });
 }
 

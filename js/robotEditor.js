@@ -130,6 +130,7 @@ function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
 function renderRobotPreview() {
     if (!previewCtx || !previewRobot) return;
 
+    // Clear the canvas only once
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     previewCtx.save();
 
@@ -142,8 +143,8 @@ function renderRobotPreview() {
     const tempY = previewRobot.y_m;
     const tempAngle = previewRobot.angle_rad;
 
-    previewRobot.x_m = 0;
-    previewRobot.y_m = 0;
+    previewRobot.x_m = previewCanvas.width / 2 / PIXELS_PER_METER;
+    previewRobot.y_m = previewCanvas.height / 2 / PIXELS_PER_METER;
     previewRobot.angle_rad = -Math.PI / 2;
 
     previewRobot.draw(previewCtx, previewRobot.sensors);
