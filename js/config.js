@@ -23,13 +23,15 @@ export const currentMaxValError = 2; // Error máximo para la lógica de PID eje
 // La rotación se maneja en el editor. Estas son las conexiones para la pieza en su orientación 0 grados.
 // Las imágenes deben estar en 'assets/track_parts/'
 export const AVAILABLE_TRACK_PARTS = [
-    { name: "Recta", file: "recta.png", connections: { N: true, S: true, E: false, W: false } },
-    { name: "Curva", file: "curva.png", connections: { N: true, E: true, S: false, W: false } },
-    { name: "Cruce", file: "cruce.png", connections: { N: true, S: true, E: true, W: true } },
-    { name: "Intersección T", file: "t_junction.png", connections: { N: true, S: true, E: true, W: false } },
-    // Añade más piezas según tus archivos PNG
-    // Ejemplo: Pieza final de pista (solo una conexión)
-    // { name: "Final N", file: "final_n.png", connections: { N: true, S: false, E: false, W: false } },
+    { name: "C0.00-BCS", file: "C0.00-BCS.png", connections: { N: false, S: false, E: false, W: false } },
+    { name: "C1.01-RCS", file: "C1.01-RCS.png", connections: { N: true, S: true, E: false, W: false } },
+    { name: "C1.02-MCS", file: "C1.02-MCS.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C1.03-CCS", file: "C1.03-CCS.png", connections: { N: false, S: true, E: false, W: true } },
+    { name: "C1.04-MCS", file: "C1.04-MCS.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C1.05-RCS", file: "C1.05-RCS.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C1.06-MCS", file: "C1.06-MCS.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C2.07-RCI", file: "C2.07-RCI.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C2.08-MCS", file: "C2.08-MCS.png", connections: { N: true, S: true, E: false, W: false } },
 ];
 
 
