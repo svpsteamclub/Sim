@@ -185,18 +185,19 @@ function renderRobotPreview() {
         0.02, `${(previewRobot.length_m * 100).toFixed(1)} cm`);
 
     // Offset de sensores (desde el eje horizontal)
-    const sensorLineY = -previewRobot.sensorForwardProtrusion_m;
+    // En el sistema de coordenadas del robot, el offset es positivo hacia adelante (eje X)
+    const sensorLineX = previewRobot.sensorForwardProtrusion_m;
     drawDimensionLine(previewCtx,
-        -previewRobot.wheelbase_m/2 - 0.02, 0, // Comienza en el eje horizontal
-        -previewRobot.wheelbase_m/2 - 0.02, sensorLineY,
+        0, -previewRobot.wheelbase_m/2 - 0.02, // Comienza en el eje vertical
+        sensorLineX, -previewRobot.wheelbase_m/2 - 0.02,
         0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
 
     // Spread de sensores (ahora en la parte superior)
-    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m;
-    const sensorSpreadEndX = previewRobot.sensorSideSpread_m;
+    const sensorSpreadStartY = -previewRobot.sensorSideSpread_m;
+    const sensorSpreadEndY = previewRobot.sensorSideSpread_m;
     drawDimensionLine(previewCtx,
-        sensorSpreadStartX, -previewRobot.length_m/2 - 0.02,
-        sensorSpreadEndX, -previewRobot.length_m/2 - 0.02,
+        previewRobot.sensorForwardProtrusion_m, sensorSpreadStartY,
+        previewRobot.sensorForwardProtrusion_m, sensorSpreadEndY,
         0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
 
     previewCtx.restore();
