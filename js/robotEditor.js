@@ -184,10 +184,10 @@ function renderRobotPreview() {
         previewRobot.wheelbase_m/2 + 0.02, lengthEndY,
         0.02, `${(previewRobot.length_m * 100).toFixed(1)} cm`);
 
-    // Offset de sensores
-    const sensorLineY = previewRobot.length_m/2 + previewRobot.sensorForwardProtrusion_m;
+    // Offset de sensores (desde el eje horizontal)
+    const sensorLineY = previewRobot.sensorForwardProtrusion_m;
     drawDimensionLine(previewCtx,
-        -previewRobot.wheelbase_m/2 - 0.02, previewRobot.length_m/2,
+        -previewRobot.wheelbase_m/2 - 0.02, 0, // Comienza en el eje horizontal
         -previewRobot.wheelbase_m/2 - 0.02, sensorLineY,
         0.02, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
 
