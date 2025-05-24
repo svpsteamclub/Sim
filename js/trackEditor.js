@@ -11,6 +11,26 @@ let selectedTrackPart = null; // { ...partInfo, image: ImageElement }
 let isEraseModeActive = false; 
 let lastGeneratedTrackStartPosition = null; // { r, c, angle_rad } for the simulator
 
+// Add state management
+let savedState = null;
+
+function saveEditorState() {
+    savedState = {
+        grid: JSON.parse(JSON.stringify(grid)),
+        currentGridSize: { ...currentGridSize },
+        lastGeneratedTrackStartPosition: lastGeneratedTrackStartPosition ? { ...lastGeneratedTrackStartPosition } : null
+    };
+}
+
+function restoreEditorState() {
+    if (savedState) {
+        grid = savedState.grid;
+        currentGridSize = { ...savedState.currentGridSize };
+        lastGeneratedTrackStartPosition = savedState.lastGeneratedTrackStartPosition ? { ...savedState.lastGeneratedTrackStartPosition } : null;
+        renderEditor();
+    }
+}
+
 // Directions for connection logic
 const OPPOSITE_DIRECTIONS = { N: 'S', S: 'N', E: 'W', W: 'E' };
 const DIRECTIONS = [
@@ -34,6 +54,23 @@ export function initTrackEditor(appInterface) {
     }
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
+
+    // Add tab visibility change handler
+    const trackEditorTab = document.getElementById('track-editor');
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                if (trackEditorTab.classList.contains('active')) {
+                    // Tab became visible
+                    restoreEditorState();
+                } else {
+                    // Tab became hidden
+                    saveEditorState();
+                }
+            }
+        });
+    });
+    observer.observe(trackEditorTab, { attributes: true });
 
     // Store instance globally for simulation to access
     window.trackEditorInstance = {
