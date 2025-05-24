@@ -85,8 +85,8 @@ function setFormValues(geometry) {
 }
 
 function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
-    const arrowSize = 5;
-    const textOffset = 10;
+    const arrowSize = 5 / ctx.getTransform().a; // Ajustar tamaño de flecha para la escala
+    const textOffset = 10 / ctx.getTransform().a; // Ajustar offset de texto para la escala
     
     // Dibujar línea principal
     ctx.beginPath();
@@ -96,7 +96,6 @@ function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
     
     // Dibujar flechas
     const angle = Math.atan2(endY - startY, endX - startX);
-    const perpAngle = angle + Math.PI/2;
     
     // Flecha 1
     ctx.beginPath();
@@ -140,6 +139,7 @@ function renderRobotPreview() {
     const previewArea_m = 0.3; 
     const scale = Math.min(previewCanvas.width, previewCanvas.height) / previewArea_m;
 
+    // Primero dibujamos el robot
     previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
     previewCtx.scale(scale, scale);
 
@@ -162,8 +162,8 @@ function renderRobotPreview() {
     // Draw dimension lines
     previewCtx.strokeStyle = 'black';
     previewCtx.fillStyle = 'black';
-    previewCtx.lineWidth = 1;
-    previewCtx.font = '10px Arial';
+    previewCtx.lineWidth = 1 / scale; // Ajustar el grosor de línea para la escala
+    previewCtx.font = `${10 / scale}px Arial`; // Ajustar el tamaño de fuente para la escala
 
     // Ancho del robot (wheelbase)
     const wheelbaseStartX = -previewRobot.wheelbase_m/2;
@@ -196,7 +196,10 @@ function renderRobotPreview() {
         sensorSpreadEndX, sensorLineY + 0.02,
         0.02, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
 
-    // Draw axes or scale reference
+    previewCtx.restore();
+
+    // Dibujar ejes y leyenda de escala en coordenadas de pantalla
+    previewCtx.save();
     previewCtx.strokeStyle = "#aaa";
     previewCtx.lineWidth = 0.5;
     previewCtx.beginPath();
@@ -208,12 +211,11 @@ function renderRobotPreview() {
 
     // Scale legend (e.g., 5cm line)
     const legendLength_m = 0.05; // 5 cm
-    const legendLength_px = legendLength_m * PIXELS_PER_METER;
+    const legendLength_px = legendLength_m * scale;
     previewCtx.fillStyle = "black";
     previewCtx.fillRect(10, previewCanvas.height - 20, legendLength_px, 2);
     previewCtx.font = "10px Arial";
     previewCtx.fillText(`${legendLength_m*100} cm`, 10, previewCanvas.height - 25);
-
     previewCtx.restore();
 }
 
