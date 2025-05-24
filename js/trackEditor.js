@@ -177,10 +177,24 @@ function populateTrackPartsPalette(paletteElement) {
 function setupGrid() {
     grid = Array(currentGridSize.rows).fill(null).map(() => Array(currentGridSize.cols).fill(null));
     if (editorCanvas) {
+        // Establecer el tamaño del canvas en píxeles
         editorCanvas.width = currentGridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = currentGridSize.rows * TRACK_PART_SIZE_PX;
-        editorCanvas.style.width = editorCanvas.width + 'px'; // Set style for display
-        editorCanvas.style.height = editorCanvas.height + 'px';
+        
+        // Calcular el tamaño máximo disponible para el contenedor
+        const container = editorCanvas.parentElement;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        
+        // Calcular la escala para que el canvas se ajuste al contenedor manteniendo la proporción
+        const scaleX = containerWidth / editorCanvas.width;
+        const scaleY = containerHeight / editorCanvas.height;
+        const scale = Math.min(scaleX, scaleY);
+        
+        // Aplicar la escala al canvas
+        editorCanvas.style.width = `${editorCanvas.width * scale}px`;
+        editorCanvas.style.height = `${editorCanvas.height * scale}px`;
+        
         renderEditor();
     }
 }
