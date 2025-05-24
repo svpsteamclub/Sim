@@ -353,7 +353,7 @@ function getDirectionFromTo(r1, c1, r2, c2) {
     return null;
 }
 
-function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 1000 : 20)) {
+function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 50 : 20)) {
     console.log(`Intentando generar pista aleatoria para grid ${currentGridSize.rows}x${currentGridSize.cols} con hasta ${maxRetries} intentos...`);
     for (let i = 0; i < maxRetries; i++) {
         const generationResult = generateRandomLoopTrackLogic();
@@ -373,9 +373,9 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
 function generateCellPathAndConnections() {
     let path = []; 
     let visitedOnPath = new Set(); 
-    // Permitir caminos más cortos en grids pequeños, pero siempre loops
-    const minPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 2 : Math.max(3, Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.30));
-    const maxPathLength = Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.80); 
+    // Ajustar la longitud mínima y máxima del camino según el tamaño del grid
+    const minPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 4 : Math.max(3, Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.30));
+    const maxPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 8 : Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.80); 
     
     let startR = Math.floor(Math.random() * currentGridSize.rows);
     let startC = Math.floor(Math.random() * currentGridSize.cols);
@@ -466,11 +466,7 @@ function generateRandomLoopTrackLogic() {
     const loopParts = AVAILABLE_TRACK_PARTS.filter(p => {
         if (!p.connections) return false;
         const connCount = Object.values(p.connections).filter(conn => conn === true).length;
-        if (currentGridSize.rows * currentGridSize.cols <= 9) {
-            // En 3x3, permite piezas de 2, 3 o 4 conexiones
-            return connCount >= 2;
-        }
-        // En grids grandes, solo piezas de 2 conexiones
+        // Para todos los tamaños, solo permitir piezas con exactamente 2 conexiones
         return connCount === 2;
     });
 
