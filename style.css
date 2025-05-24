@@ -53,7 +53,7 @@ header h1 {
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
-    text-align: center;
+    text-align: left;
 }
 
 .tabs {
@@ -64,7 +64,7 @@ header h1 {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .tabs::-webkit-scrollbar {
