@@ -274,14 +274,16 @@ function onGridSingleClick(event) {
                 // alert("Por favor, selecciona una pieza de la paleta primero.");
                 return; 
             }
-            grid[r][c] = {
-                ...selectedTrackPart, // This includes original partInfo and its image
-                rotation_deg: 0 // Initial rotation
-            };
-            renderEditor();
-            // Optional: Deselect part after placing
-            // selectedTrackPart = null;
-            // document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
+            if (!grid[r][c]) {
+                grid[r][c] = {
+                    ...selectedTrackPart, // This includes original partInfo and its image
+                    rotation_deg: 0 // Initial rotation
+                };
+                renderEditor();
+                // Optional: Deselect part after placing
+                // selectedTrackPart = null;
+                // document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
+            }
         }
     }
 }
