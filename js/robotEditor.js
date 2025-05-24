@@ -139,9 +139,8 @@ function renderRobotPreview() {
     const previewArea_m = 0.3; 
     const scale = Math.min(previewCanvas.width, previewCanvas.height) / previewArea_m;
 
-    // Primero dibujamos el robot
+    // Primero dibujamos el robot sin escala
     previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
-    previewCtx.scale(scale, scale);
 
     // Draw robot
     const tempX = previewRobot.x_m;
@@ -152,12 +151,16 @@ function renderRobotPreview() {
     previewRobot.y_m = 0;
     previewRobot.angle_rad = -Math.PI / 2;
 
+    // Dibujar el robot sin escala
     previewRobot.draw(previewCtx, previewRobot.sensors);
 
     // Restore robot's original position
     previewRobot.x_m = tempX;
     previewRobot.y_m = tempY;
     previewRobot.angle_rad = tempAngle;
+
+    // Ahora aplicamos la escala para las líneas de cota
+    previewCtx.scale(scale, scale);
 
     // Draw dimension lines
     previewCtx.strokeStyle = 'black';
