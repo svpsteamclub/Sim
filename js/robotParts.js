@@ -13,40 +13,118 @@ let previewCanvas;
 let previewCtx;
 let draggedPart = null;
 let placedParts = [];
+let selectedPart = null;
+let isDragging = false;
+let dragOffset = { x: 0, y: 0 };
 
 export function initRobotParts() {
     const elems = getDOMElements();
-    partsPalette = elems.robotPartsPalette;
     previewCanvas = elems.robotPreviewCanvas;
     previewCtx = previewCanvas.getContext('2d');
+    partsPalette = elems.robotPartsPalette;
 
     if (!partsPalette || !previewCanvas) {
         console.error("Robot parts palette or preview canvas not found!");
         return;
     }
 
-    // Load and create part elements
+    // Load parts into palette
     PARTS.forEach(part => {
-        loadAndScaleImage(getAssetPath(part.src), 40, 40, (img) => {
+        const img = new Image();
+        img.src = getAssetPath(part.src);
+        img.onload = () => {
             const partElement = document.createElement('img');
             partElement.src = img.src;
-            partElement.alt = part.name;
-            partElement.title = part.name;
             partElement.draggable = true;
             partElement.dataset.partId = part.id;
-            
-            // Drag events
-            partElement.addEventListener('dragstart', handleDragStart);
-            partElement.addEventListener('dragend', handleDragEnd);
-            
+            partElement.title = part.name;
             partsPalette.appendChild(partElement);
-        });
+        };
     });
 
-    // Canvas drop events
-    previewCanvas.addEventListener('dragover', handleDragOver);
-    previewCanvas.addEventListener('drop', handleDrop);
-    previewCanvas.addEventListener('click', handleCanvasClick);
+    // Drag and drop event listeners
+    previewCanvas.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+
+    previewCanvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (draggedPart) {
+            const rect = previewCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+            const y = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
+            
+            placedParts.push({
+                id: draggedPart.id,
+                name: draggedPart.name,
+                img: draggedPart.img,
+                x: x,
+                y: y
+            });
+            
+            draggedPart = null;
+            drawRobotPreview();
+        }
+    });
+
+    // Mouse events for moving placed parts
+    previewCanvas.addEventListener('mousedown', (e) => {
+        const rect = previewCanvas.getBoundingClientRect();
+        const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+        const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
+
+        // Check if clicked on a part
+        for (let i = placedParts.length - 1; i >= 0; i--) {
+            const part = placedParts[i];
+            const partSize = 40 / PIXELS_PER_METER; // Convert pixel size to meters
+            if (Math.abs(mouseX - part.x) < partSize/2 && Math.abs(mouseY - part.y) < partSize/2) {
+                selectedPart = part;
+                isDragging = true;
+                dragOffset = {
+                    x: mouseX - part.x,
+                    y: mouseY - part.y
+                };
+                break;
+            }
+        }
+    });
+
+    previewCanvas.addEventListener('mousemove', (e) => {
+        if (isDragging && selectedPart) {
+            const rect = previewCanvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+            const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
+            
+            selectedPart.x = mouseX - dragOffset.x;
+            selectedPart.y = mouseY - dragOffset.y;
+            drawRobotPreview();
+        }
+    });
+
+    previewCanvas.addEventListener('mouseup', () => {
+        isDragging = false;
+        selectedPart = null;
+    });
+
+    // Click to remove part
+    previewCanvas.addEventListener('click', (e) => {
+        if (!isDragging) {
+            const rect = previewCanvas.getBoundingClientRect();
+            const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+            const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
+
+            // Check if clicked on a part
+            for (let i = placedParts.length - 1; i >= 0; i--) {
+                const part = placedParts[i];
+                const partSize = 40 / PIXELS_PER_METER;
+                if (Math.abs(mouseX - part.x) < partSize/2 && Math.abs(mouseY - part.y) < partSize/2) {
+                    placedParts.splice(i, 1);
+                    drawRobotPreview();
+                    break;
+                }
+            }
+        }
+    });
 }
 
 function handleDragStart(e) {
@@ -123,13 +201,21 @@ export function drawRobotPreview() {
 
         previewCtx.save();
         previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
+        if (part === selectedPart) {
+            previewCtx.globalAlpha = 0.6; // Make selected part more transparent
+        }
         previewCtx.drawImage(part.img, x - size/2, y - size/2, size, size);
         previewCtx.restore();
     });
 }
 
 export function getPlacedParts() {
-    return [...placedParts];
+    return placedParts.map(part => ({
+        ...part,
+        // Convert coordinates to be relative to robot center
+        x: part.x,
+        y: part.y
+    }));
 }
 
 export function clearPlacedParts() {

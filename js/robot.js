@@ -156,34 +156,34 @@ export class Robot {
         };
     }
 
-    draw(ctx, displaySensorStates = null) { // displaySensorStates for visual only
+    draw(ctx, displaySensorStates = null) {
         ctx.save();
         ctx.translate(this.x_m * PIXELS_PER_METER, this.y_m * PIXELS_PER_METER);
         ctx.rotate(this.angle_rad);
 
-        // Draw Wheels - usando las dimensiones reales en metros
+        // Draw Wheels
         const wheelLengthPx = WHEEL_LENGTH_M * PIXELS_PER_METER;
         const wheelWidthPx = WHEEL_WIDTH_M * PIXELS_PER_METER;
         const wheelYOffsetPx = this.wheelbase_m / 2 * PIXELS_PER_METER;
 
         if (this.wheelImage && this.wheelImage.complete && this.wheelImage.naturalWidth > 0) {
-            // Left wheel (robot's left, so positive y in local frame)
+            // Left wheel
             ctx.drawImage(this.wheelImage, -wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
-            // Right wheel (robot's right, so negative y in local frame)
+            // Right wheel
             ctx.drawImage(this.wheelImage, -wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
         } else {
-            ctx.fillStyle = 'rgba(80, 80, 80, 0.9)'; // Darker gray
+            ctx.fillStyle = 'rgba(80, 80, 80, 0.9)';
             ctx.fillRect(-wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
             ctx.fillRect(-wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
         }
             
-        // Draw direction indicator (simple triangle at the front)
-        ctx.fillStyle = 'rgba(173, 216, 230, 0.9)'; // Lighter blue
+        // Draw direction indicator
+        ctx.fillStyle = 'rgba(173, 216, 230, 0.9)';
         ctx.beginPath();
-        const indicatorTipX = wheelLengthPx / 2; 
-        const indicatorBaseX = wheelLengthPx / 2 - Math.min(10, wheelLengthPx * 0.2); // Base slightly behind tip
-        const indicatorBaseSpread = wheelWidthPx / 3; 
-        ctx.moveTo(indicatorTipX, 0); // Tip at the front center
+        const indicatorTipX = wheelLengthPx / 2;
+        const indicatorBaseX = wheelLengthPx / 2 - Math.min(10, wheelLengthPx * 0.2);
+        const indicatorBaseSpread = wheelWidthPx / 3;
+        ctx.moveTo(indicatorTipX, 0);
         ctx.lineTo(indicatorBaseX, -indicatorBaseSpread / 2);
         ctx.lineTo(indicatorBaseX, indicatorBaseSpread / 2);
         ctx.closePath();
@@ -203,7 +203,7 @@ export class Robot {
 
         ctx.restore();
 
-        // Draw Trails (outside robot's transformed context)
+        // Draw Trails
         const drawTrail = (trail, color, lineWidth) => {
             if (trail.length > 1) {
                 ctx.beginPath();
