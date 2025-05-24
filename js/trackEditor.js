@@ -353,7 +353,7 @@ function getDirectionFromTo(r1, c1, r2, c2) {
     return null;
 }
 
-function generateRandomTrackWithRetry(maxRetries = 20) {
+function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 100 : 20)) {
     for (let i = 0; i < maxRetries; i++) {
         const generationResult = generateRandomLoopTrackLogic();
         if (generationResult.success) {
@@ -371,7 +371,8 @@ function generateRandomTrackWithRetry(maxRetries = 20) {
 function generateCellPathAndConnections() {
     let path = []; 
     let visitedOnPath = new Set(); 
-    const minPathLength = Math.max(3, Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.30)); 
+    // Permitir caminos más cortos en grids pequeños, pero siempre loops
+    const minPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 2 : Math.max(3, Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.30));
     const maxPathLength = Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.80); 
     
     let startR = Math.floor(Math.random() * currentGridSize.rows);
