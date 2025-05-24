@@ -83,8 +83,10 @@ export function initTrackEditor(appInterface) {
     // Store instance globally for simulation to access
     window.trackEditorInstance = {
         loadTrackFromSimulation: (trackCanvas) => {
-            // Guardar el estado actual antes de cargar la nueva pista
-            saveEditorState();
+            // Solo guardar el estado si la pista no viene del editor
+            if (!trackCanvas.dataset.fromEditor) {
+                saveEditorState();
+            }
             
             // Clear current grid
             setupGrid();

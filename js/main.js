@@ -26,12 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Called by TrackEditor when "Use this Track" is clicked
         loadTrackFromEditor: (trackCanvas, startX_m, startY_m, startAngle_rad) => {
             if (simulationInstance) {
+                // Marcar el canvas como proveniente del editor para evitar que se limpie el estado
+                trackCanvas.dataset.fromEditor = 'true';
                 simulationInstance.loadTrack(trackCanvas, startX_m, startY_m, startAngle_rad, 
                     (success, trackWidth, trackHeight) => {
                     if (success) {
                         elems.simulationDisplayCanvas.width = trackWidth;
                         elems.simulationDisplayCanvas.height = trackHeight;
-                        // Simulation state is reset within loadTrack
                         drawCurrentSimulationState(); // Draw initial state of new track
                     } else {
                         alert("Error al cargar la pista del editor en la simulación.");
