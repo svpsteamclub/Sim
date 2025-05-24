@@ -39,6 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         },
+        // Called by Simulation when a track is loaded
+        loadTrackToEditor: (trackCanvas) => {
+            if (window.trackEditorInstance) {
+                window.trackEditorInstance.loadTrackFromSimulation(trackCanvas);
+            }
+        },
         // Called by RobotEditor when geometry is applied
         updateRobotGeometry: (newGeometry) => {
             if (simulationInstance) {
@@ -74,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         // switchToTab: (tabId) => { /* ... implementation ... */ } 
     };
+
+    // Store mainAppInterface globally for simulation to access
+    window.mainAppInterface = mainAppInterface;
 
     // --- Initialization Functions ---
     async function initializeSimulator() {

@@ -63,6 +63,13 @@ export function setupTabs() {
             tabContents.forEach(content => {
                 if (content.id === targetTab) {
                     content.classList.add('active');
+                    // If switching to track editor, notify it to show current track
+                    if (targetTab === 'track-editor' && window.trackEditorInstance) {
+                        const simulationCanvas = document.getElementById('simulationDisplayCanvas');
+                        if (simulationCanvas && simulationCanvas.getContext('2d').getImageData(0, 0, 1, 1).data[3] !== 0) {
+                            window.trackEditorInstance.loadTrackFromSimulation(simulationCanvas);
+                        }
+                    }
                 } else {
                     content.classList.remove('active');
                 }

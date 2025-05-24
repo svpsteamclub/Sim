@@ -35,6 +35,62 @@ export function initTrackEditor(appInterface) {
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
 
+    // Store instance globally for simulation to access
+    window.trackEditorInstance = {
+        loadTrackFromSimulation: (trackCanvas) => {
+            // Clear current grid
+            setupGrid();
+            
+            // Create a temporary canvas to analyze the track
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = trackCanvas.width;
+            tempCanvas.height = trackCanvas.height;
+            tempCtx.drawImage(trackCanvas, 0, 0);
+            
+            // Analyze the track image to determine grid size and piece positions
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Calculate grid size based on track dimensions
+            const gridSize = Math.max(3, Math.min(5, Math.ceil(Math.sqrt((trackCanvas.width * trackCanvas.height) / (TRACK_PART_SIZE_PX * TRACK_PART_SIZE_PX)))));
+            currentGridSize = { rows: gridSize, cols: gridSize };
+            elems.trackGridSizeSelect.value = `${gridSize}x${gridSize}`;
+            
+            // Reset grid with new size
+            setupGrid();
+            
+            // Try to identify track pieces and their positions
+            // This is a simplified version - you might need more sophisticated image analysis
+            const cellWidth = trackCanvas.width / gridSize;
+            const cellHeight = trackCanvas.height / gridSize;
+            
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    const x = c * cellWidth;
+                    const y = r * cellHeight;
+                    
+                    // Sample the center of each cell to determine if it contains a track piece
+                    const centerX = x + cellWidth / 2;
+                    const centerY = y + cellHeight / 2;
+                    
+                    // Check if this cell contains a track piece
+                    const pixelData = tempCtx.getImageData(centerX, centerY, 1, 1).data;
+                    if (pixelData[0] < 128) { // If dark pixel found (track piece)
+                        // Try to find a matching track part
+                        for (const part of AVAILABLE_TRACK_PARTS) {
+                            if (trackPartsImages[part.file]) {
+                                grid[r][c] = { ...part, image: trackPartsImages[part.file], rotation_deg: 0 };
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            renderEditor();
+        }
+    };
+
     // Forzar tamaño de grid a 3x3
     currentGridSize = { rows: 3, cols: 3 };
     elems.trackGridSizeSelect.value = '3x3';

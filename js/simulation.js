@@ -59,6 +59,22 @@ export class Simulation {
                 this.resetSimulationState(startX_m, startY_m, startAngle_rad);
                 // Initialize lap timer with the new start pose relative to the loaded track
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
+                
+                // Notify track editor if the track was loaded from a source other than the editor
+                if (source instanceof HTMLCanvasElement && !source.dataset.fromEditor) {
+                    // Create a copy of the canvas to send to the editor
+                    const trackCanvas = document.createElement('canvas');
+                    trackCanvas.width = trackWidthPx;
+                    trackCanvas.height = trackHeightPx;
+                    const ctx = trackCanvas.getContext('2d');
+                    ctx.drawImage(source, 0, 0);
+                    trackCanvas.dataset.fromEditor = 'true';
+                    
+                    // Notify the track editor through the main app interface
+                    if (window.mainAppInterface) {
+                        window.mainAppInterface.loadTrackToEditor(trackCanvas);
+                    }
+                }
             }
             if (callback) callback(success, trackWidthPx, trackHeightPx);
         }, source instanceof HTMLCanvasElement, source instanceof File ? source.name : "track_url");
