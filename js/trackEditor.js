@@ -344,7 +344,12 @@ function renderEditor() {
             ctx.strokeRect(x_topLeft, y_topLeft, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX);
 
             const currentGridPart = grid[r][c];
-            if (currentGridPart && currentGridPart.image) {
+            if (
+                currentGridPart &&
+                currentGridPart.image &&
+                currentGridPart.image instanceof HTMLImageElement &&
+                currentGridPart.image.complete
+            ) {
                 const x_center = x_topLeft + TRACK_PART_SIZE_PX / 2;
                 const y_center = y_topLeft + TRACK_PART_SIZE_PX / 2;
                 

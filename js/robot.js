@@ -158,22 +158,22 @@ export class Robot {
         ctx.translate(this.x_m * PIXELS_PER_METER, this.y_m * PIXELS_PER_METER);
         ctx.rotate(this.angle_rad);
 
-        const robotBodyWidthPx = this.wheelbase_m * PIXELS_PER_METER;
-        const robotBodyLengthPx = robotBodyWidthPx * 1.2; // Usar un tamaño proporcional al ancho
-
-        // Draw Body
+        // Draw Body - usando las dimensiones reales en metros
         if (this.bodyImage && this.bodyImage.complete && this.bodyImage.naturalWidth > 0) {
-            // Assume image is drawn centered around (0,0) in robot's local frame
-            ctx.drawImage(this.bodyImage, -robotBodyLengthPx / 2, -robotBodyWidthPx / 2, robotBodyLengthPx, robotBodyWidthPx);
+            // Asumimos que la imagen del cuerpo está en escala 1px=1mm
+            const bodyWidthPx = this.wheelbase_m * PIXELS_PER_METER;
+            const bodyLengthPx = this.wheelbase_m * 1.2 * PIXELS_PER_METER; // Mantenemos la proporción 1.2 pero en escala correcta
+            ctx.drawImage(this.bodyImage, -bodyLengthPx / 2, -bodyWidthPx / 2, bodyLengthPx, bodyWidthPx);
         } else {
             ctx.fillStyle = 'rgba(0, 0, 200, 0.8)'; // Darker blue
-            ctx.fillRect(-robotBodyLengthPx / 2, -robotBodyWidthPx / 2, robotBodyLengthPx, robotBodyWidthPx);
+            const bodyWidthPx = this.wheelbase_m * PIXELS_PER_METER;
+            const bodyLengthPx = this.wheelbase_m * 1.2 * PIXELS_PER_METER;
+            ctx.fillRect(-bodyLengthPx / 2, -bodyWidthPx / 2, bodyLengthPx, bodyWidthPx);
         }
 
-        // Draw Wheels
+        // Draw Wheels - usando las dimensiones reales en metros
         const wheelLengthPx = WHEEL_LENGTH_M * PIXELS_PER_METER;
         const wheelWidthPx = WHEEL_WIDTH_M * PIXELS_PER_METER;
-        // Wheels are typically centered along the length and offset by wheelbase/2
         const wheelYOffsetPx = this.wheelbase_m / 2 * PIXELS_PER_METER;
 
         if (this.wheelImage && this.wheelImage.complete && this.wheelImage.naturalWidth > 0) {
@@ -190,9 +190,9 @@ export class Robot {
         // Draw direction indicator (simple triangle at the front)
         ctx.fillStyle = 'rgba(173, 216, 230, 0.9)'; // Lighter blue
         ctx.beginPath();
-        const indicatorTipX = robotBodyLengthPx / 2; 
-        const indicatorBaseX = robotBodyLengthPx / 2 - Math.min(10, robotBodyLengthPx * 0.2); // Base slightly behind tip
-        const indicatorBaseSpread = robotBodyWidthPx / 3; 
+        const indicatorTipX = wheelLengthPx / 2; 
+        const indicatorBaseX = wheelLengthPx / 2 - Math.min(10, wheelLengthPx * 0.2); // Base slightly behind tip
+        const indicatorBaseSpread = wheelWidthPx / 3; 
         ctx.moveTo(indicatorTipX, 0); // Tip at the front center
         ctx.lineTo(indicatorBaseX, -indicatorBaseSpread / 2);
         ctx.lineTo(indicatorBaseX, indicatorBaseSpread / 2);
