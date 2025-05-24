@@ -31,10 +31,15 @@ export class Robot {
         this.maxTrailLength = 300; // Shorter trail for performance
 
         this.wheelImage = null;
+        this.decorativeParts = []; // Array to store decorative parts
     }
 
     setImages(wheelImg) {
         this.wheelImage = wheelImg;
+    }
+
+    setDecorativeParts(parts) {
+        this.decorativeParts = parts;
     }
     
     updateGeometry(geometry, resetTrails = true) {
@@ -183,6 +188,18 @@ export class Robot {
         ctx.lineTo(indicatorBaseX, indicatorBaseSpread / 2);
         ctx.closePath();
         ctx.fill();
+
+        // Draw decorative parts
+        this.decorativeParts.forEach(part => {
+            const x = part.x * PIXELS_PER_METER;
+            const y = part.y * PIXELS_PER_METER;
+            const size = 40; // Size of the part in pixels
+
+            ctx.save();
+            ctx.globalAlpha = 0.8;
+            ctx.drawImage(part.img, x - size/2, y - size/2, size, size);
+            ctx.restore();
+        });
 
         ctx.restore();
 

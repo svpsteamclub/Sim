@@ -47,19 +47,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         // Called by RobotEditor when geometry is applied
-        updateRobotGeometry: (newGeometry) => {
+        updateRobotGeometry: (newGeometry, decorativeParts = []) => {
             if (simulationInstance) {
                 const currentSimParams = getSimulationParamsFromUI();
                 currentSimParams.robotGeometry = newGeometry;
                 simulationInstance.updateParameters(currentSimParams);
+                // Update decorative parts
+                simulationInstance.robot.setDecorativeParts(decorativeParts);
                 // Resetting simulation is often needed if robot size changes drastically
-                // For now, just update. User should click Reset Sim if major changes.
-                // Or, force reset:
-                if (simulationInstance.track.imageData) { // Only if a track is loaded
+                if (simulationInstance.track.imageData) {
                     const currentPose = {x: simulationInstance.robot.x_m, y: simulationInstance.robot.y_m, angle: simulationInstance.robot.angle_rad};
                     simulationInstance.resetSimulationState(currentPose.x, currentPose.y, currentPose.angle, newGeometry);
                 }
-                 drawCurrentSimulationState();
+                drawCurrentSimulationState();
             }
         },
         // Called by RobotEditor to load assets for preview

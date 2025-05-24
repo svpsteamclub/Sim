@@ -2,7 +2,7 @@
 import { getDOMElements } from './ui.js';
 import { DEFAULT_ROBOT_GEOMETRY, PIXELS_PER_METER } from './config.js';
 import { Robot } from './robot.js';
-import { initRobotParts, drawRobotPreview } from './robotParts.js';
+import { initRobotParts, drawRobotPreview, getPlacedParts } from './robotParts.js';
 
 let previewCanvas, previewCtx;
 let previewRobot;
@@ -34,7 +34,9 @@ export function initRobotEditor(appInterface) {
         currentGeometry = getFormValues();
         previewRobot.updateGeometry(currentGeometry);
         renderRobotPreview();
-        mainAppInterface.updateRobotGeometry(currentGeometry);
+        // Get decorative parts and pass them to the simulation
+        const decorativeParts = getPlacedParts();
+        mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
         alert("Geometría del robot actualizada y aplicada a la simulación (requiere reinicio de sim).");
     });
 
@@ -43,7 +45,7 @@ export function initRobotEditor(appInterface) {
         setFormValues(currentGeometry);
         previewRobot.updateGeometry(currentGeometry);
         renderRobotPreview();
-        mainAppInterface.updateRobotGeometry(currentGeometry);
+        mainAppInterface.updateRobotGeometry(currentGeometry, []);
         alert("Geometría del robot restaurada a valores por defecto.");
     });
 
