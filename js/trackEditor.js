@@ -35,12 +35,32 @@ export function initTrackEditor(appInterface) {
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
 
-    const initialGridSizeValue = elems.trackGridSizeSelect.value.split('x');
-    currentGridSize = { rows: parseInt(initialGridSizeValue[0]), cols: parseInt(initialGridSizeValue[1]) };
+    // Forzar tamaño de grid a 3x3
+    currentGridSize = { rows: 3, cols: 3 };
+    elems.trackGridSizeSelect.value = '3x3';
 
     loadTrackPartAssets(() => {
         populateTrackPartsPalette(elems.trackPartsPalette);
         setupGrid(); // This will also call renderEditor
+        
+        // Generar pista aleatoria automáticamente
+        generateRandomTrackWithRetry();
+        
+        // Exportar la pista al simulador automáticamente
+        const exportedCanvas = exportTrackAsCanvas();
+        if (exportedCanvas) {
+            let startX_m, startY_m, startAngle_rad;
+            if (lastGeneratedTrackStartPosition) {
+                startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
+                startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
+                startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
+            } else {
+                startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
+                startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
+                startAngle_rad = 0;
+            }
+            mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
+        }
     });
 
     elems.trackGridSizeSelect.addEventListener('change', (e) => {
@@ -115,6 +135,8 @@ export function initTrackEditor(appInterface) {
 function loadTrackPartAssets(callback) {
     let loadedCount = 0;
     const totalParts = AVAILABLE_TRACK_PARTS.length;
+    console.log("Iniciando carga de piezas de pista. Total de piezas:", totalParts);
+    
     if (totalParts === 0) {
         console.warn("No hay partes de pista definidas en config.js (AVAILABLE_TRACK_PARTS).");
         if (typeof callback === 'function') callback();
@@ -122,16 +144,18 @@ function loadTrackPartAssets(callback) {
     }
 
     AVAILABLE_TRACK_PARTS.forEach(partInfo => {
-        // Images are expected to be TRACK_PART_SIZE_PX square already.
-        // If not, loadAndScaleImage would resize them. Here, we assume they are correct.
+        console.log(`Intentando cargar imagen: assets/track_parts/${partInfo.file}`);
         loadAndScaleImage(`assets/track_parts/${partInfo.file}`, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX, (img) => {
             if (img) {
+                console.log(`Imagen cargada exitosamente: ${partInfo.file}`);
                 trackPartsImages[partInfo.file] = img;
             } else {
                 console.error(`Fallo al cargar imagen para la pieza: ${partInfo.file}`);
             }
             loadedCount++;
+            console.log(`Progreso de carga: ${loadedCount}/${totalParts}`);
             if (loadedCount === totalParts) {
+                console.log("Todas las imágenes han sido cargadas");
                 if (typeof callback === 'function') callback();
             }
         });
