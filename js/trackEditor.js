@@ -83,6 +83,9 @@ export function initTrackEditor(appInterface) {
     // Store instance globally for simulation to access
     window.trackEditorInstance = {
         loadTrackFromSimulation: (trackCanvas) => {
+            // Guardar el estado actual antes de cargar la nueva pista
+            saveEditorState();
+            
             // Clear current grid
             setupGrid();
             
@@ -195,23 +198,18 @@ export function initTrackEditor(appInterface) {
         if (exportedCanvas) {
             let startX_m, startY_m, startAngle_rad;
             if (lastGeneratedTrackStartPosition) {
-                // Convert grid cell (r, c) and angle to simulator's world coordinates (meters)
-                // Assuming robot starts in the center of the cell. TRACK_PART_SIZE_PX is in mm effectively.
                 startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
                 startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
                 startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
             } else {
-                // Default start position if none generated (e.g. top-left cell, facing right)
                 startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
                 startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                startAngle_rad = 0; // Facing right along X-axis
+                startAngle_rad = 0;
                 alert("No se generó una posición inicial específica. Usando posición por defecto (0,0) orientada al Este. Ajusta en simulación si es necesario.");
             }
             
             mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
             alert("Pista del editor cargada en el simulador. Ve a la pestaña 'Simulación'.");
-            // Optionally, switch to the simulation tab
-            // mainAppInterface.switchToTab('simulation');
         }
     });
 
