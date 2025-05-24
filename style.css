@@ -1,110 +1,302 @@
 body {
-    font-family: sans-serif;
-    margin: 20px;
-    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
     color: #333;
-    display: flex; /* Use flex for centering the main content */
-    flex-direction: column; /* Stack title and container */
-    align-items: center; /* Center items horizontally */
-}
-
-h1 {
-    color: #333;
-    text-align: center;
-    width: 100%; /* Make h1 take full width for centering */
-}
-
-.container {
-    display: flex;
-    flex-direction: column; /* Stack simulation, code, and serial areas */
-    align-items: center; /* Center these stacked items */
-    gap: 20px;
-    width: fit-content; /* Adjust width to content */
-}
-
-.simulation-area {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center canvas and controls */
-    min-width: 600px; /* Keep canvas area adequately sized */
+    min-height: 100vh;
 }
 
-#simulationCanvas {
-    border: 1px solid #ccc;
-    background-color: #fff;
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
 }
 
-.controls {
-    margin-top: 10px; /* Space between canvas and buttons */
+header h1 {
+    margin: 0;
+    font-size: 1.8em;
 }
 
-.controls button {
-    padding: 10px 15px;
-    margin-right: 10px;
-    cursor: pointer;
-    background-color: #007bff;
+.tabs {
+    margin-top: 10px;
+}
+
+.tab-button {
+    background-color: #555;
     color: white;
     border: none;
-    border-radius: 4px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 0 2px;
+    border-radius: 5px 5px 0 0;
 }
 
-.controls button:hover {
+.tab-button.active {
+    background-color: #007bff;
+}
+
+.tab-button:hover {
+    background-color: #777;
+}
+
+.tab-button.active:hover {
     background-color: #0056b3;
 }
 
-.editor-monitor-container {
+main {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.tab-content {
+    display: none;
+    background-color: white;
+    padding: 20px;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+h2 {
+    color: #007bff;
+    margin-top: 0;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Layouts for specific tabs */
+.simulation-layout, .code-editor-layout, .robot-editor-layout, .track-editor-layout {
     display: flex;
-    flex-direction: row; /* Place editor and monitor side-by-side */
     gap: 20px;
-    width: 100%; /* Make this container take available width for children sizing */
-    justify-content: center; /* Center the editor and monitor if they don't fill width */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
-.code-area {
-    flex: 2; /* Give more space to code editor */
-    min-width: 450px; /* Minimum width for usability */
+/* Simulation Tab */
+.simulation-view {
+    flex: 3; /* Takes more space */
+    min-width: 520px;
 }
-
-.serial-output-area {
-    flex: 1; /* Less space for serial output */
-    min-width: 300px; /* Minimum width */
-}
-
-
-#codeEditor {
-    width: 100%; /* Fill the .code-area */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+#simulationDisplayCanvas {
     border: 1px solid #ccc;
-    padding: 10px;
-    font-family: monospace;
+    display: block; /* Removes extra space below canvas */
+    background-color: #fff; /* Ensure canvas bg is white if track doesn't fill */
+}
+.simulation-controls {
+    margin-top: 10px;
+}
+.simulation-controls button {
+    padding: 8px 12px;
+    margin-right: 5px;
+}
+.simulation-parameters {
+    flex: 1;
+    min-width: 250px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+.simulation-parameters label {
+    display: block;
+    margin-top: 10px;
     font-size: 0.9em;
-    min-height: 300px; /* Ensure a decent height */
 }
-
-#serialOutput {
-    width: 100%; /* Fill the .serial-output-area */
-    box-sizing: border-box;
-    height: 338px; /* Match editor height roughly (adjust as needed) */
+.simulation-parameters input[type="number"] {
+    width: 90%;
+    padding: 5px;
+    margin-top: 3px;
     border: 1px solid #ccc;
+    border-radius: 3px;
+}
+.simulation-parameters button {
+    margin-top: 15px;
+    padding: 8px 12px;
+}
+#telemetryOutput, #lapTimerOutput {
     background-color: #e9e9e9;
     padding: 10px;
-    overflow-y: auto;
+    border-radius: 3px;
     font-family: monospace;
-    font-size: 0.8em;
+    font-size: 0.85em;
     white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-top: 5px;
 }
 
-/* Adjustments for smaller screens if needed */
-@media (max-width: 900px) {
-    .editor-monitor-container {
-        flex-direction: column; /* Stack editor and monitor on smaller screens */
-        align-items: center;
-    }
-    .code-area, .serial-output-area {
-        width: 90%; /* Or specify a max-width like 600px */
-        max-width: 600px;
-    }
-    #serialOutput {
-        height: 150px; /* Reduce height when stacked */
-    }
+/* Code Editor Tab */
+#codeEditorArea {
+    flex: 3;
+    font-family: monospace;
+    font-size: 0.95em;
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 400px;
+    box-sizing: border-box;
+}
+.serial-monitor-container {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+}
+#serialMonitorOutput {
+    flex-grow: 1;
+    background-color: #e9e9e9;
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    font-size: 0.85em;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    min-height: 300px; /* Ensure it has some height */
+    max-height: calc(400px + 20px - 30px); /* Match textarea height roughly */
+    box-sizing: border-box;
+}
+#clearSerialButton {
+    margin-top: 10px;
+    padding: 8px;
+}
+
+
+/* Robot Editor Tab */
+.robot-preview {
+    flex: 1;
+    text-align: center;
+}
+#robotPreviewCanvas {
+    border: 1px solid #ccc;
+    background-color: #fdfdfd;
+}
+.robot-parameters {
+    flex: 2;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+.robot-parameters label, .track-editor-controls label {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+.robot-parameters input, .track-editor-controls input[type="text"], .track-editor-controls select {
+    width: calc(100% - 12px); /* Full width minus padding */
+    padding: 5px;
+    margin-top: 3px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+.robot-parameters button, .track-editor-controls button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    margin-right: 5px;
+}
+
+/* Track Editor Tab */
+.track-editor-grid {
+    flex: 2;
+    min-width: 350px; /* Minimum based on one track part */
+}
+#trackEditorCanvas {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: crosshair; /* Default cursor for drawing */
+}
+.track-editor-controls {
+    flex: 1;
+    min-width: 250px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+.track-parts-palette-container {
+    flex: 1;
+    min-width: 180px;
+    max-width: 220px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+#trackPartsPalette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+#trackPartsPalette img {
+    width: 70px;
+    height: 70px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    object-fit: cover; /* Ensures image aspect ratio is maintained */
+}
+#trackPartsPalette img.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 5px #007bff;
+}
+.file-input-label {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.file-input-label:hover {
+    background-color: #0056b3;
+}
+#loadTrackDesignInput {
+    display: none; /* Hide the actual file input */
+}
+.small-text {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 10px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+button:hover {
+    background-color: #0056b3;
+}
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9em;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 15px 0;
 }
