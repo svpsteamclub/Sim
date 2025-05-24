@@ -376,3 +376,46 @@ hr {
     background-color: #ddd;
     margin: 15px 0;
 }
+
+.robot-editor-layout {
+    display: grid;
+    gap: var(--spacing-lg);
+    grid-template-columns: 1fr 1fr;
+}
+
+.robot-preview {
+    background-color: var(--surface-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.robot-parameters {
+    background-color: var(--surface-color);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.robot-parameters label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.robot-parameters input[type="number"] {
+    width: 100%;
+    padding: var(--spacing-xs);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+}
+
+.robot-parameters button {
+    margin-top: var(--spacing-md);
+}
