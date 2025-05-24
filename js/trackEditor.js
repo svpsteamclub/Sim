@@ -296,7 +296,10 @@ function onGridDoubleClick(event) {
     const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-        grid[r][c].rotation_deg = (grid[r][c].rotation_deg + 90) % 360;
+        // Implementar ciclo completo de rotación: 0° → 90° → 180° → 270° → 0°
+        const currentRotation = grid[r][c].rotation_deg;
+        const nextRotation = (currentRotation + 90) % 360;
+        grid[r][c].rotation_deg = nextRotation;
         renderEditor();
     }
     event.preventDefault(); // Prevent text selection on double click
