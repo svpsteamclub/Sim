@@ -39,6 +39,13 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    justify-content: center;
+}
+
+header > div {
+    max-width: 1400px;
+    width: 100%;
 }
 
 header h1 {
@@ -46,6 +53,7 @@ header h1 {
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+    text-align: center;
 }
 
 .tabs {
@@ -56,6 +64,7 @@ header h1 {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    justify-content: center;
 }
 
 .tabs::-webkit-scrollbar {
