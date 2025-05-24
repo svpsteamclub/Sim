@@ -35,5 +35,5 @@ export const AVAILABLE_TRACK_PARTS = [
 
 
 // Para la simulación (Robot.js)
-export const WHEEL_LENGTH_M = 0.03; // 30mm en metros
-export const WHEEL_WIDTH_M = 0.01; // 10mm en metros
+export const WHEEL_LENGTH_M = 0.065; // 65mm en metros
+export const WHEEL_WIDTH_M = 0.025; // 25mm en metros
