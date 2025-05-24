@@ -291,10 +291,12 @@ button:disabled {
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
     background-color: var(--background-color);
     padding: 0;
     border-radius: var(--radius-md);
     order: 3;
+    min-height: 0;
 }
 
 #trackEditorCanvas {
@@ -307,6 +309,7 @@ button:disabled {
     box-shadow: var(--shadow-md);
     display: block;
     margin: 0;
+    object-fit: none;
 }
 
 #trackPartsPalette {
