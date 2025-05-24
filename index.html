@@ -202,7 +202,7 @@ function constrain(value, minVal, maxVal) {
                         <option value="5x5">5x5</option>
                     </select>
                     <button id="generateRandomTrack">Generar Pista Aleatoria (Loop)</button>
-                    <button id="toggleEraseModeButton">Activar Modo Borrar</button>
+                    <button id="exportTrackToSimulator">Usar en Simulación</button>
                     <hr>
                     <label for="trackEditorTrackName">Nombre de Pista:</label>
                     <input type="text" id="trackEditorTrackName" value="MiPistaEditada">
@@ -210,14 +210,14 @@ function constrain(value, minVal, maxVal) {
                     <label for="loadTrackDesignInput" class="file-input-label">Cargar Diseño (.json)</label>
                     <input type="file" id="loadTrackDesignInput" accept=".json,.trackdesign">
                     <hr>
-                    <button id="exportTrackToSimulator">Usar esta Pista en Simulación</button>
-                    <p class="small-text">Click para colocar, Doble-Click para rotar.</p>
                 </div>
                 <div class="track-parts-palette-container">
                     <h3>Paleta de Piezas</h3>
                     <div id="trackPartsPalette">
                         <!-- Piezas se cargarán aquí por JS -->
                     </div>
+                    <p class="small-text">Click para colocar, Doble-Click para rotar.</p>
+                    <button id="toggleEraseModeButton">Activar Modo Borrar</button>
                 </div>
             </div>
         </div>
