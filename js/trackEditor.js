@@ -199,24 +199,6 @@ export function initTrackEditor(appInterface) {
     
     elems.toggleEraseModeButton.addEventListener('click', () => toggleEraseMode(elems.toggleEraseModeButton)); 
 
-    // Add start line placement button
-    const placeStartLineButton = document.createElement('button');
-    placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
-    placeStartLineButton.className = 'editor-button';
-    elems.trackEditorControls.appendChild(placeStartLineButton);
-
-    placeStartLineButton.addEventListener('click', () => {
-        if (isPlacingStartLine) {
-            isPlacingStartLine = false;
-            placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
-            placeStartLineButton.classList.remove('active');
-        } else {
-            isPlacingStartLine = true;
-            placeStartLineButton.textContent = 'Cancelar Ubicación';
-            placeStartLineButton.classList.add('active');
-        }
-    });
-
     elems.exportTrackToSimulatorButton.addEventListener('click', () => {
         if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton);
         
@@ -282,8 +264,6 @@ export function initTrackEditor(appInterface) {
                             angle_rad: angle
                         };
                         isPlacingStartLine = false;
-                        placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
-                        placeStartLineButton.classList.remove('active');
                         renderEditor();
                     } else {
                         alert('Por favor, selecciona una sección de conexión Norte-Sur o Este-Oeste para la línea de comienzo.');
@@ -400,12 +380,9 @@ function setupGrid() {
         // Calcular el tamaño máximo disponible para el contenedor
         const container = editorCanvas.parentElement;
         const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
         
-        // Calcular la escala para que el canvas se ajuste al contenedor manteniendo la proporción
-        const scaleX = containerWidth / editorCanvas.width;
-        const scaleY = containerHeight / editorCanvas.height;
-        const scale = Math.min(scaleX, scaleY);
+        // Calcular la escala para que el canvas se ajuste al ancho del contenedor
+        const scale = containerWidth / editorCanvas.width;
         
         // Aplicar la escala al canvas
         editorCanvas.style.width = `${editorCanvas.width * scale}px`;
@@ -418,7 +395,8 @@ function setupGrid() {
 function renderEditor() {
     if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
     
-    ctx.fillStyle = '#f0f0f0'; // Light grey background for empty grid
+    // Limpiar el canvas con fondo blanco
+    ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
 
     const connIndicatorSize = Math.max(6, TRACK_PART_SIZE_PX * 0.02); 
@@ -492,8 +470,9 @@ function toggleEraseMode(buttonElement) {
 function onGridSingleClick(event) {
     if (!editorCanvas) return;
     const rect = editorCanvas.getBoundingClientRect();
-    const x_canvas = event.clientX - rect.left;
-    const y_canvas = event.clientY - rect.top;
+    const scale = editorCanvas.width / rect.width;
+    const x_canvas = (event.clientX - rect.left) * scale;
+    const y_canvas = (event.clientY - rect.top) * scale;
 
     const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
     const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
@@ -521,8 +500,9 @@ function onGridSingleClick(event) {
 function onGridDoubleClick(event) {
     if (isEraseModeActive || !editorCanvas) return;
     const rect = editorCanvas.getBoundingClientRect();
-    const x_canvas = event.clientX - rect.left;
-    const y_canvas = event.clientY - rect.top;
+    const scale = editorCanvas.width / rect.width;
+    const x_canvas = (event.clientX - rect.left) * scale;
+    const y_canvas = (event.clientY - rect.top) * scale;
 
     const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
     const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
