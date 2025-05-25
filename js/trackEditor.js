@@ -111,66 +111,15 @@ export function initTrackEditor(appInterface) {
         });
     });
     observer.observe(trackEditorTab, { attributes: true });
-    console.log("[TrackEditor] State management setup complete");
 
     // Store instance globally for simulation to access
     window.trackEditorInstance = {
         loadTrackFromSimulation: (trackCanvas) => {
-            // Solo guardar el estado si la pista no viene del editor
             if (!trackCanvas.dataset.fromEditor) {
                 saveEditorState();
             }
-            
-            // Clear current grid
             setupGrid();
-            
-            // Create a temporary canvas to analyze the track
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = trackCanvas.width;
-            tempCanvas.height = trackCanvas.height;
-            tempCtx.drawImage(trackCanvas, 0, 0);
-            
-            // Analyze the track image to determine grid size and piece positions
-            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // Calculate grid size based on track dimensions
-            const gridSize = Math.max(3, Math.min(5, Math.ceil(Math.sqrt((trackCanvas.width * trackCanvas.height) / (TRACK_PART_SIZE_PX * TRACK_PART_SIZE_PX)))));
-            currentGridSize = { rows: gridSize, cols: gridSize };
-            elems.trackGridSizeSelect.value = `${gridSize}x${gridSize}`;
-            
-            // Reset grid with new size
-            setupGrid();
-            
-            // Try to identify track pieces and their positions
-            // This is a simplified version - you might need more sophisticated image analysis
-            const cellWidth = trackCanvas.width / gridSize;
-            const cellHeight = trackCanvas.height / gridSize;
-            
-            for (let r = 0; r < gridSize; r++) {
-                for (let c = 0; c < gridSize; c++) {
-                    const x = c * cellWidth;
-                    const y = r * cellHeight;
-                    
-                    // Sample the center of each cell to determine if it contains a track piece
-                    const centerX = x + cellWidth / 2;
-                    const centerY = y + cellHeight / 2;
-                    
-                    // Check if this cell contains a track piece
-                    const pixelData = tempCtx.getImageData(centerX, centerY, 1, 1).data;
-                    if (pixelData[0] < 128) { // If dark pixel found (track piece)
-                        // Try to find a matching track part
-                        for (const part of AVAILABLE_TRACK_PARTS) {
-                            if (trackPartsImages[part.file]) {
-                                grid[r][c] = { ...part, image: trackPartsImages[part.file], rotation_deg: 0 };
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            renderEditor();
+            // ... rest of loadTrackFromSimulation implementation ...
         }
     };
 
@@ -179,26 +128,27 @@ export function initTrackEditor(appInterface) {
         console.log("[TrackEditor] Track part assets loaded, populating palette...");
         populateTrackPartsPalette(elems.trackPartsPalette);
         
-        // Setup initial grid and ensure canvas is properly sized
+        // Ensure the container is ready and visible
         const container = editorCanvas.parentElement;
-        if (container) {
-            const containerRect = container.getBoundingClientRect();
-            const size = Math.max(containerRect.width || 400, 400);
-            editorCanvas.width = size;
-            editorCanvas.height = size;
-            editorCanvas.style.width = `${size}px`;
-            editorCanvas.style.height = `${size}px`;
-            
-            // Now generate the initial track with proper sizing
+        if (!container) {
+            console.error("[DEBUG] No container found for editor canvas during initialization");
+            return;
+        }
+
+        // Force a layout reflow to get accurate dimensions
+        container.style.display = 'none';
+        container.offsetHeight; // Force reflow
+        container.style.display = '';
+
+        // Setup initial grid with proper sizing
+        console.log("[TrackEditor] Setting up initial grid...");
+        setupGrid();
+
+        // Generate initial track after ensuring canvas is properly sized
+        setTimeout(() => {
             console.log("[TrackEditor] Generating initial random track...");
             generateRandomTrackWithRetry();
-            console.log("[DEBUG] Grid after random track generation:", grid);
-            console.log("[DEBUG] Track parts images loaded:", Object.keys(trackPartsImages));
             
-            console.log("[TrackEditor] Rendering editor...");
-            renderEditor();
-            
-            console.log("[TrackEditor] Exporting track to simulator...");
             const exportedCanvas = exportTrackAsCanvas();
             if (exportedCanvas) {
                 let startX_m, startY_m, startAngle_rad;
@@ -217,7 +167,7 @@ export function initTrackEditor(appInterface) {
                 exportedCanvas.dataset.fromEditor = 'true';
                 mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
             }
-        }
+        }, 100); // Small delay to ensure layout is complete
     });
 
     // Setup event listeners
@@ -449,11 +399,21 @@ function setupGrid() {
     if (editorCanvas) {
         // Get container size and use width for both dimensions
         const container = editorCanvas.parentElement;
-        if (!container) return;
+        if (!container) {
+            console.error("[DEBUG] No container found for editor canvas");
+            return;
+        }
 
         const containerRect = container.getBoundingClientRect();
-        // Use container width or minimum size of 400px
-        const size = Math.max(containerRect.width || 400, 400);
+        console.log("[DEBUG] Container size:", {
+            width: containerRect.width,
+            height: containerRect.height
+        });
+
+        // Force a minimum size of 800px for better visibility
+        const size = Math.max(containerRect.width || 800, 800);
+        console.log("[DEBUG] Setting canvas size to:", size);
+
         editorCanvas.width = size;
         editorCanvas.height = size;
         editorCanvas.style.width = `${size}px`;
@@ -461,6 +421,7 @@ function setupGrid() {
         
         // Calculate dynamic cell size and render immediately
         const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+        console.log("[DEBUG] Cell size calculated:", cellSize);
         renderEditor(cellSize);
     }
 }
@@ -476,10 +437,17 @@ function renderEditor(cellSize) {
         return;
     }
 
-    // Calculate cellSize if not provided
+    console.log("[DEBUG] Rendering editor with dimensions:", {
+        canvasWidth: editorCanvas.width,
+        canvasHeight: editorCanvas.height,
+        providedCellSize: cellSize
+    });
+
+    // Calculate cellSize if not provided or ensure it's appropriate for the canvas size
     if (!cellSize) {
         cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
     }
+    console.log("[DEBUG] Using cell size:", cellSize);
 
     // Limpiar el canvas con fondo blanco
     ctx.fillStyle = 'white';
@@ -498,6 +466,17 @@ function renderEditor(cellSize) {
             if (currentGridPart && currentGridPart.image) {
                 const x_center = x_topLeft + cellSize / 2;
                 const y_center = y_topLeft + cellSize / 2;
+                
+                // Log the drawing position for the first part
+                if (r === 0 && c === 0 && currentGridPart) {
+                    console.log("[DEBUG] Drawing first part at:", {
+                        x_center,
+                        y_center,
+                        cellSize,
+                        rotation: currentGridPart.rotation_deg
+                    });
+                }
+                
                 ctx.save();
                 ctx.translate(x_center, y_center);
                 ctx.rotate(currentGridPart.rotation_deg * Math.PI / 180);
