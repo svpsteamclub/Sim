@@ -79,7 +79,13 @@ export function initRobotEditor(appInterface) {
     mainAppInterface.loadRobotAssets((wheelImg) => {
         console.log("Robot assets loaded, setting images...");
         previewRobot.setImages(wheelImg);
-        renderRobotPreview();
+        // Load default robot JSON only on first load
+        if (!window._defaultRobotLoaded) {
+            window._defaultRobotLoaded = true;
+            loadDefaultRobotJSON();
+        } else {
+            renderRobotPreview();
+        }
     });
 
     // Guardar y cargar robot
@@ -316,4 +322,28 @@ function getPlacedPartsRaw() {
         y: p.y,
         rotation: p.rotation || 0
     }));
+}
+
+export async function loadDefaultRobotJSON() {
+    try {
+        const response = await fetch('assets/RobotSLC2025.json');
+        if (!response.ok) throw new Error('No se pudo cargar RobotSLC2025.json');
+        const robotData = await response.json();
+        if (robotData.geometry) {
+            setFormValues(robotData.geometry);
+            currentGeometry = getFormValues();
+            previewRobot.updateGeometry(currentGeometry);
+        }
+        if (robotData.parts && window.restorePlacedPartsRaw) {
+            window.restorePlacedPartsRaw(robotData.parts);
+        }
+        renderRobotPreview();
+        // Notificar a la simulación
+        if (mainAppInterface && typeof mainAppInterface.updateRobotGeometry === 'function') {
+            const decorativeParts = window.getPlacedParts ? window.getPlacedParts() : [];
+            mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
+        }
+    } catch (err) {
+        console.warn('No se pudo cargar el robot por defecto:', err);
+    }
 }
