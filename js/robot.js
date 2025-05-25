@@ -190,16 +190,20 @@ export class Robot {
         ctx.fill();
 
         // Draw decorative parts
-        this.decorativeParts.forEach(part => {
-            const x = part.x * PIXELS_PER_METER;
-            const y = part.y * PIXELS_PER_METER;
-            const size = 40; // Size of the part in pixels
+        if (this.decorativeParts && this.decorativeParts.length > 0) {
+            this.decorativeParts.forEach(part => {
+                if (part.img && part.img.complete && part.img.naturalWidth > 0) {
+                    const x = part.x * PIXELS_PER_METER;
+                    const y = part.y * PIXELS_PER_METER;
+                    const size = 40; // Size of the part in pixels (40mm)
 
-            ctx.save();
-            ctx.globalAlpha = 0.8;
-            ctx.drawImage(part.img, x - size/2, y - size/2, size, size);
-            ctx.restore();
-        });
+                    ctx.save();
+                    ctx.globalAlpha = 0.8;
+                    ctx.drawImage(part.img, x - size/2, y - size/2, size, size);
+                    ctx.restore();
+                }
+            });
+        }
 
         ctx.restore();
 

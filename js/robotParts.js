@@ -149,6 +149,9 @@ export function initRobotParts() {
 export function drawRobotPreview() {
     if (!previewCtx || !previewCanvas) return;
 
+    // Clear the canvas before drawing parts
+    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
     // Draw placed parts
     placedParts.forEach(part => {
         const size = 40; // Size of the part in pixels (40mm)
@@ -165,7 +168,9 @@ export function drawRobotPreview() {
 
 export function getPlacedParts() {
     return placedParts.map(part => ({
-        ...part,
+        id: part.id,
+        name: part.name,
+        img: part.img, // Keep the image reference
         // Convert pixel coordinates to meters for simulation
         x: (part.x - previewCanvas.width/2) / PIXELS_PER_METER,
         y: (part.y - previewCanvas.height/2) / PIXELS_PER_METER
