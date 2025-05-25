@@ -313,59 +313,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Botón para ubicar línea de comienzo en simulación
     const placeStartLineSimButton = document.getElementById('placeStartLineSimButton');
-    if (placeStartLineSimButton) {
-        placeStartLineSimButton.addEventListener('click', () => {
-            isPlacingStartLineSim = !isPlacingStartLineSim;
-            placeStartLineSimButton.classList.toggle('active', isPlacingStartLineSim);
-            placeStartLineSimButton.textContent = isPlacingStartLineSim ? 'Cancelar Ubicación' : 'Ubicar Línea de Comienzo';
-        });
-    }
+    let startLineStartPoint = null;
 
-    // Manejar clic en el canvas de simulación para ubicar línea de comienzo
-    elems.simulationDisplayCanvas.addEventListener('click', (event) => {
-        if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track || !simulationInstance.track.imageData) return;
+    placeStartLineSimButton.addEventListener('click', () => {
+        isPlacingStartLineSim = !isPlacingStartLineSim;
+        placeStartLineSimButton.textContent = isPlacingStartLineSim ? 'Cancelar Ubicación' : 'Ubicar Línea de Comienzo';
+        placeStartLineSimButton.style.backgroundColor = isPlacingStartLineSim ? '#d9534f' : '';
+        
+        if (isPlacingStartLineSim) {
+            elems.simulationDisplayCanvas.style.cursor = 'crosshair';
+        } else {
+            elems.simulationDisplayCanvas.style.cursor = 'default';
+            startLineStartPoint = null;
+        }
+    });
+
+    elems.simulationDisplayCanvas.addEventListener('mousedown', (event) => {
+        if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track.imageData) return;
+
         const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        // Convertir a coordenadas de la imagen de la pista
-        const trackX = x * (simulationInstance.track.width_px / elems.simulationDisplayCanvas.width);
-        const trackY = y * (simulationInstance.track.height_px / elems.simulationDisplayCanvas.height);
-        // Buscar la celda más cercana con línea (negro)
-        // Buscar en un radio pequeño alrededor del clic
-        let found = false;
-        let angle = null;
-        for (let dy = -2; dy <= 2 && !found; dy++) {
-            for (let dx = -2; dx <= 2 && !found; dx++) {
-                const px = Math.round(trackX + dx);
-                const py = Math.round(trackY + dy);
-                if (px < 0 || py < 0 || px >= simulationInstance.track.width_px || py >= simulationInstance.track.height_px) continue;
-                // Revisar si es línea
-                if (simulationInstance.track.isPixelOnLine(px, py)) {
-                    // Determinar orientación local (N-S o E-W) usando vecinos
-                    const up = py > 0 && simulationInstance.track.isPixelOnLine(px, py - 1);
-                    const down = py < simulationInstance.track.height_px - 1 && simulationInstance.track.isPixelOnLine(px, py + 1);
-                    const left = px > 0 && simulationInstance.track.isPixelOnLine(px - 1, py);
-                    const right = px < simulationInstance.track.width_px - 1 && simulationInstance.track.isPixelOnLine(px + 1, py);
-                    if (up && down) angle = Math.PI / 2; // N-S
-                    else if (left && right) angle = 0; // E-W
-                    if (angle !== null) {
-                        // Actualizar posición de inicio
-                        const startX_m = px / PIXELS_PER_METER;
-                        const startY_m = py / PIXELS_PER_METER;
-                        simulationInstance.resetSimulationState(startX_m, startY_m, angle);
-                        drawCurrentSimulationState();
-                        isPlacingStartLineSim = false;
-                        placeStartLineSimButton.textContent = 'Ubicar Línea de Comienzo';
-                        placeStartLineSimButton.classList.remove('active');
-                        found = true;
-                        alert('Línea de comienzo ubicada.');
-                    }
-                }
-            }
-        }
-        if (!found) {
-            alert('Haz clic sobre una línea recta (N-S o E-W) para ubicar la línea de comienzo.');
-        }
+        const scale = elems.simulationDisplayCanvas.width / rect.width;
+        const x = (event.clientX - rect.left) * scale;
+        const y = (event.clientY - rect.top) * scale;
+
+        startLineStartPoint = { x, y };
+    });
+
+    elems.simulationDisplayCanvas.addEventListener('mousemove', (event) => {
+        if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
+
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const scale = elems.simulationDisplayCanvas.width / rect.width;
+        const x = (event.clientX - rect.left) * scale;
+        const y = (event.clientY - rect.top) * scale;
+
+        // Draw current track state
+        const ctx = elems.simulationDisplayCanvas.getContext('2d');
+        simulationInstance.draw(ctx, elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
+
+        // Draw preview line
+        ctx.save();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "#FF00FF";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(startLineStartPoint.x, startLineStartPoint.y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.restore();
+    });
+
+    elems.simulationDisplayCanvas.addEventListener('mouseup', (event) => {
+        if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
+
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const scale = elems.simulationDisplayCanvas.width / rect.width;
+        const x = (event.clientX - rect.left) * scale;
+        const y = (event.clientY - rect.top) * scale;
+
+        // Convert to meters for simulation
+        const x1_m = startLineStartPoint.x / PIXELS_PER_METER;
+        const y1_m = startLineStartPoint.y / PIXELS_PER_METER;
+        const x2_m = x / PIXELS_PER_METER;
+        const y2_m = y / PIXELS_PER_METER;
+
+        // Calculate angle for robot orientation (perpendicular to line)
+        const dx = x2_m - x1_m;
+        const dy = y2_m - y1_m;
+        const angle_rad = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
+
+        // Calculate center point of line for robot position
+        const center_x_m = (x1_m + x2_m) / 2;
+        const center_y_m = (y1_m + y2_m) / 2;
+
+        // Reset simulation with new start position
+        simulationInstance.resetSimulationState(center_x_m, center_y_m, angle_rad);
+        
+        // Initialize lap timer with new start line
+        simulationInstance.lapTimer.initialize(
+            { x_m: center_x_m, y_m: center_y_m, angle_rad: angle_rad },
+            simulationInstance.totalSimTime_s,
+            { x1: x1_m, y1: y1_m, x2: x2_m, y2: y2_m }
+        );
+
+        // Exit placement mode
+        isPlacingStartLineSim = false;
+        placeStartLineSimButton.textContent = 'Ubicar Línea de Comienzo';
+        placeStartLineSimButton.style.backgroundColor = '';
+        elems.simulationDisplayCanvas.style.cursor = 'default';
+        startLineStartPoint = null;
+
+        // Redraw final state
+        drawCurrentSimulationState();
     });
     
     // --- Start Everything ---

@@ -12,30 +12,41 @@ export class LapTimer {
         this.onPositiveSide = false; // Which side of the line the robot is on
     }
 
-    initialize(startPose, currentTime_s) {
+    initialize(startPose, currentTime_s, customStartLine = null) {
         if (!this.robotWidth_m || !this.robotLength_m || isNaN(this.robotWidth_m) || isNaN(this.robotLength_m)) {
             console.error('[LapTimer] ERROR: robotWidth_m or robotLength_m is invalid:', this.robotWidth_m, this.robotLength_m);
         }
         console.log("[LapTimer] Initializing with start pose:", startPose);
-        // Define start/finish line based on start pose and robot dimensions
-        // Line is perpendicular to robot's starting angle, centered on robot's rear axle
-        const halfWidth = this.robotWidth_m * 2; // Make line wider than robot
-        const backOffset = -this.robotLength_m / 2; // Line at the back of the robot
 
-        const cosA = Math.cos(startPose.angle_rad);
-        const sinA = Math.sin(startPose.angle_rad);
+        if (customStartLine) {
+            // Use provided custom start line
+            this.startLine = {
+                x1: customStartLine.x1,
+                y1: customStartLine.y1,
+                x2: customStartLine.x2,
+                y2: customStartLine.y2
+            };
+        } else {
+            // Define start/finish line based on start pose and robot dimensions
+            // Line is perpendicular to robot's starting angle, centered on robot's rear axle
+            const halfWidth = this.robotWidth_m * 2; // Make line wider than robot
+            const backOffset = -this.robotLength_m / 2; // Line at the back of the robot
 
-        const lineCenterX = startPose.x_m + backOffset * cosA;
-        const lineCenterY = startPose.y_m + backOffset * sinA;
+            const cosA = Math.cos(startPose.angle_rad);
+            const sinA = Math.sin(startPose.angle_rad);
 
-        const perpendicularAngle = startPose.angle_rad + Math.PI / 2;
-        const dx = halfWidth * Math.cos(perpendicularAngle);
-        const dy = halfWidth * Math.sin(perpendicularAngle);
+            const lineCenterX = startPose.x_m + backOffset * cosA;
+            const lineCenterY = startPose.y_m + backOffset * sinA;
 
-        this.startLine = {
-            x1: lineCenterX - dx, y1: lineCenterY - dy,
-            x2: lineCenterX + dx, y2: lineCenterY + dy
-        };
+            const perpendicularAngle = startPose.angle_rad + Math.PI / 2;
+            const dx = halfWidth * Math.cos(perpendicularAngle);
+            const dy = halfWidth * Math.sin(perpendicularAngle);
+
+            this.startLine = {
+                x1: lineCenterX - dx, y1: lineCenterY - dy,
+                x2: lineCenterX + dx, y2: lineCenterY + dy
+            };
+        }
 
         this.currentLapStartTime_s = currentTime_s;
         this.lapCount = 0;

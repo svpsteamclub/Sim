@@ -9,61 +9,7 @@ let currentGridSize = { rows: 4, cols: 4 };
 let trackPartsImages = {}; // Cache for loaded track part images { 'fileName.png': ImageElement }
 let selectedTrackPart = null; // { ...partInfo, image: ImageElement }
 let isEraseModeActive = false; 
-let lastGeneratedTrackStartPosition = null; // { r, c, angle_rad } for the simulator
-let isPlacingStartLine = false; // New state for start line placement mode
-
-// Add state management
 let savedState = null;
-
-function saveEditorState() {
-    // Create a deep copy of the grid, but only save necessary data
-    const gridCopy = grid.map(row =>
-        row.map(cell => {
-            if (cell) {
-                // Save only the essential data, including the file reference
-                return {
-                    file: cell.file,
-                    name: cell.name,
-                    connections: cell.connections,
-                    rotation_deg: cell.rotation_deg
-                };
-            }
-            return null;
-        })
-    );
-
-    savedState = {
-        grid: gridCopy,
-        currentGridSize: { ...currentGridSize },
-        lastGeneratedTrackStartPosition: lastGeneratedTrackStartPosition ? { ...lastGeneratedTrackStartPosition } : null
-    };
-}
-
-function restoreEditorState() {
-    if (savedState) {
-        currentGridSize = { ...savedState.currentGridSize };
-        lastGeneratedTrackStartPosition = savedState.lastGeneratedTrackStartPosition ? { ...savedState.lastGeneratedTrackStartPosition } : null;
-        
-        // Restore grid with proper image references
-        grid = savedState.grid.map(row => 
-            row.map(cell => {
-                if (cell && cell.file) {
-                    // Reattach the image from our cache
-                    return {
-                        ...cell,
-                        image: trackPartsImages[cell.file]
-                    };
-                }
-                return null;
-            })
-        );
-        
-        // Only render if we have a canvas context
-        if (ctx && editorCanvas) {
-            renderEditor();
-        }
-    }
-}
 
 // Directions for connection logic
 const OPPOSITE_DIRECTIONS = { N: 'S', S: 'N', E: 'W', W: 'E' };
@@ -151,21 +97,7 @@ export function initTrackEditor(appInterface) {
             
             const exportedCanvas = exportTrackAsCanvas();
             if (exportedCanvas) {
-                let startX_m, startY_m, startAngle_rad;
-                if (lastGeneratedTrackStartPosition) {
-                    startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
-                    startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
-                    startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
-                } else {
-                    startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                    startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                    startAngle_rad = 0;
-                }
-                exportedCanvas.dataset.startX = startX_m;
-                exportedCanvas.dataset.startY = startY_m;
-                exportedCanvas.dataset.startAngle = startAngle_rad;
-                exportedCanvas.dataset.fromEditor = 'true';
-                mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
+                mainAppInterface.loadTrackFromEditor(exportedCanvas, 0, 0, 0);
             }
         }, 100); // Small delay to ensure layout is complete
     });
@@ -174,12 +106,10 @@ export function initTrackEditor(appInterface) {
     elems.trackGridSizeSelect.addEventListener('change', (e) => {
         const size = e.target.value.split('x');
         currentGridSize = { rows: parseInt(size[0]), cols: parseInt(size[1]) };
-        lastGeneratedTrackStartPosition = null; 
         setupGrid();
     });
 
     elems.generateRandomTrackButton.addEventListener('click', () => { 
-        lastGeneratedTrackStartPosition = null; 
         if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton); 
         generateRandomTrackWithRetry(); 
     });
@@ -195,7 +125,6 @@ export function initTrackEditor(appInterface) {
     clearTrackButton.addEventListener('click', () => {
         if (confirm('¿Estás seguro de que quieres limpiar toda la pista?')) {
             setupGrid();
-            lastGeneratedTrackStartPosition = null;
             renderEditor();
         }
     });
@@ -214,34 +143,19 @@ export function initTrackEditor(appInterface) {
         }
         const exportedCanvas = exportTrackAsCanvas();
         if (exportedCanvas) {
-            let startX_m, startY_m, startAngle_rad;
-            if (lastGeneratedTrackStartPosition) {
-                startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
-                startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
-                startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
-            } else {
-                startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                startAngle_rad = 0;
-                alert("No se generó una posición inicial específica. Usando posición por defecto (0,0) orientada al Este. Ajusta en simulación si es necesario.");
-            }
-            
-            mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
+            mainAppInterface.loadTrackFromEditor(exportedCanvas, 0, 0, 0);
             alert("Pista del editor cargada en el simulador. Ve a la pestaña 'Simulación'.");
         }
     });
 
     elems.saveTrackDesignButton.addEventListener('click', saveTrackDesign);
     elems.loadTrackDesignInput.addEventListener('change', (event) => {
-        lastGeneratedTrackStartPosition = null; 
         if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton);
         loadTrackDesign(event, elems.trackGridSizeSelect, elems.trackEditorTrackNameInput);
     });
 
     editorCanvas.addEventListener('click', (event) => {
-        if (isPlacingStartLine) {
-            handleStartLinePlacement(event);
-        } else if (!isEraseModeActive) {
+        if (!isEraseModeActive) {
             onGridSingleClick(event);
         }
     });
@@ -546,7 +460,6 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
     for (let i = 0; i < maxRetries; i++) {
         const generationResult = generateRandomLoopTrackLogic();
         if (generationResult.success) {
-            lastGeneratedTrackStartPosition = generationResult.startPosition;
             console.log(`Pista aleatoria generada con éxito en intento ${i + 1}`);
             renderEditor(); // Make sure grid is re-rendered
             return;
@@ -554,7 +467,6 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
     }
     console.warn(`No se pudo generar una pista en bucle válida después de ${maxRetries} intentos para grid ${currentGridSize.rows}x${currentGridSize.cols}.`);
     alert("No se pudo generar una pista en bucle válida después de varios intentos. Prueba un grid más grande o revisa las piezas.");
-    lastGeneratedTrackStartPosition = null;
     setupGrid(); // Clear grid on failure
 }
 
@@ -659,17 +571,16 @@ function generateRandomLoopTrackLogic() {
 
     if (loopParts.length === 0) {
         console.error("No track parts with exactly 2 connections found for loop generation.");
-        return { success: false, startPosition: null };
+        return { success: false };
     }
 
     const cellPathWithConnections = generateCellPathAndConnections();
     if (!cellPathWithConnections || cellPathWithConnections.length === 0) {
-        return { success: false, startPosition: null };
+        return { success: false };
     }
     
     let allPartsPlaced = true;
     let placedCount = 0;
-    let validConnections = []; // Array to store N-S or E-W connection positions
 
     for (const cellInfo of cellPathWithConnections) {
         const r = cellInfo.r; const c = cellInfo.c; const requiredConns = cellInfo.connections;
@@ -693,10 +604,6 @@ function generateRandomLoopTrackLogic() {
 
                 if (match) {
                     grid[r][c] = { ...partDef, image: trackPartsImages[partDef.file], rotation_deg: rot };
-                    // Check if this is a N-S or E-W connection
-                    if ((actualConns.N && actualConns.S) || (actualConns.E && actualConns.W)) {
-                        validConnections.push({ r, c, rotation_deg: rot, conns: actualConns });
-                    }
                     placedPiece = true;
                     placedCount++;
                     break;
@@ -711,27 +618,10 @@ function generateRandomLoopTrackLogic() {
     }
     
     if (!allPartsPlaced || placedCount !== cellPathWithConnections.length) {
-        return { success: false, startPosition: null };
+        return { success: false };
     }
 
-    // Select a random valid connection for the start line
-    let foundStartPosition = null;
-    if (validConnections.length > 0) {
-        const randomConn = validConnections[Math.floor(Math.random() * validConnections.length)];
-        let angle = 0;
-        if (randomConn.conns.N && randomConn.conns.S) {
-            angle = Math.PI / 2;
-        } else if (randomConn.conns.E && randomConn.conns.W) {
-            angle = 0;
-        }
-        foundStartPosition = {
-            r: randomConn.r,
-            c: randomConn.c,
-            angle_rad: angle
-        };
-    }
-
-    return { success: true, startPosition: foundStartPosition };
+    return { success: true };
 }
 
 function validateTrack() {
@@ -923,40 +813,6 @@ function exportTrackAsCanvas() {
         alert("El editor de pistas está vacío. No hay nada para exportar.");
         return null;
     }
+    exportCanvas.dataset.fromEditor = 'true';
     return exportCanvas;
-}
-
-function handleStartLinePlacement(event) {
-    const rect = editorCanvas.getBoundingClientRect();
-    const scale = editorCanvas.width / rect.width;
-    const x_canvas = (event.clientX - rect.left) * scale;
-    const y_canvas = (event.clientY - rect.top) * scale;
-    
-    const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
-    const gridX = Math.floor(x_canvas / cellSize);
-    const gridY = Math.floor(y_canvas / cellSize);
-    
-    if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols) {
-        const cell = grid[gridY][gridX];
-        if (cell) {
-            const conns = getRotatedConnections(cell, cell.rotation_deg);
-            let angle = null;
-            if (conns.N && conns.S) {
-                angle = Math.PI / 2; // Sur
-            } else if (conns.E && conns.W) {
-                angle = 0; // Este
-            }
-            if (angle !== null) {
-                lastGeneratedTrackStartPosition = {
-                    r: gridY,
-                    c: gridX,
-                    angle_rad: angle
-                };
-                isPlacingStartLine = false;
-                renderEditor();
-            } else {
-                alert('Por favor, selecciona una sección de conexión Norte-Sur o Este-Oeste para la línea de comienzo.');
-            }
-        }
-    }
 }
