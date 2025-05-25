@@ -8,7 +8,6 @@ let grid = []; // Stores { partInfo, rotation_deg, image }
 let currentGridSize = { rows: 4, cols: 4 }; 
 let trackPartsImages = {}; // Cache for loaded track part images { 'fileName.png': ImageElement }
 let selectedTrackPart = null; // { ...partInfo, image: ImageElement }
-let isEraseModeActive = false; 
 let savedState = null;
 
 // Directions for connection logic
@@ -114,11 +113,8 @@ export function initTrackEditor(appInterface) {
     });
 
     elems.generateRandomTrackButton.addEventListener('click', () => { 
-        if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton); 
         generateRandomTrackWithRetry(); 
     });
-    
-    elems.toggleEraseModeButton.addEventListener('click', () => toggleEraseMode(elems.toggleEraseModeButton));
 
     // Agregar botón de limpiar
     const clearTrackButton = document.createElement('button');
@@ -134,8 +130,6 @@ export function initTrackEditor(appInterface) {
     });
 
     elems.exportTrackToSimulatorButton.addEventListener('click', () => {
-        if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton);
-        
         const trackValidation = validateTrack();
         if (!trackValidation.isValid) { 
             let errorMsg = "La pista puede tener problemas:\n";
@@ -154,38 +148,15 @@ export function initTrackEditor(appInterface) {
 
     elems.saveTrackDesignButton.addEventListener('click', saveTrackDesign);
     elems.loadTrackDesignInput.addEventListener('change', (event) => {
-        if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton);
         loadTrackDesign(event, elems.trackGridSizeSelect, elems.trackEditorTrackNameInput);
     });
 
     editorCanvas.addEventListener('click', (event) => {
-        if (!isEraseModeActive) {
-            onGridSingleClick(event);
-        }
+        onGridSingleClick(event);
     });
 
     editorCanvas.addEventListener('dblclick', (event) => {
-        // Always handle rotation on double click unless in erase mode
-        if (isEraseModeActive) {
-            const rect = editorCanvas.getBoundingClientRect();
-            const scale = editorCanvas.width / rect.width;
-            const x_canvas = (event.clientX - rect.left) * scale;
-            const y_canvas = (event.clientY - rect.top) * scale;
-
-            const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
-            const c = Math.floor(x_canvas / cellSize);
-            const r = Math.floor(y_canvas / cellSize);
-
-            if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-                grid[r][c] = null;
-                renderEditor();
-            }
-        } else {
-            // Prevent the click event from firing after double click
-            event.preventDefault();
-            event.stopPropagation();
-            onGridDoubleClick(event);
-        }
+        onGridDoubleClick(event);
     });
 }
 
@@ -241,8 +212,6 @@ function populateTrackPartsPalette(paletteElement) {
 
         imgElement.addEventListener('click', () => {
             const elems = getDOMElements();
-            if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton); // Exit erase mode
-
             document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
             imgElement.classList.add('selected');
             
@@ -343,21 +312,6 @@ function renderEditor(cellSize) {
     }
 }
 
-function toggleEraseMode(buttonElement) {
-    isEraseModeActive = !isEraseModeActive;
-    if (isEraseModeActive) {
-        buttonElement.textContent = "Desactivar Modo Borrar";
-        buttonElement.style.backgroundColor = "#d9534f"; 
-        selectedTrackPart = null; // Deselect any part
-        document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
-        editorCanvas.style.cursor = 'url("data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"24\\" height=\\"24\\" viewBox=\\"0 0 24 24\\" fill=\\"none\\" stroke=\\"red\\" stroke-width=\\"2\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"><line x1=\\"18\\" y1=\\"6\\" x2=\\"6\\" y2=\\"18\\"></line><line x1=\\"6\\" y1=\\"6\\" x2=\\"18\\" y2=\\"18\\"></line></svg>") 12 12, auto';
-    } else {
-        buttonElement.textContent = "Activar Modo Borrar";
-        buttonElement.style.backgroundColor = ""; // Reset to default
-        editorCanvas.style.cursor = 'crosshair';
-    }
-}
-
 function onGridSingleClick(event) {
     if (!editorCanvas) return;
     const rect = editorCanvas.getBoundingClientRect();
@@ -372,12 +326,7 @@ function onGridSingleClick(event) {
     const r = Math.floor(y_canvas / cellSize);
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols) {
-        if (isEraseModeActive) {
-            if (grid[r][c]) {
-                grid[r][c] = null; 
-                renderEditor();
-            }
-        } else if (selectedTrackPart && selectedTrackPart.image) {
+        if (selectedTrackPart && selectedTrackPart.image) {
             // Only place new part on single click, not double click
             if (!event.detail || event.detail === 1) {
                 grid[r][c] = {
@@ -394,7 +343,7 @@ function onGridSingleClick(event) {
 }
 
 function onGridDoubleClick(event) {
-    if (isEraseModeActive || !editorCanvas) return;
+    if (!editorCanvas) return;
     const rect = editorCanvas.getBoundingClientRect();
     const scale = editorCanvas.width / rect.width;
     const x_canvas = (event.clientX - rect.left) * scale;
