@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let robotWheelImage = null;
     let watermarkTrackImage = null;
 
+    let isPlacingStartLineSim = false;
+    let lastPlacedStartLineSim = null;
+
     // --- Main App Interface for modules ---
     const mainAppInterface = {
         // Called by TrackEditor when "Use this Track" is clicked
@@ -307,6 +310,63 @@ document.addEventListener('DOMContentLoaded', () => {
     elems.stopSimButton.addEventListener('click', stopSimulation);
     elems.resetSimButton.addEventListener('click', resetSimulation);
     elems.applySimParamsButton.addEventListener('click', applySimulationParameters);
+
+    // Botón para ubicar línea de comienzo en simulación
+    const placeStartLineSimButton = document.getElementById('placeStartLineSimButton');
+    if (placeStartLineSimButton) {
+        placeStartLineSimButton.addEventListener('click', () => {
+            isPlacingStartLineSim = !isPlacingStartLineSim;
+            placeStartLineSimButton.classList.toggle('active', isPlacingStartLineSim);
+            placeStartLineSimButton.textContent = isPlacingStartLineSim ? 'Cancelar Ubicación' : 'Ubicar Línea de Comienzo';
+        });
+    }
+
+    // Manejar clic en el canvas de simulación para ubicar línea de comienzo
+    elems.simulationDisplayCanvas.addEventListener('click', (event) => {
+        if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track || !simulationInstance.track.imageData) return;
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        // Convertir a coordenadas de la imagen de la pista
+        const trackX = x * (simulationInstance.track.width_px / elems.simulationDisplayCanvas.width);
+        const trackY = y * (simulationInstance.track.height_px / elems.simulationDisplayCanvas.height);
+        // Buscar la celda más cercana con línea (negro)
+        // Buscar en un radio pequeño alrededor del clic
+        let found = false;
+        let angle = null;
+        for (let dy = -2; dy <= 2 && !found; dy++) {
+            for (let dx = -2; dx <= 2 && !found; dx++) {
+                const px = Math.round(trackX + dx);
+                const py = Math.round(trackY + dy);
+                if (px < 0 || py < 0 || px >= simulationInstance.track.width_px || py >= simulationInstance.track.height_px) continue;
+                // Revisar si es línea
+                if (simulationInstance.track.isPixelOnLine(px, py)) {
+                    // Determinar orientación local (N-S o E-W) usando vecinos
+                    const up = py > 0 && simulationInstance.track.isPixelOnLine(px, py - 1);
+                    const down = py < simulationInstance.track.height_px - 1 && simulationInstance.track.isPixelOnLine(px, py + 1);
+                    const left = px > 0 && simulationInstance.track.isPixelOnLine(px - 1, py);
+                    const right = px < simulationInstance.track.width_px - 1 && simulationInstance.track.isPixelOnLine(px + 1, py);
+                    if (up && down) angle = Math.PI / 2; // N-S
+                    else if (left && right) angle = 0; // E-W
+                    if (angle !== null) {
+                        // Actualizar posición de inicio
+                        const startX_m = px / PIXELS_PER_METER;
+                        const startY_m = py / PIXELS_PER_METER;
+                        simulationInstance.resetSimulationState(startX_m, startY_m, angle);
+                        drawCurrentSimulationState();
+                        isPlacingStartLineSim = false;
+                        placeStartLineSimButton.textContent = 'Ubicar Línea de Comienzo';
+                        placeStartLineSimButton.classList.remove('active');
+                        found = true;
+                        alert('Línea de comienzo ubicada.');
+                    }
+                }
+            }
+        }
+        if (!found) {
+            alert('Haz clic sobre una línea recta (N-S o E-W) para ubicar la línea de comienzo.');
+        }
+    });
     
     // --- Start Everything ---
     initializeSimulator().then(() => {

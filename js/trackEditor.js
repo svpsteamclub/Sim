@@ -269,28 +269,33 @@ export function initTrackEditor(appInterface) {
                 const cell = grid[gridY][gridX];
                 if (cell) {
                     const conns = getRotatedConnections(cell, cell.rotation_deg);
+                    let angle = null;
                     if (conns.N && conns.S) {
-                        // Found a N-S connection, set as start position
+                        angle = Math.PI / 2; // Sur
+                    } else if (conns.E && conns.W) {
+                        angle = 0; // Este
+                    }
+                    if (angle !== null) {
                         lastGeneratedTrackStartPosition = {
                             r: gridY,
                             c: gridX,
-                            angle_rad: Math.PI / 2 // Facing South
+                            angle_rad: angle
                         };
                         isPlacingStartLine = false;
                         placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
                         placeStartLineButton.classList.remove('active');
                         renderEditor();
                     } else {
-                        alert('Por favor, selecciona una sección de conexión Norte-Sur para la línea de comienzo.');
+                        alert('Por favor, selecciona una sección de conexión Norte-Sur o Este-Oeste para la línea de comienzo.');
                     }
                 }
             }
         } else if (!isEraseModeActive) {
             // Solo resetear lastGeneratedTrackStartPosition si estamos colocando una nueva pieza
-            // y la pieza que estamos colocando no es una conexión N-S
+            // y la pieza que estamos colocando no es una conexión N-S ni E-W
             if (selectedTrackPart) {
                 const conns = getRotatedConnections(selectedTrackPart, 0);
-                if (!(conns.N && conns.S)) {
+                if (!( (conns.N && conns.S) || (conns.E && conns.W) )) {
                     lastGeneratedTrackStartPosition = null;
                 }
             }
@@ -299,7 +304,7 @@ export function initTrackEditor(appInterface) {
     });
     editorCanvas.addEventListener('dblclick', (event) => {
         if (!isEraseModeActive) {
-            // Solo resetear lastGeneratedTrackStartPosition si la rotación resultante no es N-S
+            // Solo resetear lastGeneratedTrackStartPosition si la rotación resultante no es N-S ni E-W
             const rect = editorCanvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -310,7 +315,7 @@ export function initTrackEditor(appInterface) {
                 const currentRotation = grid[gridY][gridX].rotation_deg;
                 const nextRotation = ((currentRotation + 90) % 360);
                 const conns = getRotatedConnections(grid[gridY][gridX], nextRotation);
-                if (!(conns.N && conns.S)) {
+                if (!( (conns.N && conns.S) || (conns.E && conns.W) )) {
                     lastGeneratedTrackStartPosition = null;
                 }
             }
@@ -706,7 +711,7 @@ function generateRandomLoopTrackLogic() {
     
     let allPartsPlaced = true;
     let placedCount = 0;
-    let nSConnections = []; // Array to store N-S connection positions
+    let validConnections = []; // Array to store N-S or E-W connection positions
 
     for (const cellInfo of cellPathWithConnections) {
         const r = cellInfo.r; const c = cellInfo.c; const requiredConns = cellInfo.connections;
@@ -730,9 +735,9 @@ function generateRandomLoopTrackLogic() {
 
                 if (match) {
                     grid[r][c] = { ...partDef, image: trackPartsImages[partDef.file], rotation_deg: rot };
-                    // Check if this is a N-S connection
-                    if (actualConns.N && actualConns.S) {
-                        nSConnections.push({ r, c, rotation_deg: rot });
+                    // Check if this is a N-S or E-W connection
+                    if ((actualConns.N && actualConns.S) || (actualConns.E && actualConns.W)) {
+                        validConnections.push({ r, c, rotation_deg: rot, conns: actualConns });
                     }
                     placedPiece = true;
                     placedCount++;
@@ -751,14 +756,20 @@ function generateRandomLoopTrackLogic() {
         return { success: false, startPosition: null };
     }
 
-    // Select a random N-S connection for the start line
+    // Select a random valid connection for the start line
     let foundStartPosition = null;
-    if (nSConnections.length > 0) {
-        const randomNSConnection = nSConnections[Math.floor(Math.random() * nSConnections.length)];
+    if (validConnections.length > 0) {
+        const randomConn = validConnections[Math.floor(Math.random() * validConnections.length)];
+        let angle = 0;
+        if (randomConn.conns.N && randomConn.conns.S) {
+            angle = Math.PI / 2;
+        } else if (randomConn.conns.E && randomConn.conns.W) {
+            angle = 0;
+        }
         foundStartPosition = {
-            r: randomNSConnection.r,
-            c: randomNSConnection.c,
-            angle_rad: Math.PI / 2 // Facing South
+            r: randomConn.r,
+            c: randomConn.c,
+            angle_rad: angle
         };
     }
 
