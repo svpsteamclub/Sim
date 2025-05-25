@@ -164,8 +164,26 @@ export function renderRobotPreview() {
 
     // Clear the canvas
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-    previewCtx.save();
 
+    // Draw center guides
+    previewCtx.save();
+    previewCtx.strokeStyle = '#bbb';
+    previewCtx.lineWidth = 1;
+    previewCtx.setLineDash([5, 5]); // Dashed line
+    // Vertical center line
+    previewCtx.beginPath();
+    previewCtx.moveTo(previewCanvas.width / 2, 0);
+    previewCtx.lineTo(previewCanvas.width / 2, previewCanvas.height);
+    previewCtx.stroke();
+    // Horizontal center line
+    previewCtx.beginPath();
+    previewCtx.moveTo(0, previewCanvas.height / 2);
+    previewCtx.lineTo(previewCanvas.width, previewCanvas.height / 2);
+    previewCtx.stroke();
+    previewCtx.setLineDash([]); // Reset dash
+    previewCtx.restore();
+
+    previewCtx.save();
     // Center the robot in the preview canvas
     previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
 
