@@ -18,9 +18,6 @@ let selectedPart = null;
 let isDragging = false;
 let dragOffset = { x: 0, y: 0 };
 
-// Factor de escala para ajustar el sistema de coordenadas
-const SCALE_FACTOR = 0.5; // Ajustar este valor según sea necesario
-
 export function initRobotParts() {
     const elems = getDOMElements();
     previewCanvas = elems.robotPreviewCanvas;
@@ -72,8 +69,9 @@ export function initRobotParts() {
         e.preventDefault();
         if (draggedPart) {
             const rect = previewCanvas.getBoundingClientRect();
-            const x = (e.clientX - rect.left - previewCanvas.width/2) / (PIXELS_PER_METER * SCALE_FACTOR);
-            const y = (e.clientY - rect.top - previewCanvas.height/2) / (PIXELS_PER_METER * SCALE_FACTOR);
+            // Convertir coordenadas del canvas a metros (1px = 1mm)
+            const x = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+            const y = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
             
             placedParts.push({
                 id: draggedPart.id,
@@ -91,13 +89,13 @@ export function initRobotParts() {
     // Mouse events for moving placed parts
     previewCanvas.addEventListener('mousedown', (e) => {
         const rect = previewCanvas.getBoundingClientRect();
-        const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / (PIXELS_PER_METER * SCALE_FACTOR);
-        const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / (PIXELS_PER_METER * SCALE_FACTOR);
+        const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+        const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
 
         // Check if clicked on a part
         for (let i = placedParts.length - 1; i >= 0; i--) {
             const part = placedParts[i];
-            const partSize = 40 / (PIXELS_PER_METER * SCALE_FACTOR);
+            const partSize = 40 / PIXELS_PER_METER; // Tamaño de la parte en metros
             if (Math.abs(mouseX - part.x) < partSize/2 && Math.abs(mouseY - part.y) < partSize/2) {
                 selectedPart = part;
                 isDragging = true;
@@ -113,8 +111,8 @@ export function initRobotParts() {
     previewCanvas.addEventListener('mousemove', (e) => {
         if (isDragging && selectedPart) {
             const rect = previewCanvas.getBoundingClientRect();
-            const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / (PIXELS_PER_METER * SCALE_FACTOR);
-            const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / (PIXELS_PER_METER * SCALE_FACTOR);
+            const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+            const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
             
             selectedPart.x = mouseX - dragOffset.x;
             selectedPart.y = mouseY - dragOffset.y;
@@ -131,13 +129,13 @@ export function initRobotParts() {
     previewCanvas.addEventListener('click', (e) => {
         if (!isDragging) {
             const rect = previewCanvas.getBoundingClientRect();
-            const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / (PIXELS_PER_METER * SCALE_FACTOR);
-            const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / (PIXELS_PER_METER * SCALE_FACTOR);
+            const mouseX = (e.clientX - rect.left - previewCanvas.width/2) / PIXELS_PER_METER;
+            const mouseY = (e.clientY - rect.top - previewCanvas.height/2) / PIXELS_PER_METER;
 
             // Check if clicked on a part
             for (let i = placedParts.length - 1; i >= 0; i--) {
                 const part = placedParts[i];
-                const partSize = 40 / (PIXELS_PER_METER * SCALE_FACTOR);
+                const partSize = 40 / PIXELS_PER_METER;
                 if (Math.abs(mouseX - part.x) < partSize/2 && Math.abs(mouseY - part.y) < partSize/2) {
                     placedParts.splice(i, 1);
                     drawRobotPreview();
@@ -153,9 +151,9 @@ export function drawRobotPreview() {
 
     // Draw placed parts
     placedParts.forEach(part => {
-        const x = part.x * PIXELS_PER_METER * SCALE_FACTOR;
-        const y = part.y * PIXELS_PER_METER * SCALE_FACTOR;
-        const size = 40; // Size of the part in pixels
+        const x = part.x * PIXELS_PER_METER;
+        const y = part.y * PIXELS_PER_METER;
+        const size = 40; // Tamaño de la parte en píxeles
 
         previewCtx.save();
         previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
