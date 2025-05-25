@@ -245,9 +245,30 @@ h2 {
     border: 1px solid var(--border-color);
     min-width: 0;
     max-width: 100%;
+    width: 100%;
     word-break: break-word;
     overflow-wrap: break-word;
+    white-space: normal;
+    box-sizing: border-box;
+}
+
+.code-explanation pre {
+    font-family: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
     white-space: pre-line;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 1025px) {
+    .code-explanation {
+        max-width: 420px;
+    }
 }
 
 #serialMonitorOutput {
