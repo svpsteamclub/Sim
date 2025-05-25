@@ -419,19 +419,12 @@ function renderEditor(cellSize) {
         return;
     }
 
-    console.log("[DEBUG] Rendering editor with dimensions:", {
-        canvasWidth: editorCanvas.width,
-        canvasHeight: editorCanvas.height,
-        providedCellSize: cellSize
-    });
-
     // Calculate cellSize if not provided or ensure it's appropriate for the canvas size
     if (!cellSize) {
         cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
     }
-    console.log("[DEBUG] Using cell size:", cellSize);
 
-    // Limpiar el canvas con fondo blanco
+    // Clear the canvas with white background
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
     
@@ -440,43 +433,22 @@ function renderEditor(cellSize) {
         for (let c = 0; c < currentGridSize.cols; c++) {
             const x_topLeft = c * cellSize;
             const y_topLeft = r * cellSize;
-            // Draw grid cell border
-            ctx.strokeStyle = '#cccccc';
-            ctx.lineWidth = 1;
+            
+            // Draw subtle grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 0.5;
             ctx.strokeRect(x_topLeft, y_topLeft, cellSize, cellSize);
+            
             const currentGridPart = grid[r][c];
             if (currentGridPart && currentGridPart.image) {
                 const x_center = x_topLeft + cellSize / 2;
                 const y_center = y_topLeft + cellSize / 2;
-                
-                // Log the drawing position for the first part
-                if (r === 0 && c === 0 && currentGridPart) {
-                    console.log("[DEBUG] Drawing first part at:", {
-                        x_center,
-                        y_center,
-                        cellSize,
-                        rotation: currentGridPart.rotation_deg
-                    });
-                }
                 
                 ctx.save();
                 ctx.translate(x_center, y_center);
                 ctx.rotate(currentGridPart.rotation_deg * Math.PI / 180);
                 ctx.drawImage(currentGridPart.image, -cellSize / 2, -cellSize / 2, cellSize, cellSize);
                 ctx.restore();
-                
-                // Draw connection indicators
-                const connIndicatorSize = Math.max(6, cellSize * 0.02);
-                const connIndicatorOffset = Math.max(2, cellSize * 0.005);
-                const actualConns = getRotatedConnections(currentGridPart, currentGridPart.rotation_deg);
-                ctx.fillStyle = actualConns.N ? 'green' : 'rgba(200,0,0,0.6)';
-                ctx.fillRect(x_center - connIndicatorSize / 2, y_topLeft + connIndicatorOffset, connIndicatorSize, connIndicatorSize);
-                ctx.fillStyle = actualConns.E ? 'green' : 'rgba(200,0,0,0.6)';
-                ctx.fillRect(x_topLeft + cellSize - connIndicatorOffset - connIndicatorSize, y_center - connIndicatorSize / 2, connIndicatorSize, connIndicatorSize);
-                ctx.fillStyle = actualConns.S ? 'green' : 'rgba(200,0,0,0.6)';
-                ctx.fillRect(x_center - connIndicatorSize / 2, y_topLeft + cellSize - connIndicatorOffset - connIndicatorSize, connIndicatorSize, connIndicatorSize);
-                ctx.fillStyle = actualConns.W ? 'green' : 'rgba(200,0,0,0.6)';
-                ctx.fillRect(x_topLeft + connIndicatorOffset, y_center - connIndicatorSize / 2, connIndicatorSize, connIndicatorSize);
             }
         }
     }
