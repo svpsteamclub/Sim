@@ -6,6 +6,7 @@ import { initCodeEditor, loadUserCode, executeUserSetup, executeUserLoop, getMot
 import { initRobotEditor, getCurrentRobotGeometry } from './robotEditor.js';
 import { initTrackEditor } from './trackEditor.js';
 import { loadAndScaleImage, getAssetPath } from './utils.js';
+import '../js/monaco-setup.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -115,6 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Error al cargar el código inicial del robot. Revisa la consola.");
         }
 
+        // Ensure latest code from editor is loaded
+        if (!loadUserCode(window.monacoEditor.getValue())) {
+             alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
+             return;
+        }
+
         initRobotEditor(mainAppInterface);
         initTrackEditor(mainAppInterface); // Track editor might generate a default track
 
@@ -188,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Ensure latest code from editor is loaded
-        if (!loadUserCode(elems.codeEditorArea.value)) {
+        if (!loadUserCode(window.monacoEditor.getValue())) {
              alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
              return;
         }
@@ -207,7 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
         elems.startSimButton.disabled = true;
         elems.stopSimButton.disabled = false;
         elems.resetSimButton.disabled = true; // Disable reset while running
-        elems.codeEditorArea.disabled = true; // Disable code editing while running
+        if (window.monacoEditor) {
+            window.monacoEditor.updateOptions({ readOnly: true });
+        }
         elems.applySimParamsButton.disabled = true;
         // Robot editor and track editor controls could also be disabled
 
@@ -225,7 +234,9 @@ document.addEventListener('DOMContentLoaded', () => {
         elems.startSimButton.disabled = false;
         elems.stopSimButton.disabled = true;
         elems.resetSimButton.disabled = false;
-        elems.codeEditorArea.disabled = false;
+        if (window.monacoEditor) {
+            window.monacoEditor.updateOptions({ readOnly: false });
+        }
         elems.applySimParamsButton.disabled = false;
         console.log("Simulación detenida.");
     }
@@ -262,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
             
             // Reload user code and re-run setup for a clean state
-            if (loadUserCode(elems.codeEditorArea.value)) {
+            if (loadUserCode(window.monacoEditor.getValue())) {
                 executeUserSetup().catch(e => alert("Error en setup() durante el reinicio."));
             } else {
                 alert("Error recargando código durante reinicio.");

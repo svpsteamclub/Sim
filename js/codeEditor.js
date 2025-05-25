@@ -111,8 +111,16 @@ export function initCodeEditor(simulationState) {
         ArduinoSerial.clear();
     });
     
-    // Load initial code from textarea
-    return loadUserCode(elems.codeEditorArea.value);
+    // Wait for Monaco Editor to be ready
+    const waitForMonaco = setInterval(() => {
+        if (window.monacoEditor) {
+            clearInterval(waitForMonaco);
+            // Load initial code
+            return loadUserCode(window.monacoEditor.getValue());
+        }
+    }, 100);
+
+    return true; // Initial return, actual code loading happens when Monaco is ready
 }
 
 export function loadUserCode(code) {
