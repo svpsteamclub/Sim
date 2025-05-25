@@ -247,11 +247,9 @@ export function restorePlacedPartsRaw(partsArr) {
     placedParts.length = 0; // Vacía el array manteniendo la referencia
     const previewCanvas = getDOMElements().robotPreviewCanvas;
     partsArr.forEach(p => {
-        // Desrotar +90deg y convertir a pixeles
-        const rx = p.y;
-        const ry = -p.x;
-        const px = rx * PIXELS_PER_METER + previewCanvas.width/2;
-        const py = ry * PIXELS_PER_METER + previewCanvas.height/2;
+        // Solo convierte de metros a pixeles, sin rotar ejes
+        const px = p.x * PIXELS_PER_METER + previewCanvas.width/2;
+        const py = p.y * PIXELS_PER_METER + previewCanvas.height/2;
         const partInfo = PARTS.find(pt => pt.id === p.id);
         let img = null;
         if (partInfo) {
