@@ -165,6 +165,10 @@ export function initTrackEditor(appInterface) {
                 startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
                 startAngle_rad = 0;
             }
+            // Store the start position in the canvas for the simulation to use
+            exportedCanvas.dataset.startX = startX_m;
+            exportedCanvas.dataset.startY = startY_m;
+            exportedCanvas.dataset.startAngle = startAngle_rad;
             mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
         }
     });

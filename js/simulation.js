@@ -56,6 +56,12 @@ export class Simulation {
         // The simulation canvas should ideally match these dimensions for 1:1 pixel mapping.
         this.track.load(source, null, null, this.params.lineThreshold, (success, trackWidthPx, trackHeightPx) => {
             if (success) {
+                // If the source is a canvas with start position data, use that
+                if (source instanceof HTMLCanvasElement && source.dataset.startX) {
+                    startX_m = parseFloat(source.dataset.startX);
+                    startY_m = parseFloat(source.dataset.startY);
+                    startAngle_rad = parseFloat(source.dataset.startAngle);
+                }
                 this.resetSimulationState(startX_m, startY_m, startAngle_rad);
                 // Initialize lap timer with the new start pose relative to the loaded track
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
