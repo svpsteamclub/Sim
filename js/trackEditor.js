@@ -148,47 +148,49 @@ export function initTrackEditor(appInterface) {
     loadTrackPartAssets(() => {
         console.log("[TrackEditor] Track part assets loaded, populating palette...");
         populateTrackPartsPalette(elems.trackPartsPalette);
-        
-        console.log("[TrackEditor] Generating initial random track...");
-        generateRandomTrackWithRetry();
-        console.log("[DEBUG] Grid after random track generation:", grid);
-        console.log("[DEBUG] Track parts images loaded:", Object.keys(trackPartsImages));
-        
-        console.log("[TrackEditor] Rendering editor...");
-        renderEditor();
-        
-        console.log("[TrackEditor] Exporting track to simulator...");
-        const exportedCanvas = exportTrackAsCanvas();
-        if (exportedCanvas) {
-            let startX_m, startY_m, startAngle_rad;
-            if (lastGeneratedTrackStartPosition) {
-                startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
-                startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
-                startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
-                console.log("[TrackEditor] Exporting track with start position:", {
-                    gridPos: lastGeneratedTrackStartPosition,
-                    worldPos: { startX_m, startY_m, startAngle_rad }
+        // Wait for the next animation frame to ensure layout is complete
+        requestAnimationFrame(() => {
+            console.log("[TrackEditor] Generating initial random track...");
+            generateRandomTrackWithRetry();
+            console.log("[DEBUG] Grid after random track generation:", grid);
+            console.log("[DEBUG] Track parts images loaded:", Object.keys(trackPartsImages));
+            
+            console.log("[TrackEditor] Rendering editor...");
+            renderEditor();
+            
+            console.log("[TrackEditor] Exporting track to simulator...");
+            const exportedCanvas = exportTrackAsCanvas();
+            if (exportedCanvas) {
+                let startX_m, startY_m, startAngle_rad;
+                if (lastGeneratedTrackStartPosition) {
+                    startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
+                    startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
+                    startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
+                    console.log("[TrackEditor] Exporting track with start position:", {
+                        gridPos: lastGeneratedTrackStartPosition,
+                        worldPos: { startX_m, startY_m, startAngle_rad }
+                    });
+                } else {
+                    startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
+                    startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
+                    startAngle_rad = 0;
+                    console.log("[TrackEditor] No start position found, using default:", { startX_m, startY_m, startAngle_rad });
+                }
+                // Store the start position in the canvas for the simulation to use
+                exportedCanvas.dataset.startX = startX_m;
+                exportedCanvas.dataset.startY = startY_m;
+                exportedCanvas.dataset.startAngle = startAngle_rad;
+                exportedCanvas.dataset.fromEditor = 'true'; // Marcar que viene del editor
+                console.log("[TrackEditor] Canvas dataset set:", {
+                    startX: exportedCanvas.dataset.startX,
+                    startY: exportedCanvas.dataset.startY,
+                    startAngle: exportedCanvas.dataset.startAngle
                 });
+                mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
             } else {
-                startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
-                startAngle_rad = 0;
-                console.log("[TrackEditor] No start position found, using default:", { startX_m, startY_m, startAngle_rad });
+                console.warn("[TrackEditor] Failed to export track canvas");
             }
-            // Store the start position in the canvas for the simulation to use
-            exportedCanvas.dataset.startX = startX_m;
-            exportedCanvas.dataset.startY = startY_m;
-            exportedCanvas.dataset.startAngle = startAngle_rad;
-            exportedCanvas.dataset.fromEditor = 'true'; // Marcar que viene del editor
-            console.log("[TrackEditor] Canvas dataset set:", {
-                startX: exportedCanvas.dataset.startX,
-                startY: exportedCanvas.dataset.startY,
-                startAngle: exportedCanvas.dataset.startAngle
-            });
-            mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
-        } else {
-            console.warn("[TrackEditor] Failed to export track canvas");
-        }
+        });
     });
 
     elems.trackGridSizeSelect.addEventListener('change', (e) => {
