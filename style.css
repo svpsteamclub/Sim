@@ -244,6 +244,10 @@ h2 {
     box-shadow: none;
     border: 1px solid var(--border-color);
     min-width: 0;
+    max-width: 100%;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-line;
 }
 
 #serialMonitorOutput {
