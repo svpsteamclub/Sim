@@ -76,6 +76,20 @@
                         </select>
                     </div>
                     <div id="monacoContainer" style="height: 600px; border: 1px solid #ccc;"></div>
+                    <div class="editor-help">
+                        <h3>¿Cómo usar este editor?</h3>
+                        <p>¡Aquí puedes escribir el código que controla tu robot! Cambia el tipo de control arriba, edita el código y mira cómo responde el robot en la simulación. Si te equivocas, no pasa nada, puedes volver a intentarlo.</p>
+                        <h4>Funciones que puedes usar:</h4>
+                        <ul>
+                            <li><strong>setup()</strong>: Se ejecuta una vez al comenzar. Aquí preparas todo.</li>
+                            <li><strong>loop()</strong>: Se repite muchas veces. Aquí va la lógica principal.</li>
+                            <li><strong>digitalRead(pin)</strong>: Lee si un sensor está sobre la línea (0) o fuera (1).</li>
+                            <li><strong>analogWrite(pin, valor)</strong>: Cambia la velocidad de los motores (0 a 255).</li>
+                            <li><strong>Serial.print(...)</strong> y <strong>Serial.println(...)</strong>: Muestra mensajes en el Monitor Serial.</li>
+                            <li><strong>delay(ms)</strong>: Espera el tiempo que le digas (en milisegundos).</li>
+                        </ul>
+                        <p>¡Diviértete probando y aprendiendo cómo hacer que tu robot siga la línea!</p>
+                    </div>
                 </div>
                 <div class="serial-and-explanation">
                     <div class="serial-monitor-container">
