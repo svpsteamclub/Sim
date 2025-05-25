@@ -164,8 +164,7 @@ export function drawRobotPreview() {
         console.error("Missing previewCtx or previewCanvas in drawRobotPreview");
         return;
     }
-    // Always clear the canvas before drawing parts
-    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    // Do NOT clear the canvas here; it is cleared in renderRobotPreview
     console.log("Drawing robot preview with parts:", placedParts.length);
     // Draw placed parts
     placedParts.forEach(part => {
