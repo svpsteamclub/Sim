@@ -298,6 +298,9 @@ button:disabled {
     order: 3;
     aspect-ratio: 1;
     overflow: hidden;
+    min-height: 400px;
+    background: #fff;
+    border: 2px dashed red !important;
 }
 
 #trackEditorCanvas {
@@ -312,6 +315,7 @@ button:disabled {
     display: block;
     margin: 0;
     object-fit: contain;
+    border: 2px solid blue !important;
 }
 
 #trackPartsPalette {
