@@ -54,8 +54,18 @@ export function initTrackEditor(appInterface) {
     // Set initial grid size to 3x3
     currentGridSize = { rows: 3, cols: 3 };
     elems.trackGridSizeSelect.value = '3x3';
-    setupGrid();
-    console.log("[TrackEditor] Initial grid setup complete");
+
+    // Ensure track editor tab is visible before setting up grid
+    const trackEditorTab = document.getElementById('track-editor');
+    if (trackEditorTab) {
+        trackEditorTab.style.display = 'block';
+    }
+
+    // Wait for next frame to ensure layout is complete
+    requestAnimationFrame(() => {
+        setupGrid();
+        console.log("[TrackEditor] Initial grid setup complete");
+    });
 
     // Guardar estado cuando se cambia de sección
     document.addEventListener('visibilitychange', () => {
@@ -67,7 +77,7 @@ export function initTrackEditor(appInterface) {
     });
 
     // Guardar estado cuando se cambia entre pestañas
-    const trackEditorTab = document.getElementById('track-editor');
+    const trackEditorTabObserver = document.getElementById('track-editor');
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.attributeName === 'style') {
@@ -415,15 +425,21 @@ function setupGrid() {
     if (editorCanvas) {
         // Get container size and use width for both dimensions
         const container = editorCanvas.parentElement;
-        const containerRect = container.getBoundingClientRect();
-        const size = containerRect.width; // Use width only
-        editorCanvas.width = size;
-        editorCanvas.height = size;
-        editorCanvas.style.width = `${size}px`;
-        editorCanvas.style.height = `${size}px`;
-        // Calculate dynamic cell size
-        const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
-        renderEditor(cellSize);
+        if (!container) return;
+
+        // Wait for next frame to ensure layout is complete
+        requestAnimationFrame(() => {
+            const containerRect = container.getBoundingClientRect();
+            // Use container width or minimum size of 400px
+            const size = Math.max(containerRect.width || 400, 400);
+            editorCanvas.width = size;
+            editorCanvas.height = size;
+            editorCanvas.style.width = `${size}px`;
+            editorCanvas.style.height = `${size}px`;
+            // Calculate dynamic cell size
+            const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+            renderEditor(cellSize);
+        });
     }
 }
 
