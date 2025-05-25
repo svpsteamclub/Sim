@@ -56,9 +56,12 @@ export function initTrackEditor(appInterface) {
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
 
+    // Forzar tamaño de grid a 3x3
+    currentGridSize = { rows: 3, cols: 3 };
+    elems.trackGridSizeSelect.value = '3x3';
+
     // Inicializar el grid vacío
     setupGrid();
-    renderEditor();
 
     // Guardar estado cuando se cambia de sección
     document.addEventListener('visibilitychange', () => {
@@ -146,16 +149,14 @@ export function initTrackEditor(appInterface) {
         }
     };
 
-    // Forzar tamaño de grid a 3x3
-    currentGridSize = { rows: 3, cols: 3 };
-    elems.trackGridSizeSelect.value = '3x3';
-
     loadTrackPartAssets(() => {
         populateTrackPartsPalette(elems.trackPartsPalette);
-        setupGrid(); // This will also call renderEditor
         
         // Generar una pista aleatoria inicial
         generateRandomTrackWithRetry();
+        
+        // Asegurarse de que el editor se renderice
+        renderEditor();
         
         // Exportar la pista al simulador automáticamente
         const exportedCanvas = exportTrackAsCanvas();
