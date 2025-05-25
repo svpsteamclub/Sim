@@ -62,9 +62,13 @@ export class Simulation {
                     startY_m = parseFloat(source.dataset.startY);
                     startAngle_rad = parseFloat(source.dataset.startAngle);
                 }
+                
+                // Reset simulation state first
                 this.resetSimulationState(startX_m, startY_m, startAngle_rad);
-                // Initialize lap timer with the new start pose relative to the loaded track
+                
+                // Initialize lap timer with the new start pose
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
+                console.log("Lap timer initialized with start position:", { x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad });
                 
                 // Notify track editor if the track was loaded from a source other than the editor
                 if (source instanceof HTMLCanvasElement && !source.dataset.fromEditor) {
@@ -210,11 +214,20 @@ export class Simulation {
             this.robot.draw(displayCtx, displaySensorStates);
         }
 
-        // Draw Lap Timer Start/Finish Line (optional for debugging)
-        if (this.lapTimer.isActive && this.lapTimer.startLine.x1 !== undefined) {
+        // Draw Lap Timer Start/Finish Line
+        if (this.lapTimer.isActive) {
             displayCtx.save();
-            displayCtx.strokeStyle = "rgba(0, 255, 255, 0.7)";
-            displayCtx.lineWidth = 3;
+            // Make the line more visible with a thicker stroke and brighter color
+            displayCtx.strokeStyle = "rgba(0, 255, 255, 1.0)"; // Full opacity cyan
+            displayCtx.lineWidth = 4;
+            displayCtx.beginPath();
+            displayCtx.moveTo(this.lapTimer.startLine.x1 * PIXELS_PER_METER, this.lapTimer.startLine.y1 * PIXELS_PER_METER);
+            displayCtx.lineTo(this.lapTimer.startLine.x2 * PIXELS_PER_METER, this.lapTimer.startLine.y2 * PIXELS_PER_METER);
+            displayCtx.stroke();
+            
+            // Add a dashed line effect to make it more visible
+            displayCtx.setLineDash([10, 5]);
+            displayCtx.strokeStyle = "rgba(255, 255, 255, 0.5)"; // White dashed line
             displayCtx.beginPath();
             displayCtx.moveTo(this.lapTimer.startLine.x1 * PIXELS_PER_METER, this.lapTimer.startLine.y1 * PIXELS_PER_METER);
             displayCtx.lineTo(this.lapTimer.startLine.x2 * PIXELS_PER_METER, this.lapTimer.startLine.y2 * PIXELS_PER_METER);
