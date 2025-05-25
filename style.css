@@ -195,6 +195,7 @@ h2 {
     display: grid;
     gap: var(--spacing-lg);
     grid-template-columns: 2fr 1fr;
+    align-items: flex-start;
 }
 
 @media (max-width: 1024px) {
@@ -203,21 +204,46 @@ h2 {
     }
 }
 
-#codeEditorArea {
+.code-editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 700px;
     width: 100%;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.875rem;
-    border: 1px solid var(--border-color);
-    padding: var(--spacing-sm);
-    min-height: 400px;
-    border-radius: var(--radius-md);
-    background-color: var(--surface-color);
+}
+
+.serial-and-explanation {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    width: 100%;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 1024px) {
+    .serial-and-explanation {
+        max-width: 100%;
+        margin: 0;
+    }
 }
 
 .serial-monitor-container {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+}
+
+.code-explanation {
+    background-color: #f8f9fa;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-top: 0;
+    font-size: 0.98em;
+    box-shadow: none;
+    border: 1px solid var(--border-color);
+    min-width: 0;
 }
 
 #serialMonitorOutput {
@@ -486,12 +512,6 @@ hr {
     background-color: white;
 }
 
-.code-editor-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
 .code-template-selector {
     margin-bottom: var(--spacing-md);
 }
@@ -507,37 +527,4 @@ hr {
 
 .template-select:hover {
     border-color: #999;
-}
-
-.code-explanation {
-    background-color: #f8f9fa;
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-md);
-    margin-top: var(--spacing-md);
-}
-
-.code-explanation h3 {
-    margin-top: 0;
-    margin-bottom: var(--spacing-md);
-    color: #333;
-}
-
-.code-explanation h4 {
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-sm);
-    color: #444;
-}
-
-.code-explanation ul {
-    margin: var(--spacing-sm) 0;
-    padding-left: var(--spacing-lg);
-}
-
-.code-explanation li {
-    margin-bottom: var(--spacing-sm);
-    line-height: 1.5;
-}
-
-.code-explanation strong {
-    color: #2c5282;
 }
