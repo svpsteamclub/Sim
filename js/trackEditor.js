@@ -16,8 +16,24 @@ let isPlacingStartLine = false; // New state for start line placement mode
 let savedState = null;
 
 function saveEditorState() {
+    // Create a deep copy of the grid, but only save necessary data
+    const gridCopy = grid.map(row =>
+        row.map(cell => {
+            if (cell) {
+                // Save only the essential data, including the file reference
+                return {
+                    file: cell.file,
+                    name: cell.name,
+                    connections: cell.connections,
+                    rotation_deg: cell.rotation_deg
+                };
+            }
+            return null;
+        })
+    );
+
     savedState = {
-        grid: JSON.parse(JSON.stringify(grid)),
+        grid: gridCopy,
         currentGridSize: { ...currentGridSize },
         lastGeneratedTrackStartPosition: lastGeneratedTrackStartPosition ? { ...lastGeneratedTrackStartPosition } : null
     };
@@ -25,10 +41,27 @@ function saveEditorState() {
 
 function restoreEditorState() {
     if (savedState) {
-        grid = savedState.grid;
         currentGridSize = { ...savedState.currentGridSize };
         lastGeneratedTrackStartPosition = savedState.lastGeneratedTrackStartPosition ? { ...savedState.lastGeneratedTrackStartPosition } : null;
-        renderEditor();
+        
+        // Restore grid with proper image references
+        grid = savedState.grid.map(row => 
+            row.map(cell => {
+                if (cell && cell.file) {
+                    // Reattach the image from our cache
+                    return {
+                        ...cell,
+                        image: trackPartsImages[cell.file]
+                    };
+                }
+                return null;
+            })
+        );
+        
+        // Only render if we have a canvas context
+        if (ctx && editorCanvas) {
+            renderEditor();
+        }
     }
 }
 
