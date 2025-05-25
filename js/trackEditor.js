@@ -63,9 +63,13 @@ export function initTrackEditor(appInterface) {
         loadTrackFromSimulation: (trackCanvas) => {
             if (!trackCanvas.dataset.fromEditor) {
                 saveEditorState();
+                setupGrid();
+                const ctx = editorCanvas.getContext('2d');
+                editorCanvas.width = trackCanvas.width;
+                editorCanvas.height = trackCanvas.height;
+                ctx.drawImage(trackCanvas, 0, 0);
+                renderEditor();
             }
-            setupGrid();
-            // ... rest of loadTrackFromSimulation implementation ...
         }
     };
 
@@ -815,4 +819,50 @@ function exportTrackAsCanvas() {
     }
     exportCanvas.dataset.fromEditor = 'true';
     return exportCanvas;
+}
+
+function saveEditorState() {
+    // Create a deep copy of the grid, but only save necessary data
+    const gridCopy = grid.map(row =>
+        row.map(cell => {
+            if (cell) {
+                return {
+                    file: cell.file,
+                    name: cell.name,
+                    connections: cell.connections,
+                    rotation_deg: cell.rotation_deg
+                };
+            }
+            return null;
+        })
+    );
+
+    savedState = {
+        grid: gridCopy,
+        currentGridSize: { ...currentGridSize }
+    };
+}
+
+function restoreEditorState() {
+    if (savedState) {
+        currentGridSize = { ...savedState.currentGridSize };
+        
+        // Restore grid with proper image references
+        grid = savedState.grid.map(row => 
+            row.map(cell => {
+                if (cell && cell.file) {
+                    return {
+                        ...cell,
+                        image: trackPartsImages[cell.file]
+                    };
+                }
+                return null;
+            })
+        );
+        
+        // Only render if we have a canvas context
+        if (ctx && editorCanvas) {
+            renderEditor();
+        }
+    }
 }
