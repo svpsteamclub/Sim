@@ -24,6 +24,7 @@ let isDragging = false;
 let wasDragging = false;
 let dragOffset = { x: 0, y: 0 };
 let eraseMode = false;
+let suppressNextClick = false;
 
 export function initRobotParts() {
     console.log("Initializing robot parts...");
@@ -160,6 +161,10 @@ export function initRobotParts() {
 
     // Click to remove parts
     previewCanvas.addEventListener('click', (e) => {
+        if (suppressNextClick) {
+            suppressNextClick = false;
+            return;
+        }
         if (!isDragging && !wasDragging) {
             const rect = previewCanvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -169,9 +174,11 @@ export function initRobotParts() {
                 const part = placedParts[i];
                 const partSize = 40; // Size of the part in pixels (40mm)
                 if (Math.abs(x - part.x) < partSize/2 && Math.abs(y - part.y) < partSize/2) {
-                    console.log(`Removing part: ${part.name}`);
-                    placedParts.splice(i, 1);
-                    renderRobotPreview();
+                    if (eraseMode) {
+                        console.log(`Removing part: ${part.name}`);
+                        placedParts.splice(i, 1);
+                        renderRobotPreview();
+                    }
                     break;
                 }
             }
@@ -196,6 +203,7 @@ export function initRobotParts() {
                     console.log(`Rotated part: ${part.name} to ${part.rotation} radians`);
                 }
                 renderRobotPreview();
+                suppressNextClick = true;
                 break;
             }
         }
