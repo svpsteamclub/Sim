@@ -413,11 +413,10 @@ function populateTrackPartsPalette(paletteElement) {
 function setupGrid() {
     grid = Array(currentGridSize.rows).fill(null).map(() => Array(currentGridSize.cols).fill(null));
     if (editorCanvas) {
-        // Get container size and keep square aspect ratio
+        // Get container size and use width for both dimensions
         const container = editorCanvas.parentElement;
         const containerRect = container.getBoundingClientRect();
-        const size = Math.min(containerRect.width, containerRect.height);
-        // Set canvas size to fill container and keep square
+        const size = containerRect.width; // Use width only
         editorCanvas.width = size;
         editorCanvas.height = size;
         editorCanvas.style.width = `${size}px`;
