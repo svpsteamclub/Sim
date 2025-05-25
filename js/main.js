@@ -52,13 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentSimParams = getSimulationParamsFromUI();
                 currentSimParams.robotGeometry = newGeometry;
                 simulationInstance.updateParameters(currentSimParams);
-                // Update decorative parts
-                simulationInstance.robot.setDecorativeParts(decorativeParts);
                 // Resetting simulation is often needed if robot size changes drastically
                 if (simulationInstance.track.imageData) {
                     const currentPose = {x: simulationInstance.robot.x_m, y: simulationInstance.robot.y_m, angle: simulationInstance.robot.angle_rad};
                     simulationInstance.resetSimulationState(currentPose.x, currentPose.y, currentPose.angle, newGeometry);
                 }
+                // Update decorative parts AFTER reset
+                simulationInstance.robot.setDecorativeParts(decorativeParts);
                 drawCurrentSimulationState();
             }
         },

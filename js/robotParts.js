@@ -164,14 +164,13 @@ export function drawRobotPreview() {
         console.error("Missing previewCtx or previewCanvas in drawRobotPreview");
         return;
     }
-
+    // Always clear the canvas before drawing parts
+    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
     console.log("Drawing robot preview with parts:", placedParts.length);
-    
     // Draw placed parts
     placedParts.forEach(part => {
         const size = 40; // Size of the part in pixels (40mm)
         console.log(`Drawing part ${part.name} at:`, { x: part.x, y: part.y });
-
         previewCtx.save();
         previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
         if (part === selectedPart) {
