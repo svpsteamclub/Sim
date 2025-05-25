@@ -157,7 +157,7 @@ h2 {
 
 .simulation-parameters {
     min-width: 220px;
-    max-width: 320px;
+    max-width: inherit;
     width: 100%;
 }
 
@@ -166,7 +166,7 @@ h2 {
     flex-direction: column;
     gap: 1rem;
     min-width: 180px;
-    max-width: 320px;
+    max-width: -webkit-fill-available;
     width: 100%;
 }
 
@@ -188,7 +188,7 @@ h2 {
 
 #serialMonitorOutput {
     height: 120px;
-    width: 100%;
+    width: inherit;
     font-family: monospace;
     background: #fafbfc;
     border: 1px solid #ddd;
