@@ -240,53 +240,14 @@ export function initTrackEditor(appInterface) {
 
     editorCanvas.addEventListener('click', (event) => {
         if (isPlacingStartLine) {
-            const rect = editorCanvas.getBoundingClientRect();
-            const scale = editorCanvas.width / rect.width;
-            const x_canvas = (event.clientX - rect.left) * scale;
-            const y_canvas = (event.clientY - rect.top) * scale;
-            
-            // Calculate cell size dynamically
-            const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
-            
-            // Convert click position to grid coordinates
-            const gridX = Math.floor(x_canvas / cellSize);
-            const gridY = Math.floor(y_canvas / cellSize);
-            
-            if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols) {
-                const cell = grid[gridY][gridX];
-                if (cell) {
-                    const conns = getRotatedConnections(cell, cell.rotation_deg);
-                    let angle = null;
-                    if (conns.N && conns.S) {
-                        angle = Math.PI / 2; // Sur
-                    } else if (conns.E && conns.W) {
-                        angle = 0; // Este
-                    }
-                    if (angle !== null) {
-                        lastGeneratedTrackStartPosition = {
-                            r: gridY,
-                            c: gridX,
-                            angle_rad: angle
-                        };
-                        isPlacingStartLine = false;
-                        renderEditor();
-                    } else {
-                        alert('Por favor, selecciona una sección de conexión Norte-Sur o Este-Oeste para la línea de comienzo.');
-                    }
-                }
-            }
+            handleStartLinePlacement(event);
         } else if (!isEraseModeActive) {
-            if (selectedTrackPart) {
-                const conns = getRotatedConnections(selectedTrackPart, 0);
-                if (!( (conns.N && conns.S) || (conns.E && conns.W) )) {
-                    lastGeneratedTrackStartPosition = null;
-                }
-            }
             onGridSingleClick(event);
         }
     });
 
     editorCanvas.addEventListener('dblclick', (event) => {
+        // Always handle rotation on double click unless in erase mode
         if (isEraseModeActive) {
             const rect = editorCanvas.getBoundingClientRect();
             const scale = editorCanvas.width / rect.width;
@@ -302,6 +263,9 @@ export function initTrackEditor(appInterface) {
                 renderEditor();
             }
         } else {
+            // Prevent the click event from firing after double click
+            event.preventDefault();
+            event.stopPropagation();
             onGridDoubleClick(event);
         }
     });
@@ -495,16 +459,15 @@ function onGridSingleClick(event) {
                 grid[r][c] = null; 
                 renderEditor();
             }
-        } else { 
-            if (!selectedTrackPart || !selectedTrackPart.image) {
-                return; 
+        } else if (selectedTrackPart && selectedTrackPart.image) {
+            // Only place new part on single click, not double click
+            if (!event.detail || event.detail === 1) {
+                grid[r][c] = {
+                    ...selectedTrackPart,
+                    rotation_deg: 0 // Initial rotation
+                };
+                renderEditor();
             }
-            // Permitir reemplazar piezas existentes
-            grid[r][c] = {
-                ...selectedTrackPart,
-                rotation_deg: 0 // Initial rotation
-            };
-            renderEditor();
         }
     }
 }
@@ -958,4 +921,39 @@ function exportTrackAsCanvas() {
         return null;
     }
     return exportCanvas;
+}
+
+function handleStartLinePlacement(event) {
+    const rect = editorCanvas.getBoundingClientRect();
+    const scale = editorCanvas.width / rect.width;
+    const x_canvas = (event.clientX - rect.left) * scale;
+    const y_canvas = (event.clientY - rect.top) * scale;
+    
+    const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
+    const gridX = Math.floor(x_canvas / cellSize);
+    const gridY = Math.floor(y_canvas / cellSize);
+    
+    if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols) {
+        const cell = grid[gridY][gridX];
+        if (cell) {
+            const conns = getRotatedConnections(cell, cell.rotation_deg);
+            let angle = null;
+            if (conns.N && conns.S) {
+                angle = Math.PI / 2; // Sur
+            } else if (conns.E && conns.W) {
+                angle = 0; // Este
+            }
+            if (angle !== null) {
+                lastGeneratedTrackStartPosition = {
+                    r: gridY,
+                    c: gridX,
+                    angle_rad: angle
+                };
+                isPlacingStartLine = false;
+                renderEditor();
+            } else {
+                alert('Por favor, selecciona una sección de conexión Norte-Sur o Este-Oeste para la línea de comienzo.');
+            }
+        }
+    }
 }
