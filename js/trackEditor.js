@@ -48,19 +48,11 @@ export function initTrackEditor(appInterface) {
     mainAppInterface = appInterface;
     const elems = getDOMElements();
     editorCanvas = elems.trackEditorCanvas;
-
-    if (!editorCanvas) {
-        console.error("Track Editor Canvas not found!");
-        return;
-    }
     ctx = editorCanvas.getContext('2d');
-    console.log("Track Editor Initialized");
 
-    // Forzar tamaño de grid a 3x3
+    // Set initial grid size to 3x3
     currentGridSize = { rows: 3, cols: 3 };
     elems.trackGridSizeSelect.value = '3x3';
-
-    // Inicializar el grid vacío
     setupGrid();
 
     // Guardar estado cuando se cambia de sección
