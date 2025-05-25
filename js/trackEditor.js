@@ -55,12 +55,6 @@ export function initTrackEditor(appInterface) {
     currentGridSize = { rows: 3, cols: 3 };
     elems.trackGridSizeSelect.value = '3x3';
 
-    // Ensure track editor tab is visible before setting up grid
-    const trackEditorTab = document.getElementById('track-editor');
-    if (trackEditorTab) {
-        trackEditorTab.style.display = 'block';
-    }
-
     // Wait for next frame to ensure layout is complete
     requestAnimationFrame(() => {
         setupGrid();
@@ -77,11 +71,11 @@ export function initTrackEditor(appInterface) {
     });
 
     // Guardar estado cuando se cambia entre pestañas
-    const trackEditorTabObserver = document.getElementById('track-editor');
+    const trackEditorTab = document.getElementById('track-editor');
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-            if (mutation.attributeName === 'style') {
-                if (trackEditorTab.style.display === 'none') {
+            if (mutation.attributeName === 'class') {
+                if (!trackEditorTab.classList.contains('active')) {
                     saveEditorState();
                 } else {
                     restoreEditorState();
