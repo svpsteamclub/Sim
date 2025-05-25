@@ -81,6 +81,48 @@ export function initRobotEditor(appInterface) {
         previewRobot.setImages(wheelImg);
         renderRobotPreview();
     });
+
+    // Guardar y cargar robot
+    elems.saveRobotButton.addEventListener('click', () => {
+        const geometry = getFormValues();
+        const parts = window.getPlacedPartsRaw ? window.getPlacedPartsRaw() : getPlacedPartsRaw();
+        const robotData = {
+            geometry,
+            parts
+        };
+        const jsonData = JSON.stringify(robotData, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'robot.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+
+    elems.loadRobotInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const robotData = JSON.parse(e.target.result);
+                if (robotData.geometry) {
+                    setFormValues(robotData.geometry);
+                    currentGeometry = getFormValues();
+                    previewRobot.updateGeometry(currentGeometry);
+                }
+                if (robotData.parts) {
+                    restorePlacedParts(robotData.parts);
+                }
+                renderRobotPreview();
+            } catch (err) {}
+        };
+        reader.readAsText(file);
+        event.target.value = null;
+    });
 }
 
 function getFormValues() {
@@ -262,4 +304,52 @@ export function renderRobotPreview() {
 
 export function getCurrentRobotGeometry() {
     return { ...currentGeometry };
+}
+
+// Devuelve las partes decorativas en formato serializable (sin la imagen)
+function getPlacedPartsRaw() {
+    const parts = window.getPlacedParts ? window.getPlacedParts() : [];
+    return parts.map(p => ({
+        id: p.id,
+        name: p.name,
+        x: p.x,
+        y: p.y,
+        rotation: p.rotation || 0
+    }));
+}
+
+// Restaura las partes decorativas desde un array serializable
+function restorePlacedParts(partsArr) {
+    if (!window.clearPlacedParts || !window.PARTS) return;
+    window.clearPlacedParts();
+    const { PIXELS_PER_METER } = require('./config.js');
+    const previewCanvas = getDOMElements().robotPreviewCanvas;
+    partsArr.forEach(p => {
+        // Convertir de metros a pixeles y rotar -90deg
+        let x = p.x, y = p.y;
+        // Desrotar +90deg
+        const rx = y;
+        const ry = -x;
+        const px = rx * PIXELS_PER_METER + previewCanvas.width/2;
+        const py = ry * PIXELS_PER_METER + previewCanvas.height/2;
+        // Buscar info de la parte
+        const partInfo = window.PARTS ? window.PARTS.find(pt => pt.id === p.id) : null;
+        let img = null;
+        if (partInfo) {
+            img = new window.Image();
+            img.src = window.getAssetPath ? window.getAssetPath(partInfo.src) : partInfo.src;
+        }
+        // Agregar a placedParts
+        if (window.placedParts) {
+            window.placedParts.push({
+                id: p.id,
+                name: p.name,
+                img,
+                x: px,
+                y: py,
+                rotation: p.rotation || 0
+            });
+        }
+    });
+    if (window.drawRobotPreview) window.drawRobotPreview();
 }

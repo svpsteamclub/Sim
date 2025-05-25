@@ -37,6 +37,8 @@ export function getDOMElements() {
         applyRobotGeometryButton: document.getElementById('applyRobotGeometryButton'),
         resetRobotGeometryButton: document.getElementById('resetRobotGeometryButton'),
         robotPartsPalette: document.getElementById('robotPartsPalette'),
+        saveRobotButton: document.getElementById('saveRobotButton'),
+        loadRobotInput: document.getElementById('loadRobotInput'),
 
         // Track Editor Tab
         trackEditorCanvas: document.getElementById('trackEditorCanvas'),

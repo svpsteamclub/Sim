@@ -241,4 +241,10 @@ export function getPlacedParts() {
 export function clearPlacedParts() {
     placedParts = [];
     drawRobotPreview();
-} 
+}
+
+window.PARTS = PARTS;
+window.placedParts = placedParts;
+window.clearPlacedParts = clearPlacedParts;
+window.getAssetPath = getAssetPath;
+window.getPlacedParts = getPlacedParts; 

@@ -161,6 +161,11 @@
                     
                     <button id="applyRobotGeometryButton">Aplicar Geometría y Reiniciar Sim</button>
                     <button id="resetRobotGeometryButton">Geometría por Defecto</button>
+                    <div style="margin-top: 1em; display: flex; gap: 0.5em; align-items: center;">
+                        <button id="saveRobotButton" style="flex:1;">Guardar Robot</button>
+                        <label for="loadRobotInput" class="file-input-label" style="flex:1; text-align:center; cursor:pointer; margin:0;">Cargar Robot (.json)</label>
+                        <input type="file" id="loadRobotInput" accept=".json" style="display:none;">
+                    </div>
                 </div>
             </div>
         </div>
