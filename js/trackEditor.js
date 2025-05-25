@@ -151,6 +151,8 @@ export function initTrackEditor(appInterface) {
         
         console.log("[TrackEditor] Generating initial random track...");
         generateRandomTrackWithRetry();
+        console.log("[DEBUG] Grid after random track generation:", grid);
+        console.log("[DEBUG] Track parts images loaded:", Object.keys(trackPartsImages));
         
         console.log("[TrackEditor] Rendering editor...");
         renderEditor();
@@ -431,9 +433,24 @@ function setupGrid() {
 function renderEditor() {
     if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
     
+    // Debug: Log canvas size and CSS size
+    console.log(
+      "[DEBUG] Canvas size (width x height):",
+      editorCanvas.width, "x", editorCanvas.height,
+      "| CSS size:", editorCanvas.style.width, "x", editorCanvas.style.height,
+      "| Bounding rect:", editorCanvas.getBoundingClientRect()
+    );
+
     // Limpiar el canvas con fondo blanco
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+
+    // DEBUG: Draw a large green rectangle filling the canvas
+    ctx.save();
+    ctx.strokeStyle = 'green';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(0, 0, editorCanvas.width, editorCanvas.height);
+    ctx.restore();
 
     // DEBUG: Draw a red rectangle in the top-left corner
     ctx.save();
