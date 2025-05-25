@@ -8,6 +8,22 @@ import { initTrackEditor } from './trackEditor.js';
 import { loadAndScaleImage, getAssetPath } from './utils.js';
 import '../js/monaco-setup.js';
 
+// Función para esperar a que Monaco esté listo
+function waitForMonaco(maxAttempts = 50) {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const checkMonaco = setInterval(() => {
+            attempts++;
+            if (window.monacoEditor) {
+                clearInterval(checkMonaco);
+                resolve();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkMonaco);
+                reject(new Error("Monaco Editor no se pudo inicializar"));
+            }
+        }, 100);
+    });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const elems = getDOMElements();
@@ -88,50 +104,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization Functions ---
     async function initializeSimulator() {
-        // Load robot assets
-        await new Promise(resolve => {
-            mainAppInterface.loadRobotAssets((b, w) => { resolve(); });
-        });
-        // Load watermark
-        await new Promise(resolve => {
-            loadAndScaleImage(getAssetPath('watermark.png'), null, null, (img) => {
-                watermarkTrackImage = img;
-                resolve();
+        try {
+            // Esperar a que Monaco esté listo
+            await waitForMonaco();
+            
+            // Load robot assets
+            await new Promise(resolve => {
+                mainAppInterface.loadRobotAssets((b, w) => { resolve(); });
             });
-        });
-        
-        const initialSimParams = getSimulationParamsFromUI();
-        initialSimParams.robotGeometry = getCurrentRobotGeometry(); // Get from robot editor
-        
-        simulationInstance = new Simulation(
-            { wheel: robotWheelImage }, 
-            watermarkTrackImage,
-            initialSimParams.robotGeometry
-        );
-        simulationInstance.updateParameters(initialSimParams);
+            // Load watermark
+            await new Promise(resolve => {
+                loadAndScaleImage(getAssetPath('watermark.png'), null, null, (img) => {
+                    watermarkTrackImage = img;
+                    resolve();
+                });
+            });
+            
+            const initialSimParams = getSimulationParamsFromUI();
+            initialSimParams.robotGeometry = getCurrentRobotGeometry(); // Get from robot editor
+            
+            simulationInstance = new Simulation(
+                { wheel: robotWheelImage }, 
+                watermarkTrackImage,
+                initialSimParams.robotGeometry
+            );
+            simulationInstance.updateParameters(initialSimParams);
 
-        // Initialize other modules that depend on simulation state
-        const codeLoaded = initCodeEditor(simulationInstance); // Pass full sim instance for API access
-        if (!codeLoaded) {
-            alert("Error al cargar el código inicial del robot. Revisa la consola.");
+            // Initialize other modules that depend on simulation state
+            const codeLoaded = initCodeEditor(simulationInstance); // Pass full sim instance for API access
+            if (!codeLoaded) {
+                throw new Error("Error al cargar el código inicial del robot.");
+            }
+
+            initRobotEditor(mainAppInterface);
+            initTrackEditor(mainAppInterface); // Track editor might generate a default track
+
+            // Load a default track or wait for user
+            // For now, let's assume track editor handles its default view.
+            // Simulation will start with no track until one is exported from editor.
+            elems.simulationDisplayCanvas.width = 700; // Default size
+            elems.simulationDisplayCanvas.height = 500;
+            drawCurrentSimulationState(); // Draw empty state initially
+            updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData()); // Initial lap display
+
+            console.log("Simulador inicializado y listo.");
+        } catch (err) {
+            console.error("Fallo en la inicialización del simulador:", err);
+            alert("Error crítico durante la inicialización. Revisa la consola.");
         }
-
-        // Ensure latest code from editor is loaded
-        if (!loadUserCode(window.monacoEditor.getValue())) {
-             alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
-             return;
-        }
-
-        initRobotEditor(mainAppInterface);
-        initTrackEditor(mainAppInterface); // Track editor might generate a default track
-
-        // Load a default track or wait for user
-        // For now, let's assume track editor handles its default view.
-        // Simulation will start with no track until one is exported from editor.
-        elems.simulationDisplayCanvas.width = 700; // Default size
-        elems.simulationDisplayCanvas.height = 500;
-        drawCurrentSimulationState(); // Draw empty state initially
-        updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData()); // Initial lap display
     }
 
     // --- Simulation Loop ---
