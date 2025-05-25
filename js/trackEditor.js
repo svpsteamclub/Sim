@@ -313,12 +313,20 @@ export function initTrackEditor(appInterface) {
             const r = Math.floor(y_canvas / cellSize);
             
             if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-                const currentRotation = grid[r][c].rotation_deg;
-                const nextRotation = ((currentRotation + 90) % 360);
-                const conns = getRotatedConnections(grid[r][c], nextRotation);
-                if (!( (conns.N && conns.S) || (conns.E && conns.W) )) {
-                    lastGeneratedTrackStartPosition = null;
-                }
+                // Get current rotation and normalize it to 0-359 range
+                let currentRotation = grid[r][c].rotation_deg || 0;
+                currentRotation = ((currentRotation % 360) + 360) % 360;
+                
+                // Calculate next rotation in sequence: 0 -> 90 -> 180 -> 270 -> 0
+                let nextRotation;
+                if (currentRotation < 90) nextRotation = 90;
+                else if (currentRotation < 180) nextRotation = 180;
+                else if (currentRotation < 270) nextRotation = 270;
+                else nextRotation = 0;
+                
+                grid[r][c].rotation_deg = nextRotation;
+                console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
+                renderEditor();
             }
             onGridDoubleClick(event);
         }
@@ -410,8 +418,8 @@ function setupGrid() {
             height: containerRect.height
         });
 
-        // Force a minimum size of 1050px for better visibility
-        const size = Math.max(containerRect.width || 1050, 1050);
+        // Force a minimum size of 1200px for better visibility
+        const size = Math.max(containerRect.width || 1200, 1200);
         console.log("[DEBUG] Setting canvas size to:", size);
 
         editorCanvas.width = size;
@@ -569,22 +577,19 @@ function onGridDoubleClick(event) {
     const r = Math.floor(y_canvas / cellSize);
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-        // Implementar ciclo completo de rotación: 0° → 90° → 180° → 270° → 0°
-        let currentRotation = grid[r][c].rotation_deg;
-        
-        // Asegurarse de que la rotación actual esté en el rango 0-359
+        // Get current rotation and normalize it to 0-359 range
+        let currentRotation = grid[r][c].rotation_deg || 0;
         currentRotation = ((currentRotation % 360) + 360) % 360;
         
-        // Calcular la siguiente rotación en el ciclo
+        // Calculate next rotation in sequence: 0 -> 90 -> 180 -> 270 -> 0
         let nextRotation;
-        if (currentRotation === 0) nextRotation = 90;
-        else if (currentRotation === 90) nextRotation = 180;
-        else if (currentRotation === 180) nextRotation = 270;
-        else if (currentRotation === 270) nextRotation = 0;
-        else nextRotation = 0; // Si por alguna razón no está en un ángulo válido, resetear a 0
+        if (currentRotation < 90) nextRotation = 90;
+        else if (currentRotation < 180) nextRotation = 180;
+        else if (currentRotation < 270) nextRotation = 270;
+        else nextRotation = 0;
         
         grid[r][c].rotation_deg = nextRotation;
-        console.log(`Rotando pieza en [${r},${c}] de ${currentRotation}° a ${nextRotation}°`); // Debug log
+        console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
         renderEditor();
     }
     event.preventDefault(); // Prevent text selection on double click
