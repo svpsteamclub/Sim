@@ -90,9 +90,9 @@ require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monacoContainer'), {
         value: defaultCode,
         language: 'javascript',
-        theme: 'vs-dark',
+        theme: 'vs',
         minimap: {
-            enabled: true
+            enabled: false
         },
         automaticLayout: true,
         fontSize: 14,
@@ -116,4 +116,4 @@ window.addEventListener('resize', function() {
     if (editor) {
         editor.layout();
     }
-}); 
+});
