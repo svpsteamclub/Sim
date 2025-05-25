@@ -273,12 +273,16 @@ export function initTrackEditor(appInterface) {
     editorCanvas.addEventListener('click', (event) => {
         if (isPlacingStartLine) {
             const rect = editorCanvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+            const scale = editorCanvas.width / rect.width;
+            const x_canvas = (event.clientX - rect.left) * scale;
+            const y_canvas = (event.clientY - rect.top) * scale;
+            
+            // Calculate cell size dynamically
+            const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
             
             // Convert click position to grid coordinates
-            const gridX = Math.floor(x / TRACK_PART_SIZE_PX);
-            const gridY = Math.floor(y / TRACK_PART_SIZE_PX);
+            const gridX = Math.floor(x_canvas / cellSize);
+            const gridY = Math.floor(y_canvas / cellSize);
             
             if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols) {
                 const cell = grid[gridY][gridX];
@@ -335,13 +339,15 @@ export function initTrackEditor(appInterface) {
             const scale = editorCanvas.width / rect.width;
             const x_canvas = (event.clientX - rect.left) * scale;
             const y_canvas = (event.clientY - rect.top) * scale;
-            const gridX = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
-            const gridY = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
+            const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
             
-            if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols && grid[gridY][gridX]) {
-                const currentRotation = grid[gridY][gridX].rotation_deg;
+            const c = Math.floor(x_canvas / cellSize);
+            const r = Math.floor(y_canvas / cellSize);
+            
+            if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
+                const currentRotation = grid[r][c].rotation_deg;
                 const nextRotation = ((currentRotation + 90) % 360);
-                const conns = getRotatedConnections(grid[gridY][gridX], nextRotation);
+                const conns = getRotatedConnections(grid[r][c], nextRotation);
                 if (!( (conns.N && conns.S) || (conns.E && conns.W) )) {
                     lastGeneratedTrackStartPosition = null;
                 }
@@ -524,8 +530,11 @@ function onGridSingleClick(event) {
     const x_canvas = (event.clientX - rect.left) * scale;
     const y_canvas = (event.clientY - rect.top) * scale;
 
-    const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
-    const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
+    // Calculate cell size dynamically
+    const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
+    
+    const c = Math.floor(x_canvas / cellSize);
+    const r = Math.floor(y_canvas / cellSize);
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols) {
         if (isEraseModeActive) {
@@ -554,8 +563,11 @@ function onGridDoubleClick(event) {
     const x_canvas = (event.clientX - rect.left) * scale;
     const y_canvas = (event.clientY - rect.top) * scale;
 
-    const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
-    const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
+    // Calculate cell size dynamically
+    const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
+    
+    const c = Math.floor(x_canvas / cellSize);
+    const r = Math.floor(y_canvas / cellSize);
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
         // Implementar ciclo completo de rotación: 0° → 90° → 180° → 270° → 0°
