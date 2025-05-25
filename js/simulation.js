@@ -223,27 +223,30 @@ export class Simulation {
 
         // Draw Lap Timer Start/Finish Line
         if (this.lapTimer.isActive) {
-            console.log("[Simulation] Drawing start line:", {
-                isActive: this.lapTimer.isActive,
-                startLine: this.lapTimer.startLine,
-                robotPos: { x: this.robot.x_m, y: this.robot.y_m, angle: this.robot.angle_rad }
-            });
+            const x1 = this.lapTimer.startLine.x1 * PIXELS_PER_METER;
+            const y1 = this.lapTimer.startLine.y1 * PIXELS_PER_METER;
+            const x2 = this.lapTimer.startLine.x2 * PIXELS_PER_METER;
+            const y2 = this.lapTimer.startLine.y2 * PIXELS_PER_METER;
+            console.log("[Simulation] Drawing start line at pixels:", { x1, y1, x2, y2 });
+
             displayCtx.save();
-            // Make the line more visible with a thicker stroke and brighter color
-            displayCtx.strokeStyle = "rgba(0, 255, 255, 1.0)"; // Full opacity cyan
-            displayCtx.lineWidth = 4;
+            displayCtx.setLineDash([]); // solid line
+            displayCtx.strokeStyle = "#FF00FF"; // bright magenta
+            displayCtx.lineWidth = 8;
             displayCtx.beginPath();
-            displayCtx.moveTo(this.lapTimer.startLine.x1 * PIXELS_PER_METER, this.lapTimer.startLine.y1 * PIXELS_PER_METER);
-            displayCtx.lineTo(this.lapTimer.startLine.x2 * PIXELS_PER_METER, this.lapTimer.startLine.y2 * PIXELS_PER_METER);
+            displayCtx.moveTo(x1, y1);
+            displayCtx.lineTo(x2, y2);
             displayCtx.stroke();
-            
-            // Add a dashed line effect to make it more visible
-            displayCtx.setLineDash([10, 5]);
-            displayCtx.strokeStyle = "rgba(255, 255, 255, 0.5)"; // White dashed line
+
+            // Draw debug circles at endpoints
+            displayCtx.fillStyle = "#00FF00";
             displayCtx.beginPath();
-            displayCtx.moveTo(this.lapTimer.startLine.x1 * PIXELS_PER_METER, this.lapTimer.startLine.y1 * PIXELS_PER_METER);
-            displayCtx.lineTo(this.lapTimer.startLine.x2 * PIXELS_PER_METER, this.lapTimer.startLine.y2 * PIXELS_PER_METER);
-            displayCtx.stroke();
+            displayCtx.arc(x1, y1, 12, 0, 2 * Math.PI);
+            displayCtx.fill();
+            displayCtx.beginPath();
+            displayCtx.arc(x2, y2, 12, 0, 2 * Math.PI);
+            displayCtx.fill();
+
             displayCtx.restore();
         } else {
             console.log("[Simulation] Lap timer not active, not drawing start line");
