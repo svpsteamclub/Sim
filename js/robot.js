@@ -46,6 +46,7 @@ export class Robot {
         if (!geometry) return;
 
         this.wheelbase_m = geometry.width_m;
+        this.length_m = geometry.length_m || 0.15; // Use provided length or default to 0.15m
         this.sensorForwardProtrusion_m = geometry.sensorOffset_m;
         this.sensorSideSpread_m = geometry.sensorSpread_m;
         this.sensorDiameter_m = geometry.sensorDiameter_m;
