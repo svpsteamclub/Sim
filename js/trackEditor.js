@@ -590,28 +590,31 @@ function onGridDoubleClick(event) {
 function getRotatedConnections(part, rotation_deg) {
     if (!part || !part.connections) return { N: false, S: false, E: false, W: false };
     
-    // Normalizar la rotación a un valor entre 0 y 359
+    // Normalize rotation to 0-359
     rotation_deg = ((rotation_deg % 360) + 360) % 360;
     
-    // Calcular el número de rotaciones de 90 grados (0, 1, 2, o 3)
-    const numRotations = Math.round(rotation_deg / 90) % 4;
+    // Calculate number of 90-degree rotations (0 to 3)
+    const numRotations = Math.floor(rotation_deg / 90);
     
     const rotated = { N: false, S: false, E: false, W: false };
     
-    // Mapear las conexiones originales a las rotadas
-    const directions = ['N', 'E', 'S', 'W'];
-    for (const dirKey of directions) {
-        if (part.connections[dirKey]) {
-            // Encontrar el índice de la dirección actual
-            const currentIndex = directions.indexOf(dirKey);
-            // Calcular el nuevo índice después de la rotación
-            const newIndex = (currentIndex + numRotations) % 4;
-            // Establecer la conexión en la nueva dirección
-            rotated[directions[newIndex]] = true;
+    // Define the rotation sequence for each direction
+    const rotationMap = {
+        N: ['N', 'E', 'S', 'W'],
+        S: ['S', 'W', 'N', 'E'],
+        E: ['E', 'S', 'W', 'N'],
+        W: ['W', 'N', 'E', 'S']
+    };
+    
+    // Apply rotations for each original connection
+    for (const [direction, isConnected] of Object.entries(part.connections)) {
+        if (isConnected) {
+            const rotatedDirection = rotationMap[direction][numRotations];
+            rotated[rotatedDirection] = true;
         }
     }
     
-    console.log(`Rotando conexiones de ${rotation_deg}° (${numRotations} rotaciones):`, rotated); // Debug log
+    console.log(`Rotated connections ${rotation_deg}° (${numRotations} rotations):`, rotated);
     return rotated;
 }
 
