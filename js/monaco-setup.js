@@ -202,6 +202,13 @@ function constrain(value, minVal, maxVal) {
 }`
 };
 
+// Textos explicativos para cada plantilla
+const codeExplanations = {
+    onoff: `Control On/Off:\nEste código implementa un control básico para el robot seguidor de línea. El robot avanza recto cuando el sensor central detecta la línea. Si la línea se pierde por la izquierda o la derecha, el robot gira en esa dirección para recuperarla. Es ideal para comenzar, pero puede ser inestable en curvas rápidas.`,
+    proportional: `Control Proporcional:\nEste código utiliza un control proporcional (P) para ajustar la velocidad de los motores según la posición de la línea. Calcula un error basado en los sensores y corrige la trayectoria suavemente, permitiendo un seguimiento más preciso y menos oscilaciones que el control On/Off.`,
+    pid: `Control PID:\nEste código implementa un control PID (Proporcional, Integral, Derivativo). Ajusta la velocidad de los motores considerando el error actual, la suma de errores pasados y la velocidad de cambio del error. Es el método más avanzado y permite un seguimiento de línea suave y estable, incluso en curvas complejas.`
+};
+
 // Initialize Monaco Editor
 require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs' } });
 
@@ -233,13 +240,21 @@ require(['vs/editor/editor.main'], function () {
 
     // Handle template selection changes
     const templateSelector = document.getElementById('codeTemplate');
+    const codeExplanationElem = document.querySelector('.code-explanation');
     if (templateSelector) {
         templateSelector.addEventListener('change', (e) => {
             const selectedTemplate = e.target.value;
             if (codeTemplates[selectedTemplate]) {
                 editor.setValue(codeTemplates[selectedTemplate]);
             }
+            if (codeExplanationElem && codeExplanations[selectedTemplate]) {
+                codeExplanationElem.innerHTML = `<h3>Guía del Código</h3><pre style='font-family:inherit;background:none;border:none;padding:0;margin:0;'>${codeExplanations[selectedTemplate]}</pre>`;
+            }
         });
+        // Inicializar explicación al cargar
+        if (codeExplanationElem && codeExplanations[templateSelector.value]) {
+            codeExplanationElem.innerHTML = `<h3>Guía del Código</h3><pre style='font-family:inherit;background:none;border:none;padding:0;margin:0;'>${codeExplanations[templateSelector.value]}</pre>`;
+        }
     }
 });
 
