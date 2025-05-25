@@ -243,8 +243,36 @@ export function clearPlacedParts() {
     drawRobotPreview();
 }
 
+export function restorePlacedPartsRaw(partsArr) {
+    placedParts.length = 0; // Vacía el array manteniendo la referencia
+    const previewCanvas = getDOMElements().robotPreviewCanvas;
+    partsArr.forEach(p => {
+        // Desrotar +90deg y convertir a pixeles
+        const rx = p.y;
+        const ry = -p.x;
+        const px = rx * PIXELS_PER_METER + previewCanvas.width/2;
+        const py = ry * PIXELS_PER_METER + previewCanvas.height/2;
+        const partInfo = PARTS.find(pt => pt.id === p.id);
+        let img = null;
+        if (partInfo) {
+            img = new window.Image();
+            img.src = getAssetPath(partInfo.src);
+        }
+        placedParts.push({
+            id: p.id,
+            name: p.name,
+            img,
+            x: px,
+            y: py,
+            rotation: p.rotation || 0
+        });
+    });
+    renderRobotPreview();
+}
+
 window.PARTS = PARTS;
 window.placedParts = placedParts;
 window.clearPlacedParts = clearPlacedParts;
 window.getAssetPath = getAssetPath;
-window.getPlacedParts = getPlacedParts; 
+window.getPlacedParts = getPlacedParts;
+window.restorePlacedPartsRaw = restorePlacedPartsRaw; 

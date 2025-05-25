@@ -114,8 +114,8 @@ export function initRobotEditor(appInterface) {
                     currentGeometry = getFormValues();
                     previewRobot.updateGeometry(currentGeometry);
                 }
-                if (robotData.parts) {
-                    restorePlacedParts(robotData.parts);
+                if (robotData.parts && window.restorePlacedPartsRaw) {
+                    window.restorePlacedPartsRaw(robotData.parts);
                 }
                 renderRobotPreview();
             } catch (err) {}
@@ -316,40 +316,4 @@ function getPlacedPartsRaw() {
         y: p.y,
         rotation: p.rotation || 0
     }));
-}
-
-// Restaura las partes decorativas desde un array serializable
-function restorePlacedParts(partsArr) {
-    if (!window.clearPlacedParts || !window.PARTS) return;
-    window.clearPlacedParts();
-    const { PIXELS_PER_METER } = require('./config.js');
-    const previewCanvas = getDOMElements().robotPreviewCanvas;
-    partsArr.forEach(p => {
-        // Convertir de metros a pixeles y rotar -90deg
-        let x = p.x, y = p.y;
-        // Desrotar +90deg
-        const rx = y;
-        const ry = -x;
-        const px = rx * PIXELS_PER_METER + previewCanvas.width/2;
-        const py = ry * PIXELS_PER_METER + previewCanvas.height/2;
-        // Buscar info de la parte
-        const partInfo = window.PARTS ? window.PARTS.find(pt => pt.id === p.id) : null;
-        let img = null;
-        if (partInfo) {
-            img = new window.Image();
-            img.src = window.getAssetPath ? window.getAssetPath(partInfo.src) : partInfo.src;
-        }
-        // Agregar a placedParts
-        if (window.placedParts) {
-            window.placedParts.push({
-                id: p.id,
-                name: p.name,
-                img,
-                x: px,
-                y: py,
-                rotation: p.rotation || 0
-            });
-        }
-    });
-    if (window.drawRobotPreview) window.drawRobotPreview();
 }
