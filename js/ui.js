@@ -42,7 +42,6 @@ export function getDOMElements() {
         trackEditorCanvas: document.getElementById('trackEditorCanvas'),
         trackGridSizeSelect: document.getElementById('trackGridSize'),
         generateRandomTrackButton: document.getElementById('generateRandomTrack'),
-        toggleEraseModeButton: document.getElementById('toggleEraseModeButton'),
         trackEditorTrackNameInput: document.getElementById('trackEditorTrackName'),
         saveTrackDesignButton: document.getElementById('saveTrackDesignButton'),
         loadTrackDesignInput: document.getElementById('loadTrackDesignInput'),
