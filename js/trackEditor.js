@@ -88,13 +88,7 @@ export function initTrackEditor(appInterface) {
     currentGridSize = { rows: 3, cols: 3 };
     elems.trackGridSizeSelect.value = '3x3';
 
-    // Wait for next frame to ensure layout is complete
-    requestAnimationFrame(() => {
-        setupGrid();
-        console.log("[TrackEditor] Initial grid setup complete");
-    });
-
-    // Guardar estado cuando se cambia de sección
+    // Setup state management
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             saveEditorState();
@@ -103,7 +97,7 @@ export function initTrackEditor(appInterface) {
         }
     });
 
-    // Guardar estado cuando se cambia entre pestañas
+    // Setup tab change observer
     const trackEditorTab = document.getElementById('track-editor');
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
@@ -116,7 +110,6 @@ export function initTrackEditor(appInterface) {
             }
         });
     });
-
     observer.observe(trackEditorTab, { attributes: true });
     console.log("[TrackEditor] State management setup complete");
 
@@ -185,8 +178,18 @@ export function initTrackEditor(appInterface) {
     loadTrackPartAssets(() => {
         console.log("[TrackEditor] Track part assets loaded, populating palette...");
         populateTrackPartsPalette(elems.trackPartsPalette);
-        // Wait for the next animation frame to ensure layout is complete
-        requestAnimationFrame(() => {
+        
+        // Setup initial grid and ensure canvas is properly sized
+        const container = editorCanvas.parentElement;
+        if (container) {
+            const containerRect = container.getBoundingClientRect();
+            const size = Math.max(containerRect.width || 400, 400);
+            editorCanvas.width = size;
+            editorCanvas.height = size;
+            editorCanvas.style.width = `${size}px`;
+            editorCanvas.style.height = `${size}px`;
+            
+            // Now generate the initial track with proper sizing
             console.log("[TrackEditor] Generating initial random track...");
             generateRandomTrackWithRetry();
             console.log("[DEBUG] Grid after random track generation:", grid);
@@ -203,33 +206,21 @@ export function initTrackEditor(appInterface) {
                     startX_m = (lastGeneratedTrackStartPosition.c + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
                     startY_m = (lastGeneratedTrackStartPosition.r + 0.5) * TRACK_PART_SIZE_PX / PIXELS_PER_METER;
                     startAngle_rad = lastGeneratedTrackStartPosition.angle_rad;
-                    console.log("[TrackEditor] Exporting track with start position:", {
-                        gridPos: lastGeneratedTrackStartPosition,
-                        worldPos: { startX_m, startY_m, startAngle_rad }
-                    });
                 } else {
                     startX_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
                     startY_m = (0.5 * TRACK_PART_SIZE_PX) / PIXELS_PER_METER;
                     startAngle_rad = 0;
-                    console.log("[TrackEditor] No start position found, using default:", { startX_m, startY_m, startAngle_rad });
                 }
-                // Store the start position in the canvas for the simulation to use
                 exportedCanvas.dataset.startX = startX_m;
                 exportedCanvas.dataset.startY = startY_m;
                 exportedCanvas.dataset.startAngle = startAngle_rad;
-                exportedCanvas.dataset.fromEditor = 'true'; // Marcar que viene del editor
-                console.log("[TrackEditor] Canvas dataset set:", {
-                    startX: exportedCanvas.dataset.startX,
-                    startY: exportedCanvas.dataset.startY,
-                    startAngle: exportedCanvas.dataset.startAngle
-                });
+                exportedCanvas.dataset.fromEditor = 'true';
                 mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
-            } else {
-                console.warn("[TrackEditor] Failed to export track canvas");
             }
-        });
+        }
     });
 
+    // Setup event listeners
     elems.trackGridSizeSelect.addEventListener('change', (e) => {
         const size = e.target.value.split('x');
         currentGridSize = { rows: parseInt(size[0]), cols: parseInt(size[1]) };
@@ -243,7 +234,7 @@ export function initTrackEditor(appInterface) {
         generateRandomTrackWithRetry(); 
     });
     
-    elems.toggleEraseModeButton.addEventListener('click', () => toggleEraseMode(elems.toggleEraseModeButton)); 
+    elems.toggleEraseModeButton.addEventListener('click', () => toggleEraseMode(elems.toggleEraseModeButton));
 
     // Agregar botón de limpiar
     const clearTrackButton = document.createElement('button');
@@ -460,19 +451,17 @@ function setupGrid() {
         const container = editorCanvas.parentElement;
         if (!container) return;
 
-        // Wait for next frame to ensure layout is complete
-        requestAnimationFrame(() => {
-            const containerRect = container.getBoundingClientRect();
-            // Use container width or minimum size of 400px
-            const size = Math.max(containerRect.width || 400, 400);
-            editorCanvas.width = size;
-            editorCanvas.height = size;
-            editorCanvas.style.width = `${size}px`;
-            editorCanvas.style.height = `${size}px`;
-            // Calculate dynamic cell size
-            const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
-            renderEditor(cellSize);
-        });
+        const containerRect = container.getBoundingClientRect();
+        // Use container width or minimum size of 400px
+        const size = Math.max(containerRect.width || 400, 400);
+        editorCanvas.width = size;
+        editorCanvas.height = size;
+        editorCanvas.style.width = `${size}px`;
+        editorCanvas.style.height = `${size}px`;
+        
+        // Calculate dynamic cell size and render immediately
+        const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+        renderEditor(cellSize);
     }
 }
 
