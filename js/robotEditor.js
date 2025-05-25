@@ -146,7 +146,7 @@ function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
     ctx.restore();
 }
 
-function renderRobotPreview() {
+export function renderRobotPreview() {
     if (!previewCtx || !previewRobot) {
         console.error("Missing previewCtx or previewRobot:", { previewCtx: !!previewCtx, previewRobot: !!previewRobot });
         return;

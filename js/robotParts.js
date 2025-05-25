@@ -1,6 +1,7 @@
 import { getDOMElements } from './ui.js';
 import { loadAndScaleImage, getAssetPath } from './utils.js';
 import { PIXELS_PER_METER } from './config.js';
+import { renderRobotPreview } from './robotEditor.js';
 
 const PARTS = [
     { id: 'antenna', name: 'Antena', src: 'parts/antenna.png' },
@@ -16,6 +17,7 @@ let draggedPart = null;
 let placedParts = [];
 let selectedPart = null;
 let isDragging = false;
+let wasDragging = false;
 let dragOffset = { x: 0, y: 0 };
 
 export function initRobotParts() {
@@ -108,6 +110,7 @@ export function initRobotParts() {
                 console.log(`Selected part for moving: ${part.name}`);
                 selectedPart = part;
                 isDragging = true;
+                wasDragging = false;
                 dragOffset = {
                     x: x - part.x,
                     y: y - part.y
@@ -119,13 +122,13 @@ export function initRobotParts() {
 
     previewCanvas.addEventListener('mousemove', (e) => {
         if (isDragging && selectedPart) {
+            wasDragging = true;
             const rect = previewCanvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
             selectedPart.x = x - dragOffset.x;
             selectedPart.y = y - dragOffset.y;
-            drawRobotPreview();
+            renderRobotPreview();
         }
     });
 
@@ -139,11 +142,10 @@ export function initRobotParts() {
 
     // Click to remove parts
     previewCanvas.addEventListener('click', (e) => {
-        if (!isDragging) {
+        if (!isDragging && !wasDragging) {
             const rect = previewCanvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-
             // Check if clicked on a part
             for (let i = placedParts.length - 1; i >= 0; i--) {
                 const part = placedParts[i];
@@ -151,11 +153,12 @@ export function initRobotParts() {
                 if (Math.abs(x - part.x) < partSize/2 && Math.abs(y - part.y) < partSize/2) {
                     console.log(`Removing part: ${part.name}`);
                     placedParts.splice(i, 1);
-                    drawRobotPreview();
+                    renderRobotPreview();
                     break;
                 }
             }
         }
+        wasDragging = false;
     });
 }
 
