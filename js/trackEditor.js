@@ -313,12 +313,9 @@ export function initTrackEditor(appInterface) {
             const r = Math.floor(y_canvas / cellSize);
             
             if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-                // Get current rotation and normalize it to 0-359 range
-                let currentRotation = grid[r][c].rotation_deg || 0;
-                currentRotation = ((currentRotation % 360) + 360) % 360;
-                
-                // Calculate next rotation in sequence: 0 -> 90 -> 180 -> 270 -> 0
-                let nextRotation = ((Math.floor(currentRotation / 90) + 1) % 4) * 90;
+                // Simply add 90 degrees to current rotation
+                const currentRotation = grid[r][c].rotation_deg || 0;
+                const nextRotation = (currentRotation + 90) % 360;
                 
                 grid[r][c].rotation_deg = nextRotation;
                 console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
@@ -573,12 +570,9 @@ function onGridDoubleClick(event) {
     const r = Math.floor(y_canvas / cellSize);
 
     if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-        // Get current rotation and normalize it to 0-359 range
-        let currentRotation = grid[r][c].rotation_deg || 0;
-        currentRotation = ((currentRotation % 360) + 360) % 360;
-        
-        // Calculate next rotation in sequence: 0 -> 90 -> 180 -> 270 -> 0
-        let nextRotation = ((Math.floor(currentRotation / 90) + 1) % 4) * 90;
+        // Simply add 90 degrees to current rotation
+        const currentRotation = grid[r][c].rotation_deg || 0;
+        const nextRotation = (currentRotation + 90) % 360;
         
         grid[r][c].rotation_deg = nextRotation;
         console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
@@ -619,7 +613,6 @@ function getRotatedConnections(part, rotation_deg) {
             break;
     }
     
-    console.log(`Rotated connections ${rotation_deg}°:`, rotated);
     return rotated;
 }
 
