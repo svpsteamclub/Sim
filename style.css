@@ -296,14 +296,13 @@ button:disabled {
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
     order: 3;
-    min-height: 400px;
-    max-height: 800px;
+    aspect-ratio: 1;
     overflow: hidden;
 }
 
 #trackEditorCanvas {
     width: 100%;
-    height: auto;
+    height: 100%;
     max-width: 100%;
     max-height: 100%;
     aspect-ratio: 1;
