@@ -14,11 +14,9 @@ export class Simulation {
         // Ensure robot geometry is valid
         if (!this.robot.length_m || isNaN(this.robot.length_m)) {
             this.robot.length_m = 0.15; // Default length in meters
-            console.warn('[Simulation] Robot length_m was undefined, set to default 0.15');
         }
         if (!this.robot.wheelbase_m || isNaN(this.robot.wheelbase_m)) {
             this.robot.wheelbase_m = 0.1; // Default wheelbase in meters
-            console.warn('[Simulation] Robot wheelbase_m was undefined, set to default 0.1');
         }
 
         this.track = new Track();
@@ -62,7 +60,6 @@ export class Simulation {
 
     // Load a track (from file or editor canvas)
     loadTrack(source, startX_m, startY_m, startAngle_rad, callback) {
-        console.log("[Simulation] Loading track with initial params:", { startX_m, startY_m, startAngle_rad });
         this.track.load(source, null, null, this.params.lineThreshold, (success, trackWidthPx, trackHeightPx) => {
             if (success) {
                 // If the source is a canvas with start position data, use that
@@ -70,7 +67,6 @@ export class Simulation {
                     startX_m = parseFloat(source.dataset.startX);
                     startY_m = parseFloat(source.dataset.startY);
                     startAngle_rad = parseFloat(source.dataset.startAngle);
-                    console.log("[Simulation] Using start position from canvas dataset:", { startX_m, startY_m, startAngle_rad });
                 }
                 
                 // Reset simulation state first
@@ -79,23 +75,15 @@ export class Simulation {
                 // Ensure LapTimer has up-to-date robot dimensions
                 if (!this.robot.length_m || isNaN(this.robot.length_m)) {
                     this.robot.length_m = 0.15;
-                    console.warn('[Simulation] Robot length_m was undefined, set to default 0.15');
                 }
                 if (!this.robot.wheelbase_m || isNaN(this.robot.wheelbase_m)) {
                     this.robot.wheelbase_m = 0.1;
-                    console.warn('[Simulation] Robot wheelbase_m was undefined, set to default 0.1');
                 }
                 this.lapTimer.robotWidth_m = this.robot.wheelbase_m;
                 this.lapTimer.robotLength_m = this.robot.length_m;
                 
                 // Initialize lap timer with the new start pose
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
-                console.log("[Simulation] Lap timer initialized:", {
-                    isActive: this.lapTimer.isActive,
-                    startLine: this.lapTimer.startLine,
-                    robotWidth: this.lapTimer.robotWidth_m,
-                    robotLength: this.lapTimer.robotLength_m
-                });
 
                 // Position robot at start line
                 if (this.lapTimer.isActive && this.lapTimer.startLine) {
@@ -111,12 +99,6 @@ export class Simulation {
                     this.robot.x_m = lineCenterX + backOffset * cosA;
                     this.robot.y_m = lineCenterY + backOffset * sinA;
                     this.robot.angle_rad = startAngle_rad;
-                    
-                    console.log("[Simulation] Robot positioned at start line:", {
-                        x: this.robot.x_m,
-                        y: this.robot.y_m,
-                        angle: this.robot.angle_rad
-                    });
                 }
                 
                 // Notify track editor if the track was loaded from a source other than the editor
@@ -269,7 +251,6 @@ export class Simulation {
             const y1 = this.lapTimer.startLine.y1 * PIXELS_PER_METER;
             const x2 = this.lapTimer.startLine.x2 * PIXELS_PER_METER;
             const y2 = this.lapTimer.startLine.y2 * PIXELS_PER_METER;
-            console.log("[Simulation] Drawing start line at pixels:", { x1, y1, x2, y2 });
 
             displayCtx.save();
             displayCtx.setLineDash([]); // solid line
@@ -290,8 +271,6 @@ export class Simulation {
             displayCtx.fill();
 
             displayCtx.restore();
-        } else {
-            console.log("[Simulation] Lap timer not active, not drawing start line");
         }
     }
 

@@ -42,19 +42,14 @@ export class Track {
             
             try {
                 this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
-                console.log(`Track image data loaded: ${this.width_px}x${this.height_px}`);
                 if (callback) callback(true, this.width_px, this.height_px);
             } catch (error) {
-                console.error("Error getting image data from track:", error);
-                // This can happen due to CORS if loading from a URL without proper headers
-                // or if the image is tainted.
                 this.imageData = null;
                 if (callback) callback(false, 0, 0);
             }
         };
         
         img.onerror = (error) => {
-            console.error("Error loading track image:", error, "Source:", source);
             this.imageData = null;
             if (callback) callback(false, 0, 0);
         };
@@ -71,11 +66,9 @@ export class Track {
                     if (callback) callback(success, this.width_px, this.height_px);
                 })
                 .catch(err => {
-                    console.error("Error setting track from canvas directly:", err);
                     if (callback) callback(false, 0, 0);
                 });
         } else {
-            console.error("Invalid track source type:", source);
             if (callback) callback(false, 0, 0);
         }
     }
@@ -96,11 +89,9 @@ export class Track {
             
             try {
                 this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
-                console.log(`Track set from canvas. Dimensions: ${this.width_px}x${this.height_px}`);
                 this.image.src = sourceCanvas.toDataURL(); // Keep an Image object too for consistency
                 resolve(true);
             } catch (e) {
-                console.error("Error getting image data from canvas-generated track:", e);
                 this.imageData = null;
                 reject(e);
             }

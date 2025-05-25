@@ -147,9 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             drawCurrentSimulationState(); // Draw empty state initially
             updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData()); // Initial lap display
 
-            console.log("Simulador inicializado y listo.");
         } catch (err) {
-            console.error("Fallo en la inicialización del simulador:", err);
             alert("Error crítico durante la inicialización. Revisa la consola.");
         }
     }
@@ -165,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await executeUserLoop(); // This will call analogWrite, updating robot.motorPWMSpeeds in simulationInstance
         } catch (e) {
-            console.error("Error en el loop del usuario, deteniendo simulación:", e);
             stopSimulation();
             alert("Error en tu función loop(). La simulación se ha detenido. Revisa la consola y el Monitor Serial.");
             return;
@@ -196,8 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (simData.outOfBounds) {
-            console.warn("Robot fuera de pista. Deteniendo simulación.");
-            // stopSimulation(); // Optionally stop
+            stopSimulation();
             // alert("¡El robot se salió de la pista!");
         }
         
@@ -242,7 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lastFrameTime = performance.now();
         animationFrameId = requestAnimationFrame(simulationLoop);
-        console.log("Simulación iniciada.");
     }
 
     function stopSimulation() {
@@ -258,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             window.monacoEditor.updateOptions({ readOnly: false });
         }
         elems.applySimParamsButton.disabled = false;
-        console.log("Simulación detenida.");
     }
 
     function resetSimulation() {
@@ -293,7 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData());
             updateTelemetry({}); // Clear telemetry
         }
-        console.log("Simulación reiniciada.");
     }
 
     function drawCurrentSimulationState() {
@@ -321,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (simulationInstance) {
             const params = getSimulationParamsFromUI();
             simulationInstance.updateParameters(params);
-            console.log("Parámetros de simulación aplicados:", params);
         }
     }
 
@@ -429,9 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Start Everything ---
     initializeSimulator().then(() => {
-        console.log("Simulador inicializado y listo.");
     }).catch(err => {
-        console.error("Fallo en la inicialización del simulador:", err);
         alert("Error crítico durante la inicialización. Revisa la consola.");
     });
 });
