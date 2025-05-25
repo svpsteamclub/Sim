@@ -271,16 +271,18 @@ h2 {
     }
 }
 
+/* Monitor Serial minimalista y funcional */
 #serialMonitorOutput {
-    background-color: var(--background-color);
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.875rem;
-    white-space: pre-wrap;
+    height: 180px;
+    width: 100%;
+    font-family: monospace;
+    background: #fafbfc;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    box-sizing: border-box;
     overflow-y: auto;
-    min-height: 300px;
-    border-radius: var(--radius-md);
+    resize: none;
 }
 
 /* Common button styles */
