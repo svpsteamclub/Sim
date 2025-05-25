@@ -200,7 +200,7 @@ export class Robot {
                     ctx.save();
                     ctx.globalAlpha = 0.8;
                     ctx.translate(x, y);
-                    ctx.rotate(-Math.PI / 2); // Rotate part image by -90deg to match editor orientation
+                    ctx.rotate(Math.PI / 2); // Rotate part image by +90deg to match editor orientation
                     ctx.drawImage(part.img, -sizeW/2, -sizeH/2, sizeW, sizeH);
                     ctx.restore();
                 }
