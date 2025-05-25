@@ -199,7 +199,9 @@ export class Robot {
 
                     ctx.save();
                     ctx.globalAlpha = 0.8;
-                    ctx.drawImage(part.img, x - size/2, y - size/2, size, size);
+                    ctx.translate(x, y);
+                    ctx.rotate(-Math.PI / 2); // Rotate part image by -90deg to match editor orientation
+                    ctx.drawImage(part.img, -size/2, -size/2, size, size);
                     ctx.restore();
                 }
             });
