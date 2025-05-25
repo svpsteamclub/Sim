@@ -277,11 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
                 const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
                 startAngle = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
-                
-                // Move the robot slightly behind the start line
-                const backOffset = simulationInstance.robot.length_m / 2;
-                startX += backOffset * Math.cos(startAngle);
-                startY += backOffset * Math.sin(startAngle);
             }
 
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
