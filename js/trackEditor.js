@@ -417,23 +417,60 @@ function setupGrid() {
         editorCanvas.width = currentGridSize.cols * TRACK_PART_SIZE_PX;
         editorCanvas.height = currentGridSize.rows * TRACK_PART_SIZE_PX;
         
+        // Debug: Log canvas dimensions
+        console.log("[DEBUG] Canvas dimensions:", {
+            width: editorCanvas.width,
+            height: editorCanvas.height,
+            TRACK_PART_SIZE_PX,
+            gridSize: currentGridSize
+        });
+        
         // Calcular el tamaño máximo disponible para el contenedor
         const container = editorCanvas.parentElement;
         const containerWidth = container.clientWidth;
         
+        // Debug: Log container dimensions
+        console.log("[DEBUG] Container dimensions:", {
+            width: containerWidth,
+            height: container.clientHeight,
+            rect: container.getBoundingClientRect()
+        });
+        
         // Calcular la escala para que el canvas se ajuste al ancho del contenedor
         const scale = containerWidth / editorCanvas.width;
+        
+        // Debug: Log scale calculation
+        console.log("[DEBUG] Scale calculation:", {
+            scale,
+            finalWidth: editorCanvas.width * scale,
+            finalHeight: editorCanvas.height * scale
+        });
         
         // Aplicar la escala al canvas
         editorCanvas.style.width = `${editorCanvas.width * scale}px`;
         editorCanvas.style.height = `${editorCanvas.height * scale}px`;
+        
+        // Debug: Log final canvas style
+        console.log("[DEBUG] Final canvas style:", {
+            width: editorCanvas.style.width,
+            height: editorCanvas.style.height,
+            rect: editorCanvas.getBoundingClientRect()
+        });
         
         renderEditor();
     }
 }
 
 function renderEditor() {
-    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) return;
+    if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) {
+        console.error("[DEBUG] Cannot render editor:", {
+            hasCtx: !!ctx,
+            hasCanvas: !!editorCanvas,
+            canvasWidth: editorCanvas?.width,
+            canvasHeight: editorCanvas?.height
+        });
+        return;
+    }
     
     // Debug: Log canvas size and CSS size
     console.log(
@@ -464,6 +501,13 @@ function renderEditor() {
     const connIndicatorSize = Math.max(6, TRACK_PART_SIZE_PX * 0.02); 
     const connIndicatorOffset = Math.max(2, TRACK_PART_SIZE_PX * 0.005);
 
+    // Debug: Log grid state
+    console.log("[DEBUG] Grid state:", {
+        rows: currentGridSize.rows,
+        cols: currentGridSize.cols,
+        grid: grid.map(row => row.map(cell => cell ? cell.file : null))
+    });
+
     for (let r = 0; r < currentGridSize.rows; r++) {
         for (let c = 0; c < currentGridSize.cols; c++) {
             const x_topLeft = c * TRACK_PART_SIZE_PX;
@@ -481,6 +525,21 @@ function renderEditor() {
                 currentGridPart.image instanceof HTMLImageElement &&
                 currentGridPart.image.complete
             ) {
+                // Debug: Log track part being drawn
+                console.log(`[DEBUG] Drawing track part at [${r},${c}]:`, {
+                    file: currentGridPart.file,
+                    rotation: currentGridPart.rotation_deg,
+                    imageComplete: currentGridPart.image.complete,
+                    imageSize: {
+                        width: currentGridPart.image.width,
+                        height: currentGridPart.image.height
+                    },
+                    position: {
+                        x: x_topLeft,
+                        y: y_topLeft
+                    }
+                });
+
                 const x_center = x_topLeft + TRACK_PART_SIZE_PX / 2;
                 const y_center = y_topLeft + TRACK_PART_SIZE_PX / 2;
                 
