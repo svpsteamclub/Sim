@@ -466,6 +466,9 @@ function onGridSingleClick(event) {
                     ...selectedTrackPart,
                     rotation_deg: 0 // Initial rotation
                 };
+                // Unselect the part after placing it
+                document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
+                selectedTrackPart = null;
                 renderEditor();
             }
         }
