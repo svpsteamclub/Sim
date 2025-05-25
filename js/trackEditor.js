@@ -413,55 +413,22 @@ function populateTrackPartsPalette(paletteElement) {
 function setupGrid() {
     grid = Array(currentGridSize.rows).fill(null).map(() => Array(currentGridSize.cols).fill(null));
     if (editorCanvas) {
-        // Establecer el tamaño del canvas en píxeles
-        editorCanvas.width = currentGridSize.cols * TRACK_PART_SIZE_PX;
-        editorCanvas.height = currentGridSize.rows * TRACK_PART_SIZE_PX;
-        
-        // Debug: Log canvas dimensions
-        console.log("[DEBUG] Canvas dimensions:", {
-            width: editorCanvas.width,
-            height: editorCanvas.height,
-            TRACK_PART_SIZE_PX,
-            gridSize: currentGridSize
-        });
-        
-        // Calcular el tamaño máximo disponible para el contenedor
+        // Get container size and keep square aspect ratio
         const container = editorCanvas.parentElement;
-        const containerWidth = container.clientWidth;
-        
-        // Debug: Log container dimensions
-        console.log("[DEBUG] Container dimensions:", {
-            width: containerWidth,
-            height: container.clientHeight,
-            rect: container.getBoundingClientRect()
-        });
-        
-        // Calcular la escala para que el canvas se ajuste al ancho del contenedor
-        const scale = containerWidth / editorCanvas.width;
-        
-        // Debug: Log scale calculation
-        console.log("[DEBUG] Scale calculation:", {
-            scale,
-            finalWidth: editorCanvas.width * scale,
-            finalHeight: editorCanvas.height * scale
-        });
-        
-        // Aplicar la escala al canvas
-        editorCanvas.style.width = `${editorCanvas.width * scale}px`;
-        editorCanvas.style.height = `${editorCanvas.height * scale}px`;
-        
-        // Debug: Log final canvas style
-        console.log("[DEBUG] Final canvas style:", {
-            width: editorCanvas.style.width,
-            height: editorCanvas.style.height,
-            rect: editorCanvas.getBoundingClientRect()
-        });
-        
-        renderEditor();
+        const containerRect = container.getBoundingClientRect();
+        const size = Math.min(containerRect.width, containerRect.height);
+        // Set canvas size to fill container and keep square
+        editorCanvas.width = size;
+        editorCanvas.height = size;
+        editorCanvas.style.width = `${size}px`;
+        editorCanvas.style.height = `${size}px`;
+        // Calculate dynamic cell size
+        const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+        renderEditor(cellSize);
     }
 }
 
-function renderEditor() {
+function renderEditor(cellSize) {
     if (!ctx || !editorCanvas || editorCanvas.width === 0 || editorCanvas.height === 0) {
         console.error("[DEBUG] Cannot render editor:", {
             hasCtx: !!ctx,
@@ -471,53 +438,18 @@ function renderEditor() {
         });
         return;
     }
-    
-    // Debug: Log canvas size and CSS size
-    console.log(
-      "[DEBUG] Canvas size (width x height):",
-      editorCanvas.width, "x", editorCanvas.height,
-      "| CSS size:", editorCanvas.style.width, "x", editorCanvas.style.height,
-      "| Bounding rect:", editorCanvas.getBoundingClientRect()
-    );
-
     // Limpiar el canvas con fondo blanco
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
-
-    // DEBUG: Draw a large green rectangle filling the canvas
-    ctx.save();
-    ctx.strokeStyle = 'green';
-    ctx.lineWidth = 10;
-    ctx.strokeRect(0, 0, editorCanvas.width, editorCanvas.height);
-    ctx.restore();
-
-    // DEBUG: Draw a red rectangle in the top-left corner
-    ctx.save();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 5;
-    ctx.strokeRect(10, 10, 100, 100);
-    ctx.restore();
-
-    const connIndicatorSize = Math.max(6, TRACK_PART_SIZE_PX * 0.02); 
-    const connIndicatorOffset = Math.max(2, TRACK_PART_SIZE_PX * 0.005);
-
-    // Debug: Log grid state
-    console.log("[DEBUG] Grid state:", {
-        rows: currentGridSize.rows,
-        cols: currentGridSize.cols,
-        grid: grid.map(row => row.map(cell => cell ? cell.file : null))
-    });
-
+    // Draw grid and track parts
     for (let r = 0; r < currentGridSize.rows; r++) {
         for (let c = 0; c < currentGridSize.cols; c++) {
-            const x_topLeft = c * TRACK_PART_SIZE_PX;
-            const y_topLeft = r * TRACK_PART_SIZE_PX;
-            
+            const x_topLeft = c * cellSize;
+            const y_topLeft = r * cellSize;
             // Draw grid cell border
             ctx.strokeStyle = '#cccccc';
             ctx.lineWidth = 1;
-            ctx.strokeRect(x_topLeft, y_topLeft, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX);
-
+            ctx.strokeRect(x_topLeft, y_topLeft, cellSize, cellSize);
             const currentGridPart = grid[r][c];
             if (
                 currentGridPart &&
@@ -525,41 +457,23 @@ function renderEditor() {
                 currentGridPart.image instanceof HTMLImageElement &&
                 currentGridPart.image.complete
             ) {
-                // Debug: Log track part being drawn
-                console.log(`[DEBUG] Drawing track part at [${r},${c}]:`, {
-                    file: currentGridPart.file,
-                    rotation: currentGridPart.rotation_deg,
-                    imageComplete: currentGridPart.image.complete,
-                    imageSize: {
-                        width: currentGridPart.image.width,
-                        height: currentGridPart.image.height
-                    },
-                    position: {
-                        x: x_topLeft,
-                        y: y_topLeft
-                    }
-                });
-
-                const x_center = x_topLeft + TRACK_PART_SIZE_PX / 2;
-                const y_center = y_topLeft + TRACK_PART_SIZE_PX / 2;
-                
+                const x_center = x_topLeft + cellSize / 2;
+                const y_center = y_topLeft + cellSize / 2;
                 ctx.save();
                 ctx.translate(x_center, y_center);
                 ctx.rotate(currentGridPart.rotation_deg * Math.PI / 180);
-                ctx.drawImage(currentGridPart.image, -TRACK_PART_SIZE_PX / 2, -TRACK_PART_SIZE_PX / 2, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX);
+                ctx.drawImage(currentGridPart.image, -cellSize / 2, -cellSize / 2, cellSize, cellSize);
                 ctx.restore();
-
-                // Draw connection indicators
+                // Draw connection indicators (optional, scale with cellSize)
+                const connIndicatorSize = Math.max(6, cellSize * 0.02);
+                const connIndicatorOffset = Math.max(2, cellSize * 0.005);
                 const actualConns = getRotatedConnections(currentGridPart, currentGridPart.rotation_deg);
-                ctx.fillStyle = actualConns.N ? 'green' : 'rgba(200,0,0,0.6)'; 
+                ctx.fillStyle = actualConns.N ? 'green' : 'rgba(200,0,0,0.6)';
                 ctx.fillRect(x_center - connIndicatorSize / 2, y_topLeft + connIndicatorOffset, connIndicatorSize, connIndicatorSize);
-                
                 ctx.fillStyle = actualConns.E ? 'green' : 'rgba(200,0,0,0.6)';
-                ctx.fillRect(x_topLeft + TRACK_PART_SIZE_PX - connIndicatorOffset - connIndicatorSize, y_center - connIndicatorSize / 2, connIndicatorSize, connIndicatorSize);
-                
+                ctx.fillRect(x_topLeft + cellSize - connIndicatorOffset - connIndicatorSize, y_center - connIndicatorSize / 2, connIndicatorSize, connIndicatorSize);
                 ctx.fillStyle = actualConns.S ? 'green' : 'rgba(200,0,0,0.6)';
-                ctx.fillRect(x_center - connIndicatorSize / 2, y_topLeft + TRACK_PART_SIZE_PX - connIndicatorOffset - connIndicatorSize, connIndicatorSize, connIndicatorSize);
-                
+                ctx.fillRect(x_center - connIndicatorSize / 2, y_topLeft + cellSize - connIndicatorOffset - connIndicatorSize, connIndicatorSize, connIndicatorSize);
                 ctx.fillStyle = actualConns.W ? 'green' : 'rgba(200,0,0,0.6)';
                 ctx.fillRect(x_topLeft + connIndicatorOffset, y_center - connIndicatorSize / 2, connIndicatorSize, connIndicatorSize);
             }
