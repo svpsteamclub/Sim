@@ -63,8 +63,6 @@ export class Simulation {
     // Load a track (from file or editor canvas)
     loadTrack(source, startX_m, startY_m, startAngle_rad, callback) {
         console.log("[Simulation] Loading track with initial params:", { startX_m, startY_m, startAngle_rad });
-        // The track's width/height in pixels will be set by the loaded image.
-        // The simulation canvas should ideally match these dimensions for 1:1 pixel mapping.
         this.track.load(source, null, null, this.params.lineThreshold, (success, trackWidthPx, trackHeightPx) => {
             if (success) {
                 // If the source is a canvas with start position data, use that
@@ -98,6 +96,28 @@ export class Simulation {
                     robotWidth: this.lapTimer.robotWidth_m,
                     robotLength: this.lapTimer.robotLength_m
                 });
+
+                // Position robot at start line
+                if (this.lapTimer.isActive && this.lapTimer.startLine) {
+                    // Calculate robot position at start line
+                    const lineCenterX = (this.lapTimer.startLine.x1 + this.lapTimer.startLine.x2) / 2;
+                    const lineCenterY = (this.lapTimer.startLine.y1 + this.lapTimer.startLine.y2) / 2;
+                    
+                    // Position robot slightly behind the start line
+                    const backOffset = -this.robot.length_m / 2;
+                    const cosA = Math.cos(startAngle_rad);
+                    const sinA = Math.sin(startAngle_rad);
+                    
+                    this.robot.x_m = lineCenterX + backOffset * cosA;
+                    this.robot.y_m = lineCenterY + backOffset * sinA;
+                    this.robot.angle_rad = startAngle_rad;
+                    
+                    console.log("[Simulation] Robot positioned at start line:", {
+                        x: this.robot.x_m,
+                        y: this.robot.y_m,
+                        angle: this.robot.angle_rad
+                    });
+                }
                 
                 // Notify track editor if the track was loaded from a source other than the editor
                 if (source instanceof HTMLCanvasElement && !source.dataset.fromEditor) {

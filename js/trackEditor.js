@@ -10,6 +10,7 @@ let trackPartsImages = {}; // Cache for loaded track part images { 'fileName.png
 let selectedTrackPart = null; // { ...partInfo, image: ImageElement }
 let isEraseModeActive = false; 
 let lastGeneratedTrackStartPosition = null; // { r, c, angle_rad } for the simulator
+let isPlacingStartLine = false; // New state for start line placement mode
 
 // Add state management
 let savedState = null;
@@ -198,6 +199,24 @@ export function initTrackEditor(appInterface) {
     
     elems.toggleEraseModeButton.addEventListener('click', () => toggleEraseMode(elems.toggleEraseModeButton)); 
 
+    // Add start line placement button
+    const placeStartLineButton = document.createElement('button');
+    placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
+    placeStartLineButton.className = 'editor-button';
+    elems.trackEditorControls.appendChild(placeStartLineButton);
+
+    placeStartLineButton.addEventListener('click', () => {
+        if (isPlacingStartLine) {
+            isPlacingStartLine = false;
+            placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
+            placeStartLineButton.classList.remove('active');
+        } else {
+            isPlacingStartLine = true;
+            placeStartLineButton.textContent = 'Cancelar Ubicación';
+            placeStartLineButton.classList.add('active');
+        }
+    });
+
     elems.exportTrackToSimulatorButton.addEventListener('click', () => {
         if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton);
         
@@ -237,13 +256,66 @@ export function initTrackEditor(appInterface) {
     });
 
     editorCanvas.addEventListener('click', (event) => {
-        if (!isEraseModeActive) lastGeneratedTrackStartPosition = null; 
-        onGridSingleClick(event);
+        if (isPlacingStartLine) {
+            const rect = editorCanvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // Convert click position to grid coordinates
+            const gridX = Math.floor(x / TRACK_PART_SIZE_PX);
+            const gridY = Math.floor(y / TRACK_PART_SIZE_PX);
+            
+            if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols) {
+                const cell = grid[gridY][gridX];
+                if (cell) {
+                    const conns = getRotatedConnections(cell, cell.rotation_deg);
+                    if (conns.N && conns.S) {
+                        // Found a N-S connection, set as start position
+                        lastGeneratedTrackStartPosition = {
+                            r: gridY,
+                            c: gridX,
+                            angle_rad: Math.PI / 2 // Facing South
+                        };
+                        isPlacingStartLine = false;
+                        placeStartLineButton.textContent = 'Ubicar Línea de Comienzo';
+                        placeStartLineButton.classList.remove('active');
+                        renderEditor();
+                    } else {
+                        alert('Por favor, selecciona una sección de conexión Norte-Sur para la línea de comienzo.');
+                    }
+                }
+            }
+        } else if (!isEraseModeActive) {
+            // Solo resetear lastGeneratedTrackStartPosition si estamos colocando una nueva pieza
+            // y la pieza que estamos colocando no es una conexión N-S
+            if (selectedTrackPart) {
+                const conns = getRotatedConnections(selectedTrackPart, 0);
+                if (!(conns.N && conns.S)) {
+                    lastGeneratedTrackStartPosition = null;
+                }
+            }
+            onGridSingleClick(event);
+        }
     });
     editorCanvas.addEventListener('dblclick', (event) => {
-        if (!isEraseModeActive) lastGeneratedTrackStartPosition = null; 
-        if(isEraseModeActive) return; 
-        onGridDoubleClick(event);
+        if (!isEraseModeActive) {
+            // Solo resetear lastGeneratedTrackStartPosition si la rotación resultante no es N-S
+            const rect = editorCanvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const gridX = Math.floor(x / TRACK_PART_SIZE_PX);
+            const gridY = Math.floor(y / TRACK_PART_SIZE_PX);
+            
+            if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols && grid[gridY][gridX]) {
+                const currentRotation = grid[gridY][gridX].rotation_deg;
+                const nextRotation = ((currentRotation + 90) % 360);
+                const conns = getRotatedConnections(grid[gridY][gridX], nextRotation);
+                if (!(conns.N && conns.S)) {
+                    lastGeneratedTrackStartPosition = null;
+                }
+            }
+            onGridDoubleClick(event);
+        }
     });
 }
 
@@ -619,7 +691,6 @@ function generateRandomLoopTrackLogic() {
     const loopParts = AVAILABLE_TRACK_PARTS.filter(p => {
         if (!p.connections) return false;
         const connCount = Object.values(p.connections).filter(conn => conn === true).length;
-        // Para todos los tamaños, solo permitir piezas con exactamente 2 conexiones
         return connCount === 2;
     });
 
@@ -635,7 +706,7 @@ function generateRandomLoopTrackLogic() {
     
     let allPartsPlaced = true;
     let placedCount = 0;
-    let straightSegmentsForStart = []; // Store {r, c, rotation_deg} of straight parts
+    let nSConnections = []; // Array to store N-S connection positions
 
     for (const cellInfo of cellPathWithConnections) {
         const r = cellInfo.r; const c = cellInfo.c; const requiredConns = cellInfo.connections;
@@ -643,37 +714,36 @@ function generateRandomLoopTrackLogic() {
         const shuffledLoopParts = [...loopParts].sort(() => 0.5 - Math.random());
 
         for (const partDef of shuffledLoopParts) {
-            if (!trackPartsImages[partDef.file]) continue; // Skip if image not loaded
+            if (!trackPartsImages[partDef.file]) continue;
 
             const shuffledRotations = [0, 90, 180, 270].sort(() => 0.5 - Math.random());
             for (const rot of shuffledRotations) {
                 const actualConns = getRotatedConnections(partDef, rot);
                 let match = true;
-                // Check if actualConns has exactly the same true connections as requiredConns
-                for (const reqDir in requiredConns) { // Check required open
+                for (const reqDir in requiredConns) {
                     if (requiredConns[reqDir] && !actualConns[reqDir]) { match = false; break; }
                 }
                 if (!match) continue;
-                for (const actDir in actualConns) { // Check actual open (ensure no extra openings)
+                for (const actDir in actualConns) {
                     if (actualConns[actDir] && !requiredConns[actDir]) { match = false; break; }
                 }
 
                 if (match) {
                     grid[r][c] = { ...partDef, image: trackPartsImages[partDef.file], rotation_deg: rot };
-                    if (partDef.name.toLowerCase().includes("recta")) { // Identify straight parts
-                        straightSegmentsForStart.push({ r, c, rotation_deg: rot });
+                    // Check if this is a N-S connection
+                    if (actualConns.N && actualConns.S) {
+                        nSConnections.push({ r, c, rotation_deg: rot });
                     }
-                    placedPiece = true; 
-                    placedCount++; 
-                    break; 
+                    placedPiece = true;
+                    placedCount++;
+                    break;
                 }
             }
-            if (placedPiece) break; 
+            if (placedPiece) break;
         }
-        if (!placedPiece) { 
-            allPartsPlaced = false; 
-            // console.warn(`Could not place piece at [${r},${c}] needing ${JSON.stringify(requiredConns)}`);
-            break; // Stop if a piece cannot be placed
+        if (!placedPiece) {
+            allPartsPlaced = false;
+            break;
         }
     }
     
@@ -681,35 +751,15 @@ function generateRandomLoopTrackLogic() {
         return { success: false, startPosition: null };
     }
 
-    // Determine start position for the simulator
+    // Select a random N-S connection for the start line
     let foundStartPosition = null;
-    if (straightSegmentsForStart.length > 0) {
-        const randomStraight = straightSegmentsForStart[Math.floor(Math.random() * straightSegmentsForStart.length)];
-        let angle_rad = 0; // Default for East-facing
-        // Determine angle based on straight piece orientation (0 deg = N-S, 90 deg = E-W)
-        // Assuming 'recta.png' connections are N:true, S:true
-        // Rotation 0 (N-S): Start facing South (sim angle PI/2) or North (-PI/2)
-        // Rotation 90 (E-W): Start facing East (sim angle 0) or West (PI)
-        const partConns = getRotatedConnections(AVAILABLE_TRACK_PARTS.find(p => p.name.toLowerCase().includes("recta")), randomStraight.rotation_deg);
-        if (partConns.S) angle_rad = Math.PI / 2;      // Facing South
-        else if (partConns.N) angle_rad = -Math.PI / 2; // Facing North
-        else if (partConns.E) angle_rad = 0;            // Facing East
-        else if (partConns.W) angle_rad = Math.PI;      // Facing West
-        
-        foundStartPosition = { r: randomStraight.r, c: randomStraight.c, angle_rad: angle_rad };
-    } else if (cellPathWithConnections.length > 0) { // Fallback to first path cell if no straights
-        const firstPathCell = cellPathWithConnections[0];
-        const firstPart = grid[firstPathCell.r][firstPathCell.c];
-        let angle_rad = 0; 
-        if (firstPart) {
-            const conns = getRotatedConnections(firstPart, firstPart.rotation_deg);
-            // Try to orient along one of its connections
-            if (conns.S) angle_rad = Math.PI / 2; 
-            else if (conns.E) angle_rad = 0; 
-            else if (conns.N) angle_rad = -Math.PI / 2; 
-            else if (conns.W) angle_rad = Math.PI;
-        }
-        foundStartPosition = { r: firstPathCell.r, c: firstPathCell.c, angle_rad: angle_rad };
+    if (nSConnections.length > 0) {
+        const randomNSConnection = nSConnections[Math.floor(Math.random() * nSConnections.length)];
+        foundStartPosition = {
+            r: randomNSConnection.r,
+            c: randomNSConnection.c,
+            angle_rad: Math.PI / 2 // Facing South
+        };
     }
 
     return { success: true, startPosition: foundStartPosition };
