@@ -45,6 +45,7 @@ const DIRECTIONS = [
 let mainAppInterface;
 
 export function initTrackEditor(appInterface) {
+    console.log("[TrackEditor] Starting initialization...");
     mainAppInterface = appInterface;
     const elems = getDOMElements();
     editorCanvas = elems.trackEditorCanvas;
@@ -54,6 +55,7 @@ export function initTrackEditor(appInterface) {
     currentGridSize = { rows: 3, cols: 3 };
     elems.trackGridSizeSelect.value = '3x3';
     setupGrid();
+    console.log("[TrackEditor] Initial grid setup complete");
 
     // Guardar estado cuando se cambia de sección
     document.addEventListener('visibilitychange', () => {
@@ -79,6 +81,7 @@ export function initTrackEditor(appInterface) {
     });
 
     observer.observe(trackEditorTab, { attributes: true });
+    console.log("[TrackEditor] State management setup complete");
 
     // Store instance globally for simulation to access
     window.trackEditorInstance = {
@@ -141,16 +144,18 @@ export function initTrackEditor(appInterface) {
         }
     };
 
+    console.log("[TrackEditor] Starting track part assets loading...");
     loadTrackPartAssets(() => {
+        console.log("[TrackEditor] Track part assets loaded, populating palette...");
         populateTrackPartsPalette(elems.trackPartsPalette);
         
-        // Generar una pista aleatoria inicial
+        console.log("[TrackEditor] Generating initial random track...");
         generateRandomTrackWithRetry();
         
-        // Asegurarse de que el editor se renderice
+        console.log("[TrackEditor] Rendering editor...");
         renderEditor();
         
-        // Exportar la pista al simulador automáticamente
+        console.log("[TrackEditor] Exporting track to simulator...");
         const exportedCanvas = exportTrackAsCanvas();
         if (exportedCanvas) {
             let startX_m, startY_m, startAngle_rad;
@@ -179,6 +184,8 @@ export function initTrackEditor(appInterface) {
                 startAngle: exportedCanvas.dataset.startAngle
             });
             mainAppInterface.loadTrackFromEditor(exportedCanvas, startX_m, startY_m, startAngle_rad);
+        } else {
+            console.warn("[TrackEditor] Failed to export track canvas");
         }
     });
 
@@ -333,27 +340,30 @@ export function initTrackEditor(appInterface) {
 function loadTrackPartAssets(callback) {
     let loadedCount = 0;
     const totalParts = AVAILABLE_TRACK_PARTS.length;
-    console.log("Iniciando carga de piezas de pista. Total de piezas:", totalParts);
+    console.log("[TrackEditor] Starting track part assets loading. Total parts:", totalParts);
+    console.log("[TrackEditor] Available track parts:", AVAILABLE_TRACK_PARTS);
     
     if (totalParts === 0) {
-        console.warn("No hay partes de pista definidas en config.js (AVAILABLE_TRACK_PARTS).");
+        console.warn("[TrackEditor] No track parts defined in config.js (AVAILABLE_TRACK_PARTS).");
         if (typeof callback === 'function') callback();
         return;
     }
 
     AVAILABLE_TRACK_PARTS.forEach(partInfo => {
-        console.log(`Intentando cargar imagen: assets/track_parts/${partInfo.file}`);
-        loadAndScaleImage(`assets/track_parts/${partInfo.file}`, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX, (img) => {
+        const imagePath = `assets/track_parts/${partInfo.file}`;
+        console.log(`[TrackEditor] Loading image: ${imagePath}`);
+        loadAndScaleImage(imagePath, TRACK_PART_SIZE_PX, TRACK_PART_SIZE_PX, (img) => {
             if (img) {
-                console.log(`Imagen cargada exitosamente: ${partInfo.file}`);
+                console.log(`[TrackEditor] Successfully loaded image: ${partInfo.file}`);
                 trackPartsImages[partInfo.file] = img;
             } else {
-                console.error(`Fallo al cargar imagen para la pieza: ${partInfo.file}`);
+                console.error(`[TrackEditor] Failed to load image for part: ${partInfo.file}`);
             }
             loadedCount++;
-            console.log(`Progreso de carga: ${loadedCount}/${totalParts}`);
+            console.log(`[TrackEditor] Loading progress: ${loadedCount}/${totalParts}`);
             if (loadedCount === totalParts) {
-                console.log("Todas las imágenes han sido cargadas");
+                console.log("[TrackEditor] All images loaded successfully");
+                console.log("[TrackEditor] Loaded track parts:", Object.keys(trackPartsImages));
                 if (typeof callback === 'function') callback();
             }
         });
