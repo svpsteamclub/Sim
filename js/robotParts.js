@@ -180,16 +180,27 @@ export function drawRobotPreview() {
     });
 }
 
+function rotate90(x, y) {
+    // Rotate (x, y) by +90 degrees (counterclockwise)
+    return { x: -y, y: x };
+}
+
 export function getPlacedParts() {
     console.log("Getting placed parts for simulation:", placedParts.length);
-    return placedParts.map(part => ({
-        id: part.id,
-        name: part.name,
-        img: part.img, // Keep the image reference
+    return placedParts.map(part => {
         // Convert pixel coordinates to meters for simulation
-        x: (part.x - previewCanvas.width/2) / PIXELS_PER_METER,
-        y: (part.y - previewCanvas.height/2) / PIXELS_PER_METER
-    }));
+        let x_m = (part.x - previewCanvas.width/2) / PIXELS_PER_METER;
+        let y_m = (part.y - previewCanvas.height/2) / PIXELS_PER_METER;
+        // Rotate by +90deg to match simulation orientation
+        const rotated = rotate90(x_m, y_m);
+        return {
+            id: part.id,
+            name: part.name,
+            img: part.img, // Keep the image reference
+            x: rotated.x,
+            y: rotated.y
+        };
+    });
 }
 
 export function clearPlacedParts() {
