@@ -485,3 +485,59 @@ hr {
     border-radius: var(--radius-sm);
     background-color: white;
 }
+
+.code-editor-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.code-template-selector {
+    margin-bottom: var(--spacing-md);
+}
+
+.template-select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.template-select:hover {
+    border-color: #999;
+}
+
+.code-explanation {
+    background-color: #f8f9fa;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-md);
+}
+
+.code-explanation h3 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    color: #333;
+}
+
+.code-explanation h4 {
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    color: #444;
+}
+
+.code-explanation ul {
+    margin: var(--spacing-sm) 0;
+    padding-left: var(--spacing-lg);
+}
+
+.code-explanation li {
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.5;
+}
+
+.code-explanation strong {
+    color: #2c5282;
+}

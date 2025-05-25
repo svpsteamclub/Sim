@@ -1,5 +1,125 @@
-// Default code for the editor
-const defaultCode = `// Pin Definitions (as used in the simulator)
+// Code templates
+const codeTemplates = {
+    onoff: `// Pin Definitions (as used in the simulator)
+const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
+const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+
+const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
+const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+
+const TURN_SPEED = 200;      // Velocidad de giro
+const FORWARD_SPEED = 150;   // Velocidad hacia adelante
+
+function setup() {
+    Serial.begin(9600);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. On/Off Control.");
+}
+
+async function loop() {
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sC = digitalRead(CENTER_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+
+    // Control On/Off simple
+    if (sC === 0) {  // Sensor central en línea
+        // Avanzar recto
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+    }
+    else if (sL === 0) {  // Sensor izquierdo en línea
+        // Girar a la izquierda
+        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+    }
+    else if (sR === 0) {  // Sensor derecho en línea
+        // Girar a la derecha
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, 0);
+    }
+    else {  // Ningún sensor en línea
+        // Avanzar lento buscando la línea
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED/2);
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED/2);
+    }
+
+    Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
+    Serial.println(" | L:" + (sL === 0 ? "ON" : "OFF") + 
+                   " C:" + (sC === 0 ? "ON" : "OFF") + 
+                   " R:" + (sR === 0 ? "ON" : "OFF"));
+    
+    await delay(20);
+}`,
+
+    proportional: `// Pin Definitions (as used in the simulator)
+const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
+const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+
+const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
+const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+
+// Control Proporcional
+const Kp = 100.0;           // Constante proporcional
+const BASE_SPEED = 150;     // Velocidad base
+const MAX_SPEED = 255;      // Velocidad máxima
+const MIN_SPEED = 0;        // Velocidad mínima
+
+function setup() {
+    Serial.begin(9600);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. Proportional Control.");
+}
+
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+async function loop() {
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sC = digitalRead(CENTER_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+
+    // Cálculo del error (-2 a +2)
+    let error = 0;
+    if (sL === 0 && sC === 1 && sR === 1) error = -2;        // Far Right
+    else if (sL === 0 && sC === 0 && sR === 1) error = -1;   // Mid Right
+    else if (sL === 1 && sC === 0 && sR === 1) error = 0;    // Center
+    else if (sL === 1 && sC === 0 && sR === 0) error = 1;    // Mid Left
+    else if (sL === 1 && sC === 1 && sR === 0) error = 2;    // Far Left
+
+    // Cálculo proporcional
+    let correction = Kp * error;
+
+    // Aplicar corrección a los motores
+    let leftSpeed = BASE_SPEED + correction;
+    let rightSpeed = BASE_SPEED - correction;
+
+    // Limitar velocidades
+    leftSpeed = constrain(leftSpeed, MIN_SPEED, MAX_SPEED);
+    rightSpeed = constrain(rightSpeed, MIN_SPEED, MAX_SPEED);
+
+    // Aplicar a los motores
+    analogWrite(MOTOR_LEFT_PWM, leftSpeed);
+    analogWrite(MOTOR_RIGHT_PWM, rightSpeed);
+
+    Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
+    Serial.print(" | Error:" + error);
+    Serial.println(" | L:" + leftSpeed.toFixed(0) + " R:" + rightSpeed.toFixed(0));
+    
+    await delay(20);
+}`,
+
+    pid: `// Pin Definitions (as used in the simulator)
 const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
 const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
@@ -79,7 +199,8 @@ async function loop() {
 
 function constrain(value, minVal, maxVal) {
     return Math.min(Math.max(value, minVal), maxVal);
-}`;
+}`
+};
 
 // Initialize Monaco Editor
 require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs' } });
@@ -88,7 +209,7 @@ let editor = null;
 
 require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monacoContainer'), {
-        value: defaultCode,
+        value: codeTemplates.pid, // Start with PID template
         language: 'javascript',
         theme: 'vs',
         minimap: {
@@ -109,6 +230,17 @@ require(['vs/editor/editor.main'], function () {
 
     // Make the editor instance available globally
     window.monacoEditor = editor;
+
+    // Handle template selection changes
+    const templateSelector = document.getElementById('codeTemplate');
+    if (templateSelector) {
+        templateSelector.addEventListener('change', (e) => {
+            const selectedTemplate = e.target.value;
+            if (codeTemplates[selectedTemplate]) {
+                editor.setValue(codeTemplates[selectedTemplate]);
+            }
+        });
+    }
 });
 
 // Handle window resize

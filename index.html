@@ -66,7 +66,42 @@
         <div id="code-editor" class="tab-content">
             <h2>Editor de Código (Arduino-like JavaScript)</h2>
             <div class="code-editor-layout">
-                <div id="monacoContainer" style="height: 600px; border: 1px solid #ccc;"></div>
+                <div class="code-editor-container">
+                    <div class="code-template-selector">
+                        <label for="codeTemplate">Seleccionar tipo de control:</label>
+                        <select id="codeTemplate" class="template-select">
+                            <option value="onoff">Control On/Off Simple</option>
+                            <option value="proportional">Control Proporcional</option>
+                            <option value="pid" selected>Control PID Completo</option>
+                        </select>
+                    </div>
+                    <div id="monacoContainer" style="height: 600px; border: 1px solid #ccc;"></div>
+                    <div class="code-explanation">
+                        <h3>Guía del Código</h3>
+                        <p>Este editor te permite modificar el comportamiento del robot seguidor de línea. El código simula un programa de Arduino y contiene dos funciones principales:</p>
+                        
+                        <h4>Funciones Principales:</h4>
+                        <ul>
+                            <li><strong>setup()</strong>: Se ejecuta una vez al inicio. Configura los pines y la comunicación serial.</li>
+                            <li><strong>loop()</strong>: Se ejecuta continuamente. Lee los sensores y controla los motores.</li>
+                        </ul>
+
+                        <h4>Pines y Variables Importantes:</h4>
+                        <ul>
+                            <li><strong>Sensores (digitalRead)</strong>: LEFT_SENSOR_PIN(2), CENTER_SENSOR_PIN(3), RIGHT_SENSOR_PIN(4)</li>
+                            <li><strong>Motores (analogWrite)</strong>: MOTOR_LEFT_PWM(6), MOTOR_RIGHT_PWM(5)</li>
+                            <li>Los sensores retornan 0 cuando están sobre la línea negra y 1 cuando están fuera</li>
+                            <li>Los motores aceptan valores entre 0 (parado) y 255 (máxima velocidad)</li>
+                        </ul>
+
+                        <h4>Tipos de Control Disponibles:</h4>
+                        <ul>
+                            <li><strong>On/Off</strong>: Control básico que solo gira a la izquierda o derecha según el sensor activado.</li>
+                            <li><strong>Proporcional</strong>: Ajusta la velocidad de giro según qué tan lejos está de la línea.</li>
+                            <li><strong>PID</strong>: Control avanzado que considera el error actual (P), acumulado (I) y su variación (D).</li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="serial-monitor-container">
                     <h3>Monitor Serial</h3>
                     <pre id="serialMonitorOutput"></pre>
