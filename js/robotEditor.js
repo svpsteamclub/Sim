@@ -10,6 +10,7 @@ let currentGeometry = { ...DEFAULT_ROBOT_GEOMETRY };
 let mainAppInterface;
 
 export function initRobotEditor(appInterface) {
+    console.log("Initializing robot editor...");
     mainAppInterface = appInterface;
     const elems = getDOMElements();
     previewCanvas = elems.robotPreviewCanvas;
@@ -27,9 +28,13 @@ export function initRobotEditor(appInterface) {
     previewCanvas.style.width = '350px';
     previewCanvas.style.height = '350px';
 
+    console.log("Canvas size set to:", { width: previewCanvas.width, height: previewCanvas.height });
+
     // Initialize preview robot with default geometry
     previewRobot = new Robot(previewCanvas.width / 2 / PIXELS_PER_METER, previewCanvas.height / 2 / PIXELS_PER_METER, -Math.PI / 2);
     previewRobot.updateGeometry(DEFAULT_ROBOT_GEOMETRY);
+
+    console.log("Preview robot initialized with geometry:", DEFAULT_ROBOT_GEOMETRY);
 
     // Load default geometry into input fields
     setFormValues(DEFAULT_ROBOT_GEOMETRY);
@@ -39,11 +44,13 @@ export function initRobotEditor(appInterface) {
 
     // Event listeners
     elems.applyRobotGeometryButton.addEventListener('click', () => {
+        console.log("Applying robot geometry...");
         currentGeometry = getFormValues();
         previewRobot.updateGeometry(currentGeometry);
         renderRobotPreview();
         // Get decorative parts and pass them to the simulation
         const decorativeParts = getPlacedParts();
+        console.log("Decorative parts:", decorativeParts);
         mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
         alert("Geometría del robot actualizada y aplicada a la simulación (requiere reinicio de sim).");
     });
@@ -68,7 +75,9 @@ export function initRobotEditor(appInterface) {
     });
     
     // Initial render
+    console.log("Loading robot assets...");
     mainAppInterface.loadRobotAssets((wheelImg) => {
+        console.log("Robot assets loaded, setting images...");
         previewRobot.setImages(wheelImg);
         renderRobotPreview();
     });
@@ -138,7 +147,20 @@ function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
 }
 
 function renderRobotPreview() {
-    if (!previewCtx || !previewRobot) return;
+    if (!previewCtx || !previewRobot) {
+        console.error("Missing previewCtx or previewRobot:", { previewCtx: !!previewCtx, previewRobot: !!previewRobot });
+        return;
+    }
+
+    console.log("Rendering robot preview...");
+    console.log("Robot state:", {
+        x: previewRobot.x_m,
+        y: previewRobot.y_m,
+        angle: previewRobot.angle_rad,
+        wheelbase: previewRobot.wheelbase_m,
+        sensorOffset: previewRobot.sensorForwardProtrusion_m,
+        sensorSpread: previewRobot.sensorSideSpread_m
+    });
 
     // Clear the canvas
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
@@ -156,6 +178,7 @@ function renderRobotPreview() {
     previewRobot.y_m = 0;
     previewRobot.angle_rad = -Math.PI / 2;
 
+    console.log("Drawing robot at center...");
     // Draw the robot with its current sensor states
     previewRobot.draw(previewCtx, previewRobot.sensors);
 
@@ -169,6 +192,7 @@ function renderRobotPreview() {
     const wheelbaseOffset = (previewRobot.wheelbase_m / 2 + 0.03) * PIXELS_PER_METER; // 3cm extra outside robot
     const sensorSpreadYOffset = (-previewRobot.sensorForwardProtrusion_m - 0.03) * PIXELS_PER_METER; // 3cm above sensors
 
+    console.log("Drawing dimension lines...");
     // Robot width (wheelbase)
     const wheelbaseStartX = -previewRobot.wheelbase_m/2 * PIXELS_PER_METER;
     const wheelbaseEndX = previewRobot.wheelbase_m/2 * PIXELS_PER_METER;
@@ -201,6 +225,7 @@ function renderRobotPreview() {
 
     previewCtx.restore();
 
+    console.log("Drawing decorative parts...");
     // Draw decorative parts
     drawRobotPreview();
 }

@@ -19,6 +19,7 @@ let isDragging = false;
 let dragOffset = { x: 0, y: 0 };
 
 export function initRobotParts() {
+    console.log("Initializing robot parts...");
     const elems = getDOMElements();
     previewCanvas = elems.robotPreviewCanvas;
     previewCtx = previewCanvas.getContext('2d');
@@ -29,11 +30,13 @@ export function initRobotParts() {
         return;
     }
 
+    console.log("Loading parts into palette...");
     // Load parts into palette
     PARTS.forEach(part => {
         const img = new Image();
         img.src = getAssetPath(part.src);
         img.onload = () => {
+            console.log(`Loaded part image: ${part.name}`);
             const partElement = document.createElement('img');
             partElement.src = img.src;
             partElement.draggable = true;
@@ -42,6 +45,7 @@ export function initRobotParts() {
             
             // Add drag event listeners
             partElement.addEventListener('dragstart', (e) => {
+                console.log(`Starting drag of part: ${part.name}`);
                 draggedPart = {
                     id: part.id,
                     name: part.name,
@@ -52,6 +56,7 @@ export function initRobotParts() {
             });
             
             partElement.addEventListener('dragend', () => {
+                console.log(`Ended drag of part: ${part.name}`);
                 draggedPart = null;
             });
             
@@ -68,10 +73,13 @@ export function initRobotParts() {
     previewCanvas.addEventListener('drop', (e) => {
         e.preventDefault();
         if (draggedPart) {
+            console.log(`Dropping part: ${draggedPart.name}`);
             const rect = previewCanvas.getBoundingClientRect();
             // Get exact pixel coordinates (1:1 mapping)
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
+            
+            console.log(`Part dropped at coordinates:`, { x, y });
             
             placedParts.push({
                 id: draggedPart.id,
@@ -97,6 +105,7 @@ export function initRobotParts() {
             const part = placedParts[i];
             const partSize = 40; // Size of the part in pixels (40mm)
             if (Math.abs(x - part.x) < partSize/2 && Math.abs(y - part.y) < partSize/2) {
+                console.log(`Selected part for moving: ${part.name}`);
                 selectedPart = part;
                 isDragging = true;
                 dragOffset = {
@@ -121,8 +130,11 @@ export function initRobotParts() {
     });
 
     previewCanvas.addEventListener('mouseup', () => {
-        isDragging = false;
-        selectedPart = null;
+        if (isDragging) {
+            console.log(`Finished moving part: ${selectedPart?.name}`);
+            isDragging = false;
+            selectedPart = null;
+        }
     });
 
     // Click to remove parts
@@ -137,6 +149,7 @@ export function initRobotParts() {
                 const part = placedParts[i];
                 const partSize = 40; // Size of the part in pixels (40mm)
                 if (Math.abs(x - part.x) < partSize/2 && Math.abs(y - part.y) < partSize/2) {
+                    console.log(`Removing part: ${part.name}`);
                     placedParts.splice(i, 1);
                     drawRobotPreview();
                     break;
@@ -147,14 +160,17 @@ export function initRobotParts() {
 }
 
 export function drawRobotPreview() {
-    if (!previewCtx || !previewCanvas) return;
+    if (!previewCtx || !previewCanvas) {
+        console.error("Missing previewCtx or previewCanvas in drawRobotPreview");
+        return;
+    }
 
-    // Clear the canvas before drawing parts
-    previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-
+    console.log("Drawing robot preview with parts:", placedParts.length);
+    
     // Draw placed parts
     placedParts.forEach(part => {
         const size = 40; // Size of the part in pixels (40mm)
+        console.log(`Drawing part ${part.name} at:`, { x: part.x, y: part.y });
 
         previewCtx.save();
         previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
@@ -167,6 +183,7 @@ export function drawRobotPreview() {
 }
 
 export function getPlacedParts() {
+    console.log("Getting placed parts for simulation:", placedParts.length);
     return placedParts.map(part => ({
         id: part.id,
         name: part.name,
