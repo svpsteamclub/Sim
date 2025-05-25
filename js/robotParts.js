@@ -23,6 +23,7 @@ let selectedPart = null;
 let isDragging = false;
 let wasDragging = false;
 let dragOffset = { x: 0, y: 0 };
+let eraseMode = false;
 
 export function initRobotParts() {
     console.log("Initializing robot parts...");
@@ -35,6 +36,19 @@ export function initRobotParts() {
         console.error("Robot parts palette or preview canvas not found!");
         return;
     }
+
+    // Add erase mode button under the palette
+    let eraseBtn = document.createElement('button');
+    eraseBtn.textContent = 'Modo Borrar';
+    eraseBtn.style.marginTop = '8px';
+    eraseBtn.style.display = 'block';
+    eraseBtn.style.width = '100%';
+    eraseBtn.onclick = () => {
+        eraseMode = !eraseMode;
+        eraseBtn.classList.toggle('active', eraseMode);
+        eraseBtn.style.background = eraseMode ? '#e66' : '';
+    };
+    partsPalette.parentNode.appendChild(eraseBtn);
 
     console.log("Loading parts into palette...");
     // Load parts into palette
@@ -164,6 +178,28 @@ export function initRobotParts() {
         }
         wasDragging = false;
     });
+
+    // Double-click to rotate or erase parts
+    previewCanvas.addEventListener('dblclick', (e) => {
+        const rect = previewCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        for (let i = placedParts.length - 1; i >= 0; i--) {
+            const part = placedParts[i];
+            const partSize = part.img.width; // Use width for hit area
+            if (Math.abs(x - part.x) < partSize/2 && Math.abs(y - part.y) < partSize/2) {
+                if (eraseMode) {
+                    console.log(`Erasing part: ${part.name}`);
+                    placedParts.splice(i, 1);
+                } else {
+                    part.rotation = ((part.rotation || 0) + Math.PI/2) % (2*Math.PI);
+                    console.log(`Rotated part: ${part.name} to ${part.rotation} radians`);
+                }
+                renderRobotPreview();
+                break;
+            }
+        }
+    });
 }
 
 export function drawRobotPreview() {
@@ -177,13 +213,13 @@ export function drawRobotPreview() {
     placedParts.forEach(part => {
         const sizeW = part.img.width;
         const sizeH = part.img.height;
-        console.log(`Drawing part ${part.name} at:`, { x: part.x, y: part.y });
+        const rotation = part.rotation || 0;
+        console.log(`Drawing part ${part.name} at:`, { x: part.x, y: part.y, rotation });
         previewCtx.save();
-        previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
-        if (part === selectedPart) {
-            previewCtx.globalAlpha = 0.6; // Make selected part more transparent
-        }
-        previewCtx.drawImage(part.img, part.x - sizeW/2, part.y - sizeH/2, sizeW, sizeH);
+        previewCtx.translate(part.x, part.y);
+        previewCtx.rotate(rotation);
+        // Always fully opaque
+        previewCtx.drawImage(part.img, -sizeW/2, -sizeH/2, sizeW, sizeH);
         previewCtx.restore();
     });
 }
