@@ -19,6 +19,14 @@ export function initRobotEditor(appInterface) {
     }
     previewCtx = previewCanvas.getContext('2d');
 
+    // Set fixed canvas size to 350x350 pixels (35cm x 35cm)
+    previewCanvas.width = 350;
+    previewCanvas.height = 350;
+    
+    // Set display size to match canvas size exactly (1:1 pixel mapping)
+    previewCanvas.style.width = '350px';
+    previewCanvas.style.height = '350px';
+
     // Initialize preview robot with default geometry
     previewRobot = new Robot(previewCanvas.width / 2 / PIXELS_PER_METER, previewCanvas.height / 2 / PIXELS_PER_METER, -Math.PI / 2);
     previewRobot.updateGeometry(DEFAULT_ROBOT_GEOMETRY);
