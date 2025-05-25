@@ -318,11 +318,7 @@ export function initTrackEditor(appInterface) {
                 currentRotation = ((currentRotation % 360) + 360) % 360;
                 
                 // Calculate next rotation in sequence: 0 -> 90 -> 180 -> 270 -> 0
-                let nextRotation;
-                if (currentRotation < 90) nextRotation = 90;
-                else if (currentRotation < 180) nextRotation = 180;
-                else if (currentRotation < 270) nextRotation = 270;
-                else nextRotation = 0;
+                let nextRotation = ((Math.floor(currentRotation / 90) + 1) % 4) * 90;
                 
                 grid[r][c].rotation_deg = nextRotation;
                 console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
@@ -582,11 +578,7 @@ function onGridDoubleClick(event) {
         currentRotation = ((currentRotation % 360) + 360) % 360;
         
         // Calculate next rotation in sequence: 0 -> 90 -> 180 -> 270 -> 0
-        let nextRotation;
-        if (currentRotation < 90) nextRotation = 90;
-        else if (currentRotation < 180) nextRotation = 180;
-        else if (currentRotation < 270) nextRotation = 270;
-        else nextRotation = 0;
+        let nextRotation = ((Math.floor(currentRotation / 90) + 1) % 4) * 90;
         
         grid[r][c].rotation_deg = nextRotation;
         console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
