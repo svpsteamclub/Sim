@@ -410,8 +410,8 @@ function setupGrid() {
             height: containerRect.height
         });
 
-        // Force a minimum size of 800px for better visibility
-        const size = Math.max(containerRect.width || 800, 800);
+        // Force a minimum size of 1050px for better visibility
+        const size = Math.max(containerRect.width || 1050, 1050);
         console.log("[DEBUG] Setting canvas size to:", size);
 
         editorCanvas.width = size;
