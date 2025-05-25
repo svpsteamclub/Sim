@@ -175,14 +175,15 @@ export function drawRobotPreview() {
     console.log("Drawing robot preview with parts:", placedParts.length);
     // Draw placed parts
     placedParts.forEach(part => {
-        const size = 40; // Size of the part in pixels (40mm)
+        const sizeW = part.img.width;
+        const sizeH = part.img.height;
         console.log(`Drawing part ${part.name} at:`, { x: part.x, y: part.y });
         previewCtx.save();
         previewCtx.globalAlpha = 0.8; // Make parts slightly transparent
         if (part === selectedPart) {
             previewCtx.globalAlpha = 0.6; // Make selected part more transparent
         }
-        previewCtx.drawImage(part.img, part.x - size/2, part.y - size/2, size, size);
+        previewCtx.drawImage(part.img, part.x - sizeW/2, part.y - sizeH/2, sizeW, sizeH);
         previewCtx.restore();
     });
 }

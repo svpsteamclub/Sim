@@ -195,13 +195,13 @@ export class Robot {
                 if (part.img && part.img.complete && part.img.naturalWidth > 0) {
                     const x = part.x * PIXELS_PER_METER;
                     const y = part.y * PIXELS_PER_METER;
-                    const size = 40; // Size of the part in pixels (40mm)
-
+                    const sizeW = part.img.width;
+                    const sizeH = part.img.height;
                     ctx.save();
                     ctx.globalAlpha = 0.8;
                     ctx.translate(x, y);
                     ctx.rotate(-Math.PI / 2); // Rotate part image by -90deg to match editor orientation
-                    ctx.drawImage(part.img, -size/2, -size/2, size, size);
+                    ctx.drawImage(part.img, -sizeW/2, -sizeH/2, sizeW, sizeH);
                     ctx.restore();
                 }
             });
