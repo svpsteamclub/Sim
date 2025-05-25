@@ -459,9 +459,16 @@ function renderEditor(cellSize) {
         });
         return;
     }
+
+    // Calculate cellSize if not provided
+    if (!cellSize) {
+        cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
+    }
+
     // Limpiar el canvas con fondo blanco
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+    
     // Draw grid and track parts
     for (let r = 0; r < currentGridSize.rows; r++) {
         for (let c = 0; c < currentGridSize.cols; c++) {
@@ -472,12 +479,7 @@ function renderEditor(cellSize) {
             ctx.lineWidth = 1;
             ctx.strokeRect(x_topLeft, y_topLeft, cellSize, cellSize);
             const currentGridPart = grid[r][c];
-            if (
-                currentGridPart &&
-                currentGridPart.image &&
-                currentGridPart.image instanceof HTMLImageElement &&
-                currentGridPart.image.complete
-            ) {
+            if (currentGridPart && currentGridPart.image) {
                 const x_center = x_topLeft + cellSize / 2;
                 const y_center = y_topLeft + cellSize / 2;
                 ctx.save();
@@ -485,7 +487,8 @@ function renderEditor(cellSize) {
                 ctx.rotate(currentGridPart.rotation_deg * Math.PI / 180);
                 ctx.drawImage(currentGridPart.image, -cellSize / 2, -cellSize / 2, cellSize, cellSize);
                 ctx.restore();
-                // Draw connection indicators (optional, scale with cellSize)
+                
+                // Draw connection indicators
                 const connIndicatorSize = Math.max(6, cellSize * 0.02);
                 const connIndicatorOffset = Math.max(2, cellSize * 0.005);
                 const actualConns = getRotatedConnections(currentGridPart, currentGridPart.rotation_deg);
@@ -500,11 +503,12 @@ function renderEditor(cellSize) {
             }
         }
     }
+    
     if (AVAILABLE_TRACK_PARTS.length === 0 && editorCanvas.width > 0) {
-         ctx.fillStyle = "rgba(0,0,0,0.7)";
-         ctx.font = `bold ${Math.min(20, editorCanvas.width * 0.05)}px Arial`;
-         ctx.textAlign = "center";
-         ctx.fillText("No hay partes de pista en config.js", editorCanvas.width / 2, editorCanvas.height / 2);
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.font = `bold ${Math.min(20, editorCanvas.width * 0.05)}px Arial`;
+        ctx.textAlign = "center";
+        ctx.fillText("No hay partes de pista en config.js", editorCanvas.width / 2, editorCanvas.height / 2);
     }
 }
 
