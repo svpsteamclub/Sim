@@ -265,29 +265,23 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSimulation(); // Ensure it's stopped
         if (simulationInstance) {
             const currentGeo = simulationInstance.getCurrentRobotGeometry(); // Preserve current geometry
-            // Reset to the track's defined start pose, or a default if none
-            const startPose = simulationInstance.lapTimer.isActive ? 
-                { x: simulationInstance.lapTimer.startLine.x1 / PIXELS_PER_METER, // approx start X
-                  y: simulationInstance.lapTimer.startLine.y1 / PIXELS_PER_METER, // approx start Y
-                  // angle needs to be derived from start line orientation or stored
-                  angle_rad: simulationInstance.robot.angle_rad // placeholder, ideally store initial angle
-                } : { x: 0.1, y: 0.1, angle_rad: 0}; // Fallback default start
-
-            // If track is loaded, use its start. Otherwise, a generic start for an empty canvas.
+            
+            // Get the original start position from the lap timer's start line
             let startX = 0.1, startY = 0.1, startAngle = 0;
-            if (simulationInstance.track.imageData) { // Track is loaded
-                // Try to get start position from lapTimer if initialized
-                if(simulationInstance.lapTimer.startLine && simulationInstance.lapTimer.startLine.x1 !== undefined){
-                    // A more robust way to get the original start pose used for lapTimer.initialize is needed.
-                    // For now, let's assume the robot is reset to its current position if a track is loaded,
-                    // or to a default if no track is loaded.
-                    // Or better: reset to the *original* start position of the current track.
-                    // This requires storing that original start pose when a track is loaded.
-                    // For now, let's just reset the robot state at its current position if track loaded.
-                     startX = simulationInstance.robot.x_m;
-                     startY = simulationInstance.robot.y_m;
-                     startAngle = simulationInstance.robot.angle_rad;
-                }
+            if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
+                // Calculate the center point of the start line
+                startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
+                startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
+                
+                // Calculate angle perpendicular to the start line
+                const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
+                const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
+                startAngle = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
+                
+                // Move the robot slightly behind the start line
+                const backOffset = simulationInstance.robot.length_m / 2;
+                startX += backOffset * Math.cos(startAngle);
+                startY += backOffset * Math.sin(startAngle);
             }
 
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
