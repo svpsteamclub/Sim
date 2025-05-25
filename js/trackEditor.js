@@ -590,31 +590,36 @@ function onGridDoubleClick(event) {
 function getRotatedConnections(part, rotation_deg) {
     if (!part || !part.connections) return { N: false, S: false, E: false, W: false };
     
-    // Normalize rotation to 0-359
+    // Normalize rotation to 0, 90, 180, or 270
     rotation_deg = ((rotation_deg % 360) + 360) % 360;
     
-    // Calculate number of 90-degree rotations (0 to 3)
-    const numRotations = Math.floor(rotation_deg / 90);
-    
+    const original = { ...part.connections };
     const rotated = { N: false, S: false, E: false, W: false };
     
-    // Define the rotation sequence for each direction
-    const rotationMap = {
-        N: ['N', 'E', 'S', 'W'],
-        S: ['S', 'W', 'N', 'E'],
-        E: ['E', 'S', 'W', 'N'],
-        W: ['W', 'N', 'E', 'S']
-    };
-    
-    // Apply rotations for each original connection
-    for (const [direction, isConnected] of Object.entries(part.connections)) {
-        if (isConnected) {
-            const rotatedDirection = rotationMap[direction][numRotations];
-            rotated[rotatedDirection] = true;
-        }
+    switch (rotation_deg) {
+        case 0: // No rotation
+            return { ...original };
+        case 90: // 90 degrees clockwise
+            rotated.N = original.W;
+            rotated.E = original.N;
+            rotated.S = original.E;
+            rotated.W = original.S;
+            break;
+        case 180: // 180 degrees
+            rotated.N = original.S;
+            rotated.E = original.W;
+            rotated.S = original.N;
+            rotated.W = original.E;
+            break;
+        case 270: // 270 degrees clockwise
+            rotated.N = original.E;
+            rotated.E = original.S;
+            rotated.S = original.W;
+            rotated.W = original.N;
+            break;
     }
     
-    console.log(`Rotated connections ${rotation_deg}° (${numRotations} rotations):`, rotated);
+    console.log(`Rotated connections ${rotation_deg}°:`, rotated);
     return rotated;
 }
 
