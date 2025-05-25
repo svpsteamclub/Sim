@@ -154,14 +154,8 @@ export function initTrackEditor(appInterface) {
         populateTrackPartsPalette(elems.trackPartsPalette);
         setupGrid(); // This will also call renderEditor
         
-        // Intentar cargar la pista inicial de la simulación
-        const simulationCanvas = document.getElementById('simulationDisplayCanvas');
-        if (simulationCanvas && simulationCanvas.width > 0) {
-            window.trackEditorInstance.loadTrackFromSimulation(simulationCanvas);
-        } else {
-            // Si no hay pista en la simulación, generar una aleatoria
-            generateRandomTrackWithRetry();
-        }
+        // Generar una pista aleatoria inicial
+        generateRandomTrackWithRetry();
         
         // Exportar la pista al simulador automáticamente
         const exportedCanvas = exportTrackAsCanvas();
@@ -185,6 +179,7 @@ export function initTrackEditor(appInterface) {
             exportedCanvas.dataset.startX = startX_m;
             exportedCanvas.dataset.startY = startY_m;
             exportedCanvas.dataset.startAngle = startAngle_rad;
+            exportedCanvas.dataset.fromEditor = 'true'; // Marcar que viene del editor
             console.log("[TrackEditor] Canvas dataset set:", {
                 startX: exportedCanvas.dataset.startX,
                 startY: exportedCanvas.dataset.startY,
