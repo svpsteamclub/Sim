@@ -11,6 +11,16 @@ export class Simulation {
         this.robot = new Robot(0, 0, 0, initialGeometry); // Initial position set by loadTrack
         if (robotImages) this.robot.setImages(robotImages.wheel);
         
+        // Ensure robot geometry is valid
+        if (!this.robot.length_m || isNaN(this.robot.length_m)) {
+            this.robot.length_m = 0.15; // Default length in meters
+            console.warn('[Simulation] Robot length_m was undefined, set to default 0.15');
+        }
+        if (!this.robot.wheelbase_m || isNaN(this.robot.wheelbase_m)) {
+            this.robot.wheelbase_m = 0.1; // Default wheelbase in meters
+            console.warn('[Simulation] Robot wheelbase_m was undefined, set to default 0.1');
+        }
+
         this.track = new Track();
         if (watermarkImage) this.track.setWatermark(watermarkImage);
         
@@ -69,6 +79,14 @@ export class Simulation {
                 this.resetSimulationState(startX_m, startY_m, startAngle_rad);
                 
                 // Ensure LapTimer has up-to-date robot dimensions
+                if (!this.robot.length_m || isNaN(this.robot.length_m)) {
+                    this.robot.length_m = 0.15;
+                    console.warn('[Simulation] Robot length_m was undefined, set to default 0.15');
+                }
+                if (!this.robot.wheelbase_m || isNaN(this.robot.wheelbase_m)) {
+                    this.robot.wheelbase_m = 0.1;
+                    console.warn('[Simulation] Robot wheelbase_m was undefined, set to default 0.1');
+                }
                 this.lapTimer.robotWidth_m = this.robot.wheelbase_m;
                 this.lapTimer.robotLength_m = this.robot.length_m;
                 
