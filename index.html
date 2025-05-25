@@ -24,7 +24,7 @@
         <!-- Simulation Tab -->
         <div id="simulation" class="tab-content active">
             <h2>Simulación</h2>
-            <div class="simulation-layout">
+            <div class="simulation-layout simulation-double-column">
                 <div class="simulation-view">
                     <canvas id="simulationDisplayCanvas" width="700" height="500"></canvas>
                     <div class="simulation-controls">
@@ -53,10 +53,10 @@
                     <label for="lineThreshold">Umbral Línea (0-255):</label>
                     <input type="number" id="lineThreshold" value="100" step="1" min="0" max="255">
                     <button id="applySimParamsButton">Aplicar Parámetros</button>
-                    
-                    <h4>Telemetría</h4>
-                    <pre id="telemetryOutput">Esperando datos...</pre>
-                    <h4>Cronómetro</h4>
+                </div>
+                <div class="sim-monitor-column">
+                    <pre id="serialMonitorOutput"></pre>
+                    <button id="clearSerialButton" type="button">Limpiar Serial</button>
                     <pre id="lapTimerOutput">Vueltas: 0 | Mejor: --:--:--- | Actual: --:--:---</pre>
                 </div>
             </div>
