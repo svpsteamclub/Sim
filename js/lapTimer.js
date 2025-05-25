@@ -13,6 +13,9 @@ export class LapTimer {
     }
 
     initialize(startPose, currentTime_s) {
+        if (!this.robotWidth_m || !this.robotLength_m || isNaN(this.robotWidth_m) || isNaN(this.robotLength_m)) {
+            console.error('[LapTimer] ERROR: robotWidth_m or robotLength_m is invalid:', this.robotWidth_m, this.robotLength_m);
+        }
         console.log("[LapTimer] Initializing with start pose:", startPose);
         // Define start/finish line based on start pose and robot dimensions
         // Line is perpendicular to robot's starting angle, centered on robot's rear axle

@@ -68,6 +68,10 @@ export class Simulation {
                 // Reset simulation state first
                 this.resetSimulationState(startX_m, startY_m, startAngle_rad);
                 
+                // Ensure LapTimer has up-to-date robot dimensions
+                this.lapTimer.robotWidth_m = this.robot.wheelbase_m;
+                this.lapTimer.robotLength_m = this.robot.length_m;
+                
                 // Initialize lap timer with the new start pose
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
                 console.log("[Simulation] Lap timer initialized:", {
