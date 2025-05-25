@@ -165,24 +165,7 @@ export function initRobotParts() {
             suppressNextClick = false;
             return;
         }
-        if (!isDragging && !wasDragging) {
-            const rect = previewCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            // Check if clicked on a part
-            for (let i = placedParts.length - 1; i >= 0; i--) {
-                const part = placedParts[i];
-                const partSize = 40; // Size of the part in pixels (40mm)
-                if (Math.abs(x - part.x) < partSize/2 && Math.abs(y - part.y) < partSize/2) {
-                    if (eraseMode) {
-                        console.log(`Removing part: ${part.name}`);
-                        placedParts.splice(i, 1);
-                        renderRobotPreview();
-                    }
-                    break;
-                }
-            }
-        }
+        // No erase logic here; single-click does not erase parts anymore
         wasDragging = false;
     });
 
