@@ -52,6 +52,7 @@ export class Simulation {
 
     // Load a track (from file or editor canvas)
     loadTrack(source, startX_m, startY_m, startAngle_rad, callback) {
+        console.log("[Simulation] Loading track with initial params:", { startX_m, startY_m, startAngle_rad });
         // The track's width/height in pixels will be set by the loaded image.
         // The simulation canvas should ideally match these dimensions for 1:1 pixel mapping.
         this.track.load(source, null, null, this.params.lineThreshold, (success, trackWidthPx, trackHeightPx) => {
@@ -61,6 +62,7 @@ export class Simulation {
                     startX_m = parseFloat(source.dataset.startX);
                     startY_m = parseFloat(source.dataset.startY);
                     startAngle_rad = parseFloat(source.dataset.startAngle);
+                    console.log("[Simulation] Using start position from canvas dataset:", { startX_m, startY_m, startAngle_rad });
                 }
                 
                 // Reset simulation state first
@@ -68,7 +70,12 @@ export class Simulation {
                 
                 // Initialize lap timer with the new start pose
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
-                console.log("Lap timer initialized with start position:", { x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad });
+                console.log("[Simulation] Lap timer initialized:", {
+                    isActive: this.lapTimer.isActive,
+                    startLine: this.lapTimer.startLine,
+                    robotWidth: this.lapTimer.robotWidth_m,
+                    robotLength: this.lapTimer.robotLength_m
+                });
                 
                 // Notify track editor if the track was loaded from a source other than the editor
                 if (source instanceof HTMLCanvasElement && !source.dataset.fromEditor) {
@@ -216,6 +223,11 @@ export class Simulation {
 
         // Draw Lap Timer Start/Finish Line
         if (this.lapTimer.isActive) {
+            console.log("[Simulation] Drawing start line:", {
+                isActive: this.lapTimer.isActive,
+                startLine: this.lapTimer.startLine,
+                robotPos: { x: this.robot.x_m, y: this.robot.y_m, angle: this.robot.angle_rad }
+            });
             displayCtx.save();
             // Make the line more visible with a thicker stroke and brighter color
             displayCtx.strokeStyle = "rgba(0, 255, 255, 1.0)"; // Full opacity cyan
@@ -233,6 +245,8 @@ export class Simulation {
             displayCtx.lineTo(this.lapTimer.startLine.x2 * PIXELS_PER_METER, this.lapTimer.startLine.y2 * PIXELS_PER_METER);
             displayCtx.stroke();
             displayCtx.restore();
+        } else {
+            console.log("[Simulation] Lap timer not active, not drawing start line");
         }
     }
 

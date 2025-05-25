@@ -13,6 +13,7 @@ export class LapTimer {
     }
 
     initialize(startPose, currentTime_s) {
+        console.log("[LapTimer] Initializing with start pose:", startPose);
         // Define start/finish line based on start pose and robot dimensions
         // Line is perpendicular to robot's starting angle, centered on robot's rear axle
         const halfWidth = this.robotWidth_m * 2; // Make line wider than robot
@@ -41,7 +42,13 @@ export class LapTimer {
         
         // Determine initial side
         this.onPositiveSide = this._isRobotOnPositiveSide(startPose.x_m, startPose.y_m);
-        console.log("LapTimer initialized. Start line:", this.startLine, "Initial side positive:", this.onPositiveSide);
+        console.log("[LapTimer] Start line created:", {
+            startLine: this.startLine,
+            isActive: this.isActive,
+            robotWidth: this.robotWidth_m,
+            robotLength: this.robotLength_m,
+            initialSide: this.onPositiveSide
+        });
     }
 
     reset() {
