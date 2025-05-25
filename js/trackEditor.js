@@ -56,6 +56,10 @@ export function initTrackEditor(appInterface) {
     ctx = editorCanvas.getContext('2d');
     console.log("Track Editor Initialized");
 
+    // Inicializar el grid vacío
+    setupGrid();
+    renderEditor();
+
     // Guardar estado cuando se cambia de sección
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -199,6 +203,20 @@ export function initTrackEditor(appInterface) {
     
     elems.toggleEraseModeButton.addEventListener('click', () => toggleEraseMode(elems.toggleEraseModeButton)); 
 
+    // Agregar botón de limpiar
+    const clearTrackButton = document.createElement('button');
+    clearTrackButton.textContent = 'Limpiar Pista';
+    clearTrackButton.className = 'editor-button';
+    elems.trackEditorControls.appendChild(clearTrackButton);
+
+    clearTrackButton.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres limpiar toda la pista?')) {
+            setupGrid();
+            lastGeneratedTrackStartPosition = null;
+            renderEditor();
+        }
+    });
+
     elems.exportTrackToSimulatorButton.addEventListener('click', () => {
         if (isEraseModeActive) toggleEraseMode(elems.toggleEraseModeButton);
         
@@ -283,13 +301,27 @@ export function initTrackEditor(appInterface) {
         }
     });
     editorCanvas.addEventListener('dblclick', (event) => {
-        if (!isEraseModeActive) {
+        if (isEraseModeActive) {
+            const rect = editorCanvas.getBoundingClientRect();
+            const scale = editorCanvas.width / rect.width;
+            const x_canvas = (event.clientX - rect.left) * scale;
+            const y_canvas = (event.clientY - rect.top) * scale;
+
+            const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
+            const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
+
+            if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
+                grid[r][c] = null;
+                renderEditor();
+            }
+        } else {
             // Solo resetear lastGeneratedTrackStartPosition si la rotación resultante no es N-S ni E-W
             const rect = editorCanvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            const gridX = Math.floor(x / TRACK_PART_SIZE_PX);
-            const gridY = Math.floor(y / TRACK_PART_SIZE_PX);
+            const scale = editorCanvas.width / rect.width;
+            const x_canvas = (event.clientX - rect.left) * scale;
+            const y_canvas = (event.clientY - rect.top) * scale;
+            const gridX = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
+            const gridY = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
             
             if (gridY >= 0 && gridY < currentGridSize.rows && gridX >= 0 && gridX < currentGridSize.cols && grid[gridY][gridX]) {
                 const currentRotation = grid[gridY][gridX].rotation_deg;
