@@ -435,6 +435,13 @@ function renderEditor() {
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
 
+    // DEBUG: Draw a red rectangle in the top-left corner
+    ctx.save();
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 5;
+    ctx.strokeRect(10, 10, 100, 100);
+    ctx.restore();
+
     const connIndicatorSize = Math.max(6, TRACK_PART_SIZE_PX * 0.02); 
     const connIndicatorOffset = Math.max(2, TRACK_PART_SIZE_PX * 0.005);
 
