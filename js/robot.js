@@ -198,7 +198,7 @@ export class Robot {
                     const sizeW = part.img.width;
                     const sizeH = part.img.height;
                     ctx.save();
-                    ctx.globalAlpha = 0.8;
+                    // Always fully opaque
                     ctx.translate(x, y);
                     ctx.drawImage(part.img, -sizeW/2, -sizeH/2, sizeW, sizeH);
                     ctx.restore();

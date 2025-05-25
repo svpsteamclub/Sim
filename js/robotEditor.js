@@ -246,6 +246,18 @@ export function renderRobotPreview() {
     console.log("Drawing decorative parts...");
     // Draw decorative parts
     drawRobotPreview();
+
+    // Draw sensors on top
+    previewCtx.save();
+    previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
+    previewRobot.x_m = 0;
+    previewRobot.y_m = 0;
+    previewRobot.angle_rad = -Math.PI / 2;
+    previewRobot.drawSensorsForDisplay(previewCtx, previewRobot.sensors);
+    previewRobot.x_m = tempX;
+    previewRobot.y_m = tempY;
+    previewRobot.angle_rad = tempAngle;
+    previewCtx.restore();
 }
 
 export function getCurrentRobotGeometry() {
