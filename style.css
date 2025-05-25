@@ -300,7 +300,6 @@ button:disabled {
     overflow: hidden;
     min-height: 400px;
     background: #fff;
-    border: 2px dashed red !important;
 }
 
 #trackEditorCanvas {
