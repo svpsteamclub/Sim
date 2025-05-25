@@ -154,8 +154,14 @@ export function initTrackEditor(appInterface) {
         populateTrackPartsPalette(elems.trackPartsPalette);
         setupGrid(); // This will also call renderEditor
         
-        // Generar pista aleatoria automáticamente
-        generateRandomTrackWithRetry();
+        // Intentar cargar la pista inicial de la simulación
+        const simulationCanvas = document.getElementById('simulationDisplayCanvas');
+        if (simulationCanvas && simulationCanvas.width > 0) {
+            window.trackEditorInstance.loadTrackFromSimulation(simulationCanvas);
+        } else {
+            // Si no hay pista en la simulación, generar una aleatoria
+            generateRandomTrackWithRetry();
+        }
         
         // Exportar la pista al simulador automáticamente
         const exportedCanvas = exportTrackAsCanvas();
