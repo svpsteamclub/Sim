@@ -47,7 +47,8 @@ export function getDOMElements() {
         saveTrackDesignButton: document.getElementById('saveTrackDesignButton'),
         loadTrackDesignInput: document.getElementById('loadTrackDesignInput'),
         exportTrackToSimulatorButton: document.getElementById('exportTrackToSimulator'),
-        trackPartsPalette: document.getElementById('trackPartsPalette')
+        trackPartsPalette: document.getElementById('trackPartsPalette'),
+        trackEditorControls: document.querySelector('.track-editor-controls')
     };
 }
 
