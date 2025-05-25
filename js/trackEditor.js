@@ -276,8 +276,6 @@ export function initTrackEditor(appInterface) {
                 }
             }
         } else if (!isEraseModeActive) {
-            // Solo resetear lastGeneratedTrackStartPosition si estamos colocando una nueva pieza
-            // y la pieza que estamos colocando no es una conexión N-S ni E-W
             if (selectedTrackPart) {
                 const conns = getRotatedConnections(selectedTrackPart, 0);
                 if (!( (conns.N && conns.S) || (conns.E && conns.W) )) {
@@ -287,6 +285,7 @@ export function initTrackEditor(appInterface) {
             onGridSingleClick(event);
         }
     });
+
     editorCanvas.addEventListener('dblclick', (event) => {
         if (isEraseModeActive) {
             const rect = editorCanvas.getBoundingClientRect();
@@ -294,33 +293,15 @@ export function initTrackEditor(appInterface) {
             const x_canvas = (event.clientX - rect.left) * scale;
             const y_canvas = (event.clientY - rect.top) * scale;
 
-            const c = Math.floor(x_canvas / TRACK_PART_SIZE_PX);
-            const r = Math.floor(y_canvas / TRACK_PART_SIZE_PX);
+            const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
+            const c = Math.floor(x_canvas / cellSize);
+            const r = Math.floor(y_canvas / cellSize);
 
             if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
                 grid[r][c] = null;
                 renderEditor();
             }
         } else {
-            // Solo resetear lastGeneratedTrackStartPosition si la rotación resultante no es N-S ni E-W
-            const rect = editorCanvas.getBoundingClientRect();
-            const scale = editorCanvas.width / rect.width;
-            const x_canvas = (event.clientX - rect.left) * scale;
-            const y_canvas = (event.clientY - rect.top) * scale;
-            const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
-            
-            const c = Math.floor(x_canvas / cellSize);
-            const r = Math.floor(y_canvas / cellSize);
-            
-            if (r >= 0 && r < currentGridSize.rows && c >= 0 && c < currentGridSize.cols && grid[r][c]) {
-                // Simply add 90 degrees to current rotation
-                const currentRotation = grid[r][c].rotation_deg || 0;
-                const nextRotation = (currentRotation + 90) % 360;
-                
-                grid[r][c].rotation_deg = nextRotation;
-                console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
-                renderEditor();
-            }
             onGridDoubleClick(event);
         }
     });
