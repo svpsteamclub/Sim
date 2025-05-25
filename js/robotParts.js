@@ -268,9 +268,27 @@ export function restorePlacedPartsRaw(partsArr) {
     renderRobotPreview();
 }
 
+// Devuelve las partes decorativas en coordenadas del editor (sin rotar)
+export function getPlacedPartsRaw() {
+    const previewCanvas = getDOMElements().robotPreviewCanvas;
+    return placedParts.map(part => {
+        // Convierte de pixeles a metros, sin rotar
+        let x_m = (part.x - previewCanvas.width/2) / PIXELS_PER_METER;
+        let y_m = (part.y - previewCanvas.height/2) / PIXELS_PER_METER;
+        return {
+            id: part.id,
+            name: part.name,
+            x: x_m,
+            y: y_m,
+            rotation: part.rotation || 0
+        };
+    });
+}
+
 window.PARTS = PARTS;
 window.placedParts = placedParts;
 window.clearPlacedParts = clearPlacedParts;
 window.getAssetPath = getAssetPath;
 window.getPlacedParts = getPlacedParts;
-window.restorePlacedPartsRaw = restorePlacedPartsRaw; 
+window.restorePlacedPartsRaw = restorePlacedPartsRaw;
+window.getPlacedPartsRaw = getPlacedPartsRaw; 
