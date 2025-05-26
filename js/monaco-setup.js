@@ -326,7 +326,7 @@ let editor = null;
 
 require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monacoContainer'), {
-        value: codeTemplates.pid, // Start with PID template
+        value: codeTemplates.onoff, // Start with PID template
         language: 'javascript',
         theme: 'vs',
         minimap: {
