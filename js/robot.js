@@ -201,6 +201,7 @@ export class Robot {
                     ctx.save();
                     // Always fully opaque
                     ctx.translate(x, y);
+                    ctx.rotate(part.rotation || 0); // Apply the part's rotation
                     ctx.drawImage(part.img, -sizeW/2, -sizeH/2, sizeW, sizeH);
                     ctx.restore();
                 }
