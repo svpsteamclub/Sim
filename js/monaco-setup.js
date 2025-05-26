@@ -27,8 +27,12 @@ async function loop() {
     analogWrite(MOTOR_LEFT_PWM, SPEED);
     analogWrite(MOTOR_RIGHT_PWM, SPEED);          
     await delay(10);
-}`,
+}
 
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+`,
     onoff: `// Definición de pines (como se usa en el simulador)
 const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
@@ -83,9 +87,13 @@ async function loop() {
                    " R:" + (sR === 0 ? "ON" : "OFF"));
     
     await delay(10);
-}`,
+}
 
-    'continuous-turn': `// Definición de pines (como se usa en el simulador)
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+`,
+'continuous-turn': `// Definición de pines (como se usa en el simulador)
 const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
@@ -158,9 +166,13 @@ async function loop() {
                    " | Último giro: " + (lastTurnDirection === -1 ? "IZQ" : lastTurnDirection === 1 ? "DER" : "NONE"));
     
     await delay(10);
-}`,
+}
 
-    proportional: `// Definición de pines (como se usa en el simulador)
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+`,
+proportional: `// Definición de pines (como se usa en el simulador)
 const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
@@ -221,9 +233,13 @@ async function loop() {
     Serial.println(" | L:" + leftSpeed.toFixed(0) + " R:" + rightSpeed.toFixed(0));
     
     await delay(10);
-}`,
+}
 
-    pid: `// Definición de pines (como se usa en el simulador)
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+`,
+pid: `// Definición de pines (como se usa en el simulador)
 const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
@@ -303,7 +319,8 @@ async function loop() {
 
 function constrain(value, minVal, maxVal) {
     return Math.min(Math.max(value, minVal), maxVal);
-}`
+}
+`
 };
 
 // Textos explicativos para cada plantilla
