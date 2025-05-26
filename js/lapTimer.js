@@ -48,7 +48,7 @@ export class LapTimer {
             };
         }
 
-        this.currentLapStartTime_s = currentTime_s;
+        this.currentLapStartTime_s = performance.now() / 1000.0; // Use real time instead of simulation time
         this.lapCount = 0;
         this.lastLapTime_ms = null;
         this.bestLapTime_ms = null;
@@ -95,7 +95,8 @@ export class LapTimer {
         if (currentSideIsPositive !== this.onPositiveSide) {
             // Robot crossed the line. Check if it's a valid lap (e.g., moving forward)
             // Simple check: only count if lap time is more than a few seconds to avoid bouncing
-            const lapDuration_s = currentTime_s - this.currentLapStartTime_s;
+            const currentRealTime_s = performance.now() / 1000.0;
+            const lapDuration_s = currentRealTime_s - this.currentLapStartTime_s;
             if (lapDuration_s > 2.0) { // Minimum lap time to be considered valid (e.g., 2 seconds)
                 this.lapCount++;
                 completedLapTime = lapDuration_s * 1000; // to ms
@@ -104,7 +105,7 @@ export class LapTimer {
                 if (this.bestLapTime_ms === null || completedLapTime < this.bestLapTime_ms) {
                     this.bestLapTime_ms = completedLapTime;
                 }
-                this.currentLapStartTime_s = currentTime_s;
+                this.currentLapStartTime_s = currentRealTime_s;
                 newLapCompleted = true;
                 // console.log(`Lap ${this.lapCount} completed: ${formatTime(completedLapTime)}`);
             }
