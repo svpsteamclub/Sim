@@ -254,20 +254,20 @@ export class Simulation {
 
             displayCtx.save();
             displayCtx.setLineDash([]); // solid line
-            displayCtx.strokeStyle = "#FF00FF"; // bright magenta
-            displayCtx.lineWidth = 8;
+            displayCtx.strokeStyle = "#FF9999"; // light red
+            displayCtx.lineWidth = 2; // thinner line
             displayCtx.beginPath();
             displayCtx.moveTo(x1, y1);
             displayCtx.lineTo(x2, y2);
             displayCtx.stroke();
 
-            // Draw debug circles at endpoints
-            displayCtx.fillStyle = "#00FF00";
+            // Draw endpoint circles in the same color as the line
+            displayCtx.fillStyle = "#FF9999";
             displayCtx.beginPath();
-            displayCtx.arc(x1, y1, 12, 0, 2 * Math.PI);
+            displayCtx.arc(x1, y1, 4, 0, 2 * Math.PI);
             displayCtx.fill();
             displayCtx.beginPath();
-            displayCtx.arc(x2, y2, 12, 0, 2 * Math.PI);
+            displayCtx.arc(x2, y2, 4, 0, 2 * Math.PI);
             displayCtx.fill();
 
             displayCtx.restore();
