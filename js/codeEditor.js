@@ -273,7 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         simulationCodeSelect.addEventListener('change', (e) => {
             const selectedType = e.target.value;
-            if (selectedType !== 'custom') {
+            if (selectedType === 'custom' && window.monacoEditor) {
+                window.monacoEditor.setValue(customCodeTemplate);
+            } else if (selectedType !== 'custom') {
                 // Update the code template selector in the code editor tab
                 if (codeTemplate) {
                     codeTemplate.value = selectedType;
