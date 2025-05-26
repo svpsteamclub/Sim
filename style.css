@@ -618,3 +618,10 @@ hr {
         min-width: 0;
     }
 }
+
+.header-logo {
+    max-height: 60px;
+    height: auto;
+    margin-left: 2rem;
+    display: block;
+}
