@@ -22,7 +22,6 @@ export function getDOMElements() {
         applySimParamsButton: document.getElementById('applySimParamsButton'),
         telemetryOutput: document.getElementById('telemetryOutput'),
         lapTimerOutput: document.getElementById('lapTimerOutput'),
-        currentCodeType: document.getElementById('currentCodeType'),
 
         // Code Editor Tab
         codeEditorArea: document.getElementById('codeEditorArea'),

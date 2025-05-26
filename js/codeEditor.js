@@ -262,31 +262,9 @@ export function getCurrentCodeType() {
     return currentCodeType;
 }
 
-// Add event listener for simulation code selection
+// Add event listener for code template changes
 document.addEventListener('DOMContentLoaded', () => {
-    const simulationCodeSelect = document.getElementById('simulationCodeSelect');
     const codeTemplate = document.getElementById('codeTemplate');
-    
-    if (simulationCodeSelect) {
-        // Set initial code type display
-        updateCodeTypeDisplay('onoff');
-        
-        simulationCodeSelect.addEventListener('change', (e) => {
-            const selectedType = e.target.value;
-            if (selectedType === 'custom' && window.monacoEditor) {
-                window.monacoEditor.setValue(customCodeTemplate);
-            } else if (selectedType !== 'custom') {
-                // Update the code template selector in the code editor tab
-                if (codeTemplate) {
-                    codeTemplate.value = selectedType;
-                    // Trigger the template change event
-                    codeTemplate.dispatchEvent(new Event('change'));
-                }
-            }
-            // Update the current code type display
-            updateCodeTypeDisplay(selectedType);
-        });
-    }
     
     // Add event listener for code template changes
     if (codeTemplate) {
@@ -294,10 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedType = e.target.value;
             if (selectedType === 'custom' && window.monacoEditor) {
                 window.monacoEditor.setValue(customCodeTemplate);
-            }
-            // Update the simulation code selector if it exists
-            if (simulationCodeSelect) {
-                simulationCodeSelect.value = selectedType;
             }
             // Update the current code type display
             updateCodeTypeDisplay(selectedType);
