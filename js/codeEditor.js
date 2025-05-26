@@ -28,12 +28,14 @@ let _motorPWMValues = {
 const ArduinoSerial = {
     _buffer: "",
     _outputElement: null, // Will be set to the serialMonitorOutput pre element
+    _maxLines: 10, // Maximum number of lines to keep
 
     begin: function(baudRate) {
         this.println(`Serial communication started at ${baudRate} baud (simulated).`);
     },
     print: function(msg) {
         this._buffer += String(msg);
+        this._trimBuffer();
         if (this._outputElement) {
             this._outputElement.textContent = this._buffer;
             this._outputElement.scrollTop = this._outputElement.scrollHeight; // Auto-scroll
@@ -50,6 +52,13 @@ const ArduinoSerial = {
     },
     getOutput: function() { // For external UI update if needed
         return this._buffer;
+    },
+    _trimBuffer: function() {
+        // Split into lines and keep only the last _maxLines
+        const lines = this._buffer.split('\n');
+        if (lines.length > this._maxLines) {
+            this._buffer = lines.slice(-this._maxLines).join('\n');
+        }
     }
 };
 
