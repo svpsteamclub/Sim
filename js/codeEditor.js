@@ -171,7 +171,7 @@ export async function executeUserSetup() {
             ArduinoSerial.println("setup() ejecutado.");
         } catch (e) {
             console.error("Error ejecutando setup() del usuario:", e);
-            ArduinoSerial.println("Error en setup(): " + e.message);
+            Arduinoln("Error en setup(): " + e.message);
             throw e; // Re-throw to stop simulation if setup fails
         }
     }
