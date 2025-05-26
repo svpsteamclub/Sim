@@ -620,33 +620,33 @@ function validateTrack() {
 }
 
 function saveTrackDesign() {
-    const { trackEditorTrackNameInput } = getDOMElements();
-    const trackName = trackEditorTrackNameInput.value.trim() || "MiPistaEditada";
-    
+    // Si el input no existe, usar nombre por defecto
+    let trackName = "MiPistaEditada";
+    const elems = getDOMElements();
+    if (elems.trackEditorTrackNameInput) {
+        trackName = elems.trackEditorTrackNameInput.value.trim() || "MiPistaEditada";
+    }
     const designData = {
         gridSize: { ...currentGridSize },
         gridParts: [],
         trackName: trackName
     };
-
     for (let r = 0; r < currentGridSize.rows; r++) {
         for (let c = 0; c < currentGridSize.cols; c++) {
-            if (grid[r][c] && grid[r][c].file) { // Ensure it's a valid part object
+            if (grid[r][c] && grid[r][c].file) {
                 designData.gridParts.push({
                     r: r,
                     c: c,
-                    partFile: grid[r][c].file, // Save original file name
+                    partFile: grid[r][c].file,
                     rotation: grid[r][c].rotation_deg
                 });
             }
         }
     }
-
     if (designData.gridParts.length === 0) {
         alert("La pista está vacía. Nada que guardar.");
         return;
     }
-
     const jsonData = JSON.stringify(designData, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
