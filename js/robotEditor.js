@@ -342,8 +342,8 @@ function getPlacedPartsRaw() {
 
 export async function loadDefaultRobotJSON() {
     try {
-        const response = await fetch('assets/RobotSLC2025.json');
-        if (!response.ok) throw new Error('No se pudo cargar RobotSLC2025.json');
+        const response = await fetch('assets/robots/SL Generico.json');
+        if (!response.ok) throw new Error('No se pudo cargar SL Generico.json');
         const robotData = await response.json();
         if (robotData.geometry) {
             setFormValues(robotData.geometry);
