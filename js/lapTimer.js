@@ -81,7 +81,60 @@ export class LapTimer {
     }
 
     _isRobotOnPositiveSide(robotX_m, robotY_m) {
+        // First check if the robot is within the line segment bounds
+        const lineLength = Math.sqrt(
+            Math.pow(this.startLine.x2 - this.startLine.x1, 2) +
+            Math.pow(this.startLine.y2 - this.startLine.y1, 2)
+        );
+        
+        // Calculate the distance from robot to line segment
+        const distToLine = this._distanceToLineSegment(
+            robotX_m, robotY_m,
+            this.startLine.x1, this.startLine.y1,
+            this.startLine.x2, this.startLine.y2
+        );
+        
+        // Only consider the robot's position if it's within a small margin of the line segment
+        const margin = this.robotWidth_m * 0.5; // Half robot width as margin
+        if (distToLine > margin) {
+            return this.onPositiveSide; // Keep previous state if robot is far from line
+        }
+        
+        // Now check which side of the line the robot is on
         return this._getSide(robotX_m, robotY_m) > 0;
+    }
+
+    _distanceToLineSegment(x, y, x1, y1, x2, y2) {
+        const A = x - x1;
+        const B = y - y1;
+        const C = x2 - x1;
+        const D = y2 - y1;
+
+        const dot = A * C + B * D;
+        const len_sq = C * C + D * D;
+        let param = -1;
+
+        if (len_sq !== 0) {
+            param = dot / len_sq;
+        }
+
+        let xx, yy;
+
+        if (param < 0) {
+            xx = x1;
+            yy = y1;
+        } else if (param > 1) {
+            xx = x2;
+            yy = y2;
+        } else {
+            xx = x1 + param * C;
+            yy = y1 + param * D;
+        }
+
+        const dx = x - xx;
+        const dy = y - yy;
+
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     update(currentTime_s, robotPose) {
