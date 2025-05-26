@@ -176,27 +176,27 @@ const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
+const MOTOR_RIGHT_PWM = 6;     // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 5;   // analogWrite para velocidad del motor izquierdo
 
-// Control Proporcional
-const Kp = 100.0;           // Constante proporcional
-const BASE_SPEED = 150;     // Velocidad base
-const MAX_SPEED = 255;      // Velocidad máxima
-const MIN_SPEED = 0;        // Velocidad mínima
+const BASE_SPEED = 150;     // Velocidad base hacia adelante
+const MAX_SPEED = 255;      // Velocidad máxima para los motores
+
+// --- Parámetros para el Control Proporcional ---
+const Kp = 50; // Constante proporcional (¡AJUSTAR ESTE VALOR!)
+                // Un valor más alto = corrección más fuerte.
+                // Comienza con un valor entre 30-80 y ajusta.
+
+let lastError = 0; // Para recordar el último error si se pierde la línea
 
 function setup() {
     Serial.begin(9600);
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(CENTER_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     Serial.println("Robot Setup Complete. Proportional Control.");
-}
-
-function constrain(value, min, max) {
-    return Math.min(Math.max(value, min), max);
 }
 
 async function loop() {
@@ -204,34 +204,63 @@ async function loop() {
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
 
-    // Cálculo del error (-2 a +2)
     let error = 0;
-    if (sL === 0 && sC === 1 && sR === 1) error = -2;        // Muy a la derecha
-    else if (sL === 0 && sC === 0 && sR === 1) error = -1;   // Medio a la derecha
-    else if (sL === 1 && sC === 0 && sR === 1) error = 0;    // Centro
-    else if (sL === 1 && sC === 0 && sR === 0) error = 1;    // Medio a la izquierda
-    else if (sL === 1 && sC === 1 && sR === 0) error = 2;    // Muy a la izquierda
 
-    // Cálculo proporcional
-    let correction = Kp * error;
+    // --- Cálculo del Error ---
+    // Estos valores de error son ejemplos, puedes ajustarlos.
+    // La idea es que un error positivo significa que la línea está a la derecha del robot,
+    // y un error negativo significa que la línea está a la izquierda.
+    if (sL === 0 && sC === 1 && sR === 1) { // Solo sensor izquierdo detecta la línea
+        error = -2; // Error grande a la izquierda
+    } else if (sL === 0 && sC === 0 && sR === 1) { // Sensores izquierdo y central detectan
+        error = -1; // Error pequeño a la izquierda
+    } else if (sL === 1 && sC === 0 && sR === 1) { // Solo sensor central detecta
+        error = 0;  // En el centro, sin error
+    } else if (sL === 1 && sC === 0 && sR === 0) { // Sensores derecho y central detectan
+        error = 1;  // Error pequeño a la derecha
+    } else if (sL === 1 && sC === 1 && sR === 0) { // Solo sensor derecho detecta la línea
+        error = 2;  // Error grande a la derecha
+    }
+    // --- Casos donde la línea se pierde ---
+    else if (sL === 1 && sC === 1 && sR === 1) { // Ningún sensor detecta la línea
+        // Usar el último error conocido para intentar seguir la curva
+        // o podrías detener los motores o implementar una estrategia de búsqueda.
+        // Por ahora, usamos el último error.
+        error = lastError * 2; // Amplifica el último error para girar más bruscamente
+                               // si se pierde completamente la línea.
+                               // Si lastError era 0, podría girar a un lado por defecto.
+        if (lastError === 0) error = 2; // Gira a la derecha por defecto si no hay error previo
+    }
+    // Si tienes otros casos (ej. los 3 sensores en negro en un cruce),
+    // puedes añadirlos aquí. Por ejemplo:
+    // else if (sL === 0 && sC === 0 && sR === 0) { // Todos los sensores en negro (cruce?)
+    //    error = 0; // O podrías decidir parar o girar.
+    //    // Por ahora, lo tratamos como si estuviera centrado para seguir adelante.
+    // }
 
-    // Aplicar corrección a los motores
-    let leftSpeed = BASE_SPEED + correction;
-    let rightSpeed = BASE_SPEED - correction;
 
-    // Limitar velocidades
-    leftSpeed = constrain(leftSpeed, MIN_SPEED, MAX_SPEED);
-    rightSpeed = constrain(rightSpeed, MIN_SPEED, MAX_SPEED);
+    // --- Cálculo del ajuste Proporcional ---
+    let adjustment = Kp * error;
 
-    // Aplicar a los motores
-    analogWrite(MOTOR_LEFT_PWM, leftSpeed);
+    // --- Cálculo de la velocidad de los motores ---
+    let rightSpeed = BASE_SPEED + adjustment;
+    let leftSpeed = BASE_SPEED - adjustment;
+
+    // --- Restringir la velocidad de los motores al rango [0, MAX_SPEED] ---
+    rightSpeed = constrain(rightSpeed, 0, MAX_SPEED);
+    leftSpeed = constrain(leftSpeed, 0, MAX_SPEED);
+
+    // --- Aplicar velocidad a los motores ---
     analogWrite(MOTOR_RIGHT_PWM, rightSpeed);
+    analogWrite(MOTOR_LEFT_PWM, leftSpeed);
+
+    lastError = error; // Guarda el error actual para la próxima iteración
 
     Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
-    Serial.print(" | Error:" + error);
-    Serial.println(" | L:" + leftSpeed.toFixed(0) + " R:" + rightSpeed.toFixed(0));
-    
-    await delay(10);
+    Serial.print(" | Error: " + error + " Ajuste: " + adjustment.toFixed(2));
+    Serial.println(" | V.Izq: " + leftSpeed + " V.Der: " + rightSpeed);
+
+    await delay(10); // Pequeña pausa
 }
 
 function constrain(value, min, max) {
