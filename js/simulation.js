@@ -119,10 +119,24 @@ export class Simulation {
             console.log('[RandomStart] Línea generada en conexión entre piezas:', fromConnection);
             return fromConnection;
         }
-        // Si no es posible, usa la lógica anterior como respaldo
-        // ... (puedes dejar aquí la lógica anterior si lo deseas, o solo retornar null)
-        console.warn('[RandomStart] No se pudo generar una línea en conexión, usando lógica anterior o null.');
-        return null;
+        // Si no es posible, usa la línea de inicio por defecto proporcionada
+        console.warn('[RandomStart] No se pudo generar una línea en conexión, usando línea de inicio por defecto.');
+        // Coordenadas por defecto en píxeles
+        const x1 = 749.6005822946047;
+        const y1 = 523.3982349194796;
+        const x2 = 988.4578291329269;
+        const y2 = 523.3982349194796;
+        return {
+            startLine: {
+                x1: x1 / PIXELS_PER_METER,
+                y1: y1 / PIXELS_PER_METER,
+                x2: x2 / PIXELS_PER_METER,
+                y2: y2 / PIXELS_PER_METER
+            },
+            startX: (x1 + x2) / 2 / PIXELS_PER_METER,
+            startY: y1 / PIXELS_PER_METER,
+            startAngle: Math.PI / 2 // Perpendicular a la línea horizontal
+        };
     }
 
     // Update simulation parameters (from UI)
