@@ -508,6 +508,13 @@ hr {
     margin-top: var(--spacing-md);
 }
 
+.robot-parameters .file-input-label,
+.robot-parameters button#saveRobotButton {
+    min-height: 2.5em;
+    height: auto;
+    box-sizing: border-box;
+}
+
 .robot-parameters .file-input-label {
     margin-top: var(--spacing-md);
     height: 100%;
