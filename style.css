@@ -651,3 +651,11 @@ hr {
 .file-input-label:active {
     filter: brightness(0.95);
 }
+
+.danger {
+    background-color: #e53935 !important;
+    color: white !important;
+}
+.danger:hover:not(:disabled) {
+    background-color: #b71c1c !important;
+}
