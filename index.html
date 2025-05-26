@@ -198,10 +198,11 @@
                     <hr>
                     <label for="trackEditorTrackName">Nombre de Pista:</label>
                     <input type="text" id="trackEditorTrackName" value="MiPistaEditada">
-                    <button id="saveTrackDesignButton">Guardar Diseño</button>
-                    <label for="loadTrackDesignInput" class="file-input-label">Cargar Diseño (.json)</label>
-                    <input type="file" id="loadTrackDesignInput" accept=".json,.trackdesign" style="display:none;">
-                    <hr>
+                    <div style="display: flex; gap: 0.5em; align-items: center; margin-top: 1em;">
+                        <button id="saveTrackDesignButton" style="flex:1; text-align:center;">Guardar Diseño</button>
+                        <label for="loadTrackDesignInput" class="file-input-label" style="flex:1; text-align:center;">Cargar Diseño (.json)</label>
+                        <input type="file" id="loadTrackDesignInput" accept=".json,.trackdesign" style="display:none;">
+                    </div>
                 </div>
                 <div class="track-parts-palette-container">
                     <h3>Paleta de Piezas</h3>
