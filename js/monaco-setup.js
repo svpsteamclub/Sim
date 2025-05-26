@@ -1,14 +1,14 @@
-// Code templates
+// Esquemas de código
 const codeTemplates = {
-    custom: `// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+    custom: `// Definición de pines (como se usa en el simulador)
+const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
-const SPEED = 200;      // Velocidad de velocidad de motores
+const SPEED = 200;      // Velocidad de los motores
 
 function setup() {
     Serial.begin(9600);
@@ -21,21 +21,21 @@ function setup() {
 }
 
 async function loop() {
-    //Escribe aqui el codigo de lectura de sensores y logica de control
+    // Escribe aquí el código de lectura de sensores y lógica de control
     
-    //Fuciones minimas para el accionamiento de motores (ambos adelane)
+    // Funciones mínimas para el accionamiento de motores (ambos adelante)
     analogWrite(MOTOR_LEFT_PWM, SPEED);
     analogWrite(MOTOR_RIGHT_PWM, SPEED);          
     await delay(10);
 }`,
 
-    onoff: `// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+    onoff: `// Definición de pines (como se usa en el simulador)
+const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
 const TURN_SPEED = 200;      // Velocidad de giro
 const FORWARD_SPEED = 150;   // Velocidad hacia adelante
@@ -51,7 +51,7 @@ function setup() {
 }
 
 async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
 
@@ -85,13 +85,13 @@ async function loop() {
     await delay(10);
 }`,
 
-    'continuous-turn': `// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+    'continuous-turn': `// Definición de pines (como se usa en el simulador)
+const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
 const TURN_SPEED = 200;      // Velocidad de giro
 const FORWARD_SPEED = 150;   // Velocidad hacia adelante
@@ -110,7 +110,7 @@ function setup() {
 }
 
 async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
 
@@ -160,13 +160,13 @@ async function loop() {
     await delay(10);
 }`,
 
-    proportional: `// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+    proportional: `// Definición de pines (como se usa en el simulador)
+const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
 // Control Proporcional
 const Kp = 100.0;           // Constante proporcional
@@ -189,17 +189,17 @@ function constrain(value, min, max) {
 }
 
 async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
 
     // Cálculo del error (-2 a +2)
     let error = 0;
-    if (sL === 0 && sC === 1 && sR === 1) error = -2;        // Far Right
-    else if (sL === 0 && sC === 0 && sR === 1) error = -1;   // Mid Right
-    else if (sL === 1 && sC === 0 && sR === 1) error = 0;    // Center
-    else if (sL === 1 && sC === 0 && sR === 0) error = 1;    // Mid Left
-    else if (sL === 1 && sC === 1 && sR === 0) error = 2;    // Far Left
+    if (sL === 0 && sC === 1 && sR === 1) error = -2;        // Muy a la derecha
+    else if (sL === 0 && sC === 0 && sR === 1) error = -1;   // Medio a la derecha
+    else if (sL === 1 && sC === 0 && sR === 1) error = 0;    // Centro
+    else if (sL === 1 && sC === 0 && sR === 0) error = 1;    // Medio a la izquierda
+    else if (sL === 1 && sC === 1 && sR === 0) error = 2;    // Muy a la izquierda
 
     // Cálculo proporcional
     let correction = Kp * error;
@@ -223,20 +223,20 @@ async function loop() {
     await delay(10);
 }`,
 
-    pid: `// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+    pid: `// Definición de pines (como se usa en el simulador)
+const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
-// PID Constants - Tune these!
+// Constantes PID - ¡Ajusta estos valores!
 let Kp = 90.0;
 let Ki = 0.75;
 let Kd = 25.0;
 
-const BASE_SPEED = 150;      // Base speed for both motors
+const BASE_SPEED = 150;      // Velocidad base para ambos motores
 const MAX_MOTOR_SPEED = 255;
 const MIN_MOTOR_SPEED = 0;
 
@@ -258,27 +258,27 @@ function setup() {
 }
 
 async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
 
-    // --- Basic Error Calculation ---
-    if (sL === 0 && sC === 1 && sR === 1) { error = -2; } // Far Right
-    else if (sL === 0 && sC === 0 && sR === 1) { error = -1; } // Mid Right
-    else if (sL === 1 && sC === 0 && sR === 1) { error = 0;  } // Center
-    else if (sL === 1 && sC === 0 && sR === 0) { error = 1;  } // Mid Left
-    else if (sL === 1 && sC === 1 && sR === 0) { error = 2;  } // Far Left
-    // Lost line (all sensors off line or all on line - could be intersection)
+    // --- Cálculo básico del error ---
+    if (sL === 0 && sC === 1 && sR === 1) { error = -2; } // Muy a la derecha
+    else if (sL === 0 && sC === 0 && sR === 1) { error = -1; } // Medio a la derecha
+    else if (sL === 1 && sC === 0 && sR === 1) { error = 0;  } // Centro
+    else if (sL === 1 && sC === 0 && sR === 0) { error = 1;  } // Medio a la izquierda
+    else if (sL === 1 && sC === 1 && sR === 0) { error = 2;  } // Muy a la izquierda
+    // Línea perdida (todos los sensores fuera de línea o todos en línea - podría ser una intersección)
     else if ((sL === 1 && sC === 1 && sR === 1) || (sL === 0 && sC === 0 && sR === 0)) {
-        // If line lost, continue with previous error to try to recover
-        // A more robust solution might involve a search pattern or stopping.
-        // error = previousError; // this is one strategy
-        // For now, let's assume it means to go straight or rely on PID momentum
-        if (sL === 0 && sC === 0 && sR === 0) error = 0; // All on line = straight
-        // If all off, error remains previousError implicitly (if not reset)
+        // Si se pierde la línea, continuar con el error previo para intentar recuperar
+        // Una solución más robusta podría involucrar un patrón de búsqueda o detenerse.
+        // error = previousError; // esta es una estrategia
+        // Por ahora, asumimos que significa ir recto o confiar en el momentum del PID
+        if (sL === 0 && sC === 0 && sR === 0) error = 0; // Todos en línea = recto
+        // Si todos fuera, el error permanece como previousError implícitamente (si no se reinicia)
     }
 
-    // PID Calculation
+    // Cálculo PID
     integral = integral + error;
     integral = constrain(integral, INTEGRAL_MIN, INTEGRAL_MAX);
     derivative = error - previousError;
@@ -298,7 +298,7 @@ async function loop() {
     //Serial.print(" | E:" + error + " P:" + (Kp*error).toFixed(1) + " I:" + (Ki*integral).toFixed(1) + " D:" + (Kd*derivative).toFixed(1));
     //Serial.println(" | L:" + leftMotorSpeed + " R:" + rightMotorSpeed);
     
-    await delay(5); // Simulation step time, matches sim param by default
+    await delay(5); // Tiempo de paso de simulación, coincide con el parámetro de sim por defecto
 }
 
 function constrain(value, minVal, maxVal) {
