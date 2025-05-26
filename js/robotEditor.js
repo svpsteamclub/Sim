@@ -342,8 +342,8 @@ function getPlacedPartsRaw() {
 
 export async function loadDefaultRobotJSON() {
     try {
-        const response = await fetch('assets/robots/SL Generico.json');
-        if (!response.ok) throw new Error('No se pudo cargar SL Generico.json');
+        const response = await fetch('assets/robots/Robot Generico OnOff.json');
+        if (!response.ok) throw new Error('No se pudo cargar Robot Generico OnOff.json');
         const robotData = await response.json();
         if (robotData.geometry) {
             setFormValues(robotData.geometry);
@@ -374,16 +374,18 @@ async function initRobotSelectionDropdown() {
     defaultOption.textContent = 'Seleccionar robot...';
     dropdown.appendChild(defaultOption);
 
-    // Add predefined robots
+    // Add predefined robots (Robot Genérico OnOff como primero y seleccionado por defecto)
     const robots = [
+        { name: 'Robot Genérico OnOff', file: 'Robot Generico OnOff.json' },
         { name: 'SL Genérico', file: 'SL Generico.json' },
         { name: 'SLC SVP 2025', file: 'SLC_SVP_2025.json' }
     ];
 
-    robots.forEach(robot => {
+    robots.forEach((robot, idx) => {
         const option = document.createElement('option');
         option.value = robot.file;
         option.textContent = robot.name;
+        if (idx === 0) option.selected = true; // Selecciona por defecto el primero
         dropdown.appendChild(option);
     });
 
@@ -419,4 +421,9 @@ async function initRobotSelectionDropdown() {
             alert('Error al cargar el robot seleccionado');
         }
     });
+
+    // Selecciona y carga el robot por defecto al iniciar
+    dropdown.value = robots[0].file;
+    const event = new Event('change');
+    dropdown.dispatchEvent(event);
 }
