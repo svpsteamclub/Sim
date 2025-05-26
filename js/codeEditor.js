@@ -112,6 +112,55 @@ const arduinoAPI = {
     // User code might also define their own constants like LEFT_SENSOR_PIN etc.
 };
 
+// Define the custom code template
+const customCodeTemplate = `// Pines de los sensores
+const LEFT_SENSOR_PIN = 2;
+const CENTER_SENSOR_PIN = 3;
+const RIGHT_SENSOR_PIN = 4;
+
+// Pines de los motores
+const MOTOR_LEFT_PWM = 6;
+const MOTOR_RIGHT_PWM = 5;
+
+// Variables para almacenar lecturas de sensores
+let leftSensor = 0;
+let centerSensor = 0;
+let rightSensor = 0;
+
+// Variables para control de motores
+let leftMotorSpeed = 0;
+let rightMotorSpeed = 0;
+
+function setup() {
+    // Configurar pines de sensores como entrada
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    
+    // Configurar pines de motores como salida
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    
+    // Iniciar comunicación serial
+    Serial.begin(9600);
+}
+
+function loop() {
+    // Leer sensores
+    leftSensor = digitalRead(LEFT_SENSOR_PIN);
+    centerSensor = digitalRead(CENTER_SENSOR_PIN);
+    rightSensor = digitalRead(RIGHT_SENSOR_PIN);
+    
+    // Aquí va tu código de control
+    
+    // Aplicar velocidades a los motores
+    analogWrite(MOTOR_LEFT_PWM, leftMotorSpeed);
+    analogWrite(MOTOR_RIGHT_PWM, rightMotorSpeed);
+    
+    // Pequeña pausa para estabilidad
+    delay(20);
+}`;
+
 export function initCodeEditor(simulationState) {
     sharedSimulationState = simulationState; // Give API access to robot state
     const elems = getDOMElements();
@@ -235,6 +284,8 @@ export function getCurrentCodeType() {
 // Add event listener for simulation code selection
 document.addEventListener('DOMContentLoaded', () => {
     const simulationCodeSelect = document.getElementById('simulationCodeSelect');
+    const codeTemplate = document.getElementById('codeTemplate');
+    
     if (simulationCodeSelect) {
         // Set initial code type display
         updateCodeTypeDisplay('onoff');
@@ -243,12 +294,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedType = e.target.value;
             if (selectedType !== 'custom') {
                 // Update the code template selector in the code editor tab
-                const codeTemplate = document.getElementById('codeTemplate');
                 if (codeTemplate) {
                     codeTemplate.value = selectedType;
                     // Trigger the template change event
                     codeTemplate.dispatchEvent(new Event('change'));
                 }
+            }
+            // Update the current code type display
+            updateCodeTypeDisplay(selectedType);
+        });
+    }
+    
+    // Add event listener for code template changes
+    if (codeTemplate) {
+        codeTemplate.addEventListener('change', (e) => {
+            const selectedType = e.target.value;
+            if (selectedType === 'custom' && window.monacoEditor) {
+                window.monacoEditor.setValue(customCodeTemplate);
+            }
+            // Update the simulation code selector if it exists
+            if (simulationCodeSelect) {
+                simulationCodeSelect.value = selectedType;
             }
             // Update the current code type display
             updateCodeTypeDisplay(selectedType);
