@@ -108,7 +108,7 @@ main {
     padding: var(--spacing-lg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
-    margin-top: var(--spacing-md);
+    margin-top: 0;
 }
 
 .tab-content.active {
