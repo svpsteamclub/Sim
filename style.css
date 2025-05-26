@@ -625,3 +625,29 @@ hr {
     margin-left: 2rem;
     display: block;
 }
+
+#applySimParamsButton {
+    margin-top: 20px;
+}
+
+.file-input-label {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+.file-input-label:hover {
+    background-color: var(--primary-hover);
+}
+
+.file-input-label:active {
+    filter: brightness(0.95);
+}
