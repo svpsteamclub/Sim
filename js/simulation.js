@@ -150,7 +150,12 @@ export class Simulation {
         this.track.load(source, null, null, this.params.lineThreshold, (success, trackWidthPx, trackHeightPx) => {
             if (success) {
                 // If the source is a canvas with start position data, use that
-                if (source instanceof HTMLCanvasElement && source.dataset.startX) {
+                if (
+                    source instanceof HTMLCanvasElement &&
+                    source.dataset.startX !== undefined &&
+                    source.dataset.startY !== undefined &&
+                    source.dataset.startAngle !== undefined
+                ) {
                     startX_m = parseFloat(source.dataset.startX);
                     startY_m = parseFloat(source.dataset.startY);
                     startAngle_rad = parseFloat(source.dataset.startAngle);
