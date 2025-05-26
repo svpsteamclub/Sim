@@ -55,44 +55,38 @@ export class Simulation {
 
             // Check if the position is on a line
             if (this.track.isPixelOnLine(x * PIXELS_PER_METER, y * PIXELS_PER_METER)) {
-                // Check if this position is in a C1.01 or C2.08 part
-                // We'll check a small area around the point to see if it matches the pattern of these parts
-                const checkRadius = 0.05; // 5cm radius to check
-                const pointsToCheck = 8; // Number of points to check in a circle
-                let matchesPattern = false;
-
-                for (let i = 0; i < pointsToCheck; i++) {
-                    const angle = (i * 2 * Math.PI) / pointsToCheck;
-                    const checkX = x + checkRadius * Math.cos(angle);
-                    const checkY = y + checkRadius * Math.sin(angle);
-                    
-                    // Check if this point is on the line
+                // Find the direction of the line at this point by checking nearby points
+                const checkDistance = 0.02; // 2cm
+                let dx = 0, dy = 0;
+                
+                // Check points in a small circle to find line direction
+                for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+                    const checkX = x + checkDistance * Math.cos(angle);
+                    const checkY = y + checkDistance * Math.sin(angle);
                     if (this.track.isPixelOnLine(checkX * PIXELS_PER_METER, checkY * PIXELS_PER_METER)) {
-                        matchesPattern = true;
+                        dx = Math.cos(angle);
+                        dy = Math.sin(angle);
                         break;
                     }
                 }
 
-                if (matchesPattern) {
-                    // Calculate the angle of the line at this point
-                    // We'll use the direction of the line to determine the start angle
-                    const angle = Math.random() * Math.PI * 2;
+                if (dx !== 0 || dy !== 0) {
+                    // Calculate perpendicular direction for start line
+                    const perpAngle = Math.atan2(dy, dx) + Math.PI/2;
                     
                     // Calculate line endpoints (perpendicular to the track line)
                     const lineLength = this.robot.wheelbase_m * 1.5; // Make line slightly wider than robot
                     const halfLength = lineLength / 2;
                     
-                    // Calculate perpendicular direction
-                    const perpAngle = angle + Math.PI/2;
-                    const dx = Math.cos(perpAngle) * halfLength;
-                    const dy = Math.sin(perpAngle) * halfLength;
+                    const dx_perp = Math.cos(perpAngle) * halfLength;
+                    const dy_perp = Math.sin(perpAngle) * halfLength;
 
                     // Create start line
                     const startLine = {
-                        x1: x - dx,
-                        y1: y - dy,
-                        x2: x + dx,
-                        y2: y + dy
+                        x1: x - dx_perp,
+                        y1: y - dy_perp,
+                        x2: x + dx_perp,
+                        y2: y + dy_perp
                     };
 
                     // Check if both endpoints are on the track
@@ -102,7 +96,7 @@ export class Simulation {
                             startLine,
                             startX: x,
                             startY: y,
-                            startAngle: angle
+                            startAngle: perpAngle
                         };
                     }
                 }
