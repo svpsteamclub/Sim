@@ -91,6 +91,19 @@ export function initRobotEditor(appInterface) {
         }
     });
 
+    // Setup tab change observer
+    const robotEditorTab = document.getElementById('robot-editor');
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                if (robotEditorTab.classList.contains('active')) {
+                    renderRobotPreview();
+                }
+            }
+        });
+    });
+    observer.observe(robotEditorTab, { attributes: true });
+
     // Guardar y cargar robot
     elems.saveRobotButton.addEventListener('click', () => {
         const geometry = getFormValues();
