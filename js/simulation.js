@@ -42,68 +42,74 @@ export class Simulation {
     _generateRandomStartLine() {
         if (!this.track.imageData) return null;
 
-        // Get track dimensions in meters
-        const trackWidth_m = this.track.width_px / PIXELS_PER_METER;
-        const trackHeight_m = this.track.height_px / PIXELS_PER_METER;
+        // Trabajar en píxeles para asegurar que la línea esté dentro del área visible
+        const width_px = this.track.width_px;
+        const height_px = this.track.height_px;
+        const lineLength_px = this.robot.wheelbase_m * 1.5 * PIXELS_PER_METER; // en píxeles
+        const halfLength_px = lineLength_px / 2;
+        const checkDistance_px = 0.02 * PIXELS_PER_METER; // 2cm en píxeles
 
-        // Try to find a valid start line position
         const maxAttempts = 50;
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            // Generate random position on the track
-            const x = Math.random() * trackWidth_m;
-            const y = Math.random() * trackHeight_m;
+            // Generar posición aleatoria en píxeles
+            const x_px = Math.random() * width_px;
+            const y_px = Math.random() * height_px;
 
-            // Check if the position is on a line
-            if (this.track.isPixelOnLine(x * PIXELS_PER_METER, y * PIXELS_PER_METER)) {
-                // Find the direction of the line at this point by checking nearby points
-                const checkDistance = 0.02; // 2cm
+            // Verificar si la posición está sobre la línea
+            if (this.track.isPixelOnLine(x_px, y_px)) {
+                // Buscar la dirección de la línea en ese punto
                 let dx = 0, dy = 0;
-                
-                // Check points in a small circle to find line direction
                 for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-                    const checkX = x + checkDistance * Math.cos(angle);
-                    const checkY = y + checkDistance * Math.sin(angle);
-                    if (this.track.isPixelOnLine(checkX * PIXELS_PER_METER, checkY * PIXELS_PER_METER)) {
+                    const checkX = x_px + checkDistance_px * Math.cos(angle);
+                    const checkY = y_px + checkDistance_px * Math.sin(angle);
+                    if (
+                        checkX >= 0 && checkX < width_px &&
+                        checkY >= 0 && checkY < height_px &&
+                        this.track.isPixelOnLine(checkX, checkY)
+                    ) {
                         dx = Math.cos(angle);
                         dy = Math.sin(angle);
                         break;
                     }
                 }
-
                 if (dx !== 0 || dy !== 0) {
-                    // Calculate perpendicular direction for start line
-                    const perpAngle = Math.atan2(dy, dx) + Math.PI/2;
-                    
-                    // Calculate line endpoints (perpendicular to the track line)
-                    const lineLength = this.robot.wheelbase_m * 1.5; // Make line slightly wider than robot
-                    const halfLength = lineLength / 2;
-                    
-                    const dx_perp = Math.cos(perpAngle) * halfLength;
-                    const dy_perp = Math.sin(perpAngle) * halfLength;
+                    // Calcular dirección perpendicular para la línea de inicio
+                    const perpAngle = Math.atan2(dy, dx) + Math.PI / 2;
+                    const dx_perp = Math.cos(perpAngle) * halfLength_px;
+                    const dy_perp = Math.sin(perpAngle) * halfLength_px;
 
-                    // Create start line
-                    const startLine = {
-                        x1: x - dx_perp,
-                        y1: y - dy_perp,
-                        x2: x + dx_perp,
-                        y2: y + dy_perp
-                    };
+                    // Calcular los extremos de la línea de inicio
+                    const x1_px = x_px - dx_perp;
+                    const y1_px = y_px - dy_perp;
+                    const x2_px = x_px + dx_perp;
+                    const y2_px = y_px + dy_perp;
 
-                    // Check if both endpoints are on the track
-                    if (this.track.isPixelOnLine(startLine.x1 * PIXELS_PER_METER, startLine.y1 * PIXELS_PER_METER) &&
-                        this.track.isPixelOnLine(startLine.x2 * PIXELS_PER_METER, startLine.y2 * PIXELS_PER_METER)) {
+                    // Verificar que ambos extremos estén dentro del área y sobre la línea
+                    if (
+                        x1_px >= 0 && x1_px < width_px &&
+                        y1_px >= 0 && y1_px < height_px &&
+                        x2_px >= 0 && x2_px < width_px &&
+                        y2_px >= 0 && y2_px < height_px &&
+                        this.track.isPixelOnLine(x1_px, y1_px) &&
+                        this.track.isPixelOnLine(x2_px, y2_px)
+                    ) {
+                        // Convertir a metros para la posición y ángulo del robot
                         return {
-                            startLine,
-                            startX: x,
-                            startY: y,
+                            startLine: {
+                                x1: x1_px / PIXELS_PER_METER,
+                                y1: y1_px / PIXELS_PER_METER,
+                                x2: x2_px / PIXELS_PER_METER,
+                                y2: y2_px / PIXELS_PER_METER
+                            },
+                            startX: x_px / PIXELS_PER_METER,
+                            startY: y_px / PIXELS_PER_METER,
                             startAngle: perpAngle
                         };
                     }
                 }
             }
         }
-
-        // If no valid position found, return null
+        // Si no se encuentra una posición válida
         return null;
     }
 
