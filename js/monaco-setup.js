@@ -38,8 +38,8 @@ const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
+const MOTOR_RIGHT_PWM = 6;    // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 5;   // analogWrite para velocidad del motor izquierdo
 
 const TURN_SPEED = 140;      // Velocidad de giro
 const FORWARD_SPEED = 70;   // Velocidad hacia adelante
@@ -49,8 +49,8 @@ function setup() {
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(CENTER_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     Serial.println("Robot Setup Complete. On/Off Control.");
 }
 
@@ -62,23 +62,23 @@ async function loop() {
     // Control On/Off simple
     if (sC === 0) {  // Sensor central en línea
         // Avanzar recto
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
         analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
     }
     else if (sL === 0) {  // Sensor izquierdo en línea
-        // Girar a la izquierda
-        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        // Girar a la Derecha
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
     }
     else if (sR === 0) {  // Sensor derecho en línea
-        // Girar a la derecha
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        // Girar a la Izquierda
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
     }
     else {  // Ningún sensor en línea
         // Avanzar lento buscando la línea
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
         analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
     }
 
     Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
@@ -92,6 +92,7 @@ async function loop() {
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
+
 `,
 'continuous-turn': `// Definición de pines (como se usa en el simulador)
 const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
