@@ -113,52 +113,33 @@ const arduinoAPI = {
 };
 
 // Define the custom code template
-const customCodeTemplate = `// Pines de los sensores
-const LEFT_SENSOR_PIN = 2;
-const CENTER_SENSOR_PIN = 3;
-const RIGHT_SENSOR_PIN = 4;
+const customCodeTemplate = `// Pin Definitions (as used in the simulator)
+const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
+const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
 
-// Pines de los motores
-const MOTOR_LEFT_PWM = 6;
-const MOTOR_RIGHT_PWM = 5;
+const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
+const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
 
-// Variables para almacenar lecturas de sensores
-let leftSensor = 0;
-let centerSensor = 0;
-let rightSensor = 0;
-
-// Variables para control de motores
-let leftMotorSpeed = 0;
-let rightMotorSpeed = 0;
+const SPEED = 200;      // Velocidad de velocidad de motores
 
 function setup() {
-    // Configurar pines de sensores como entrada
+    Serial.begin(9600);
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(CENTER_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
-    
-    // Configurar pines de motores como salida
     pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    
-    // Iniciar comunicación serial
-    Serial.begin(9600);
+    Serial.println("Robot Setup Complete. Continuous Turn Control.");
 }
 
-function loop() {
-    // Leer sensores
-    leftSensor = digitalRead(LEFT_SENSOR_PIN);
-    centerSensor = digitalRead(CENTER_SENSOR_PIN);
-    rightSensor = digitalRead(RIGHT_SENSOR_PIN);
+async function loop() {
+    //Escribe aqui el codigo de lectura de sensores y logica de control
     
-    // Aquí va tu código de control
-    
-    // Aplicar velocidades a los motores
-    analogWrite(MOTOR_LEFT_PWM, leftMotorSpeed);
-    analogWrite(MOTOR_RIGHT_PWM, rightMotorSpeed);
-    
-    // Pequeña pausa para estabilidad
-    delay(20);
+    //Fuciones minimas para el accionamiento de motores (ambos adelane)
+    analogWrite(MOTOR_LEFT_PWM, SPEED);
+    analogWrite(MOTOR_RIGHT_PWM, SPEED);          
+    await delay(10);
 }`;
 
 export function initCodeEditor(simulationState) {
