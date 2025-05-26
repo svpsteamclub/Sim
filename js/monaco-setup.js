@@ -96,8 +96,8 @@ const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
+const MOTOR_RIGHT_PWM = 6;    // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 5;   // analogWrite para velocidad del motor izquierdo
 
 const TURN_SPEED = 200;      // Velocidad de giro
 const FORWARD_SPEED = 150;   // Velocidad hacia adelante
@@ -110,8 +110,8 @@ function setup() {
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(CENTER_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     Serial.println("Robot Setup Complete. Continuous Turn Control.");
 }
 
@@ -123,36 +123,36 @@ async function loop() {
     // Control On/Off con giro continuo
     if (sC === 0) {  // Sensor central en línea
         // Avanzar recto
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
         analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
         lastTurnDirection = 0;  // Resetear dirección de giro
     }
     else if (sL === 0) {  // Sensor izquierdo en línea
         // Girar a la izquierda
-        analogWrite(MOTOR_LEFT_PWM, 0);
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, 0);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
         lastTurnDirection = -1;  // Recordar que giramos a la izquierda
     }
     else if (sR === 0) {  // Sensor derecho en línea
         // Girar a la derecha
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, 0);
         lastTurnDirection = 1;  // Recordar que giramos a la derecha
     }
     else {  // Ningún sensor en línea
         // Continuar girando en la última dirección conocida
         if (lastTurnDirection === -1) {
             // Seguir girando a la izquierda
-            analogWrite(MOTOR_LEFT_PWM, 0);
-            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+            analogWrite(MOTOR_RIGHT_PWM, 0);
+            analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
         } else if (lastTurnDirection === 1) {
             // Seguir girando a la derecha
-            analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-            analogWrite(MOTOR_RIGHT_PWM, 0);
+            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+            analogWrite(MOTOR_LEFT_PWM, 0);
         } else {
             // Si no hay dirección previa, girar a la derecha por defecto
-            analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-            analogWrite(MOTOR_RIGHT_PWM, 0);
+            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+            analogWrite(MOTOR_LEFT_PWM, 0);
             lastTurnDirection = 1;
         }
     }
@@ -169,6 +169,7 @@ async function loop() {
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
+
 `,
 proportional: `// Definición de pines (como se usa en el simulador)
 const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
