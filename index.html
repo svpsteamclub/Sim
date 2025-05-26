@@ -57,6 +57,14 @@
                     <button id="applySimParamsButton">Aplicar Parámetros</button>
                 </div>
                 <div class="sim-monitor-column">
+                    <h4>Seleccionar Código</h4>
+                    <select id="simulationCodeSelect" style="width: 100%; margin-bottom: 1em;">
+                        <option value="custom">Código Personalizado</option>
+                        <option value="onoff">Control On/Off Simple</option>
+                        <option value="continuous-turn">Control On/Off con Giro Continuo</option>
+                        <option value="proportional">Control Proporcional</option>
+                        <option value="pid">Control PID Completo</option>
+                    </select>
                     <h4>Código Actual</h4>
                     <pre id="currentCodeType">Tipo: Código Personalizado</pre>
                     <h4>Monitor Serial</h4>

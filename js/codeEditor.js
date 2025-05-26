@@ -231,3 +231,24 @@ export function clearSerial() {
 export function getCurrentCodeType() {
     return currentCodeType;
 }
+
+// Add event listener for simulation code selection
+document.addEventListener('DOMContentLoaded', () => {
+    const simulationCodeSelect = document.getElementById('simulationCodeSelect');
+    if (simulationCodeSelect) {
+        simulationCodeSelect.addEventListener('change', (e) => {
+            const selectedType = e.target.value;
+            if (selectedType !== 'custom') {
+                // Update the code template selector in the code editor tab
+                const codeTemplate = document.getElementById('codeTemplate');
+                if (codeTemplate) {
+                    codeTemplate.value = selectedType;
+                    // Trigger the template change event
+                    codeTemplate.dispatchEvent(new Event('change'));
+                }
+            }
+            // Update the current code type display
+            updateCodeTypeDisplay(selectedType);
+        });
+    }
+});
