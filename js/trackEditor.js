@@ -840,6 +840,13 @@ function loadDefaultTrackDesign(gridSizeSelect, trackNameInput) {
                 }
             });
             renderEditor();
+            // Exportar automáticamente al simulador si la interfaz está disponible
+            if (mainAppInterface && typeof exportTrackAsCanvas === 'function') {
+                const exportedCanvas = exportTrackAsCanvas();
+                if (exportedCanvas) {
+                    mainAppInterface.loadTrackFromEditor(exportedCanvas, 0, 0, 0);
+                }
+            }
         })
         .catch(error => {
             console.error("Error al cargar la pista por defecto:", error);
