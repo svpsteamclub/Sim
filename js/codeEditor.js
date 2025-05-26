@@ -3,7 +3,7 @@ import { getDOMElements } from './ui.js';
 
 let userSetupFunction = () => {};
 let userLoopFunction = async () => {};
-let currentCodeType = 'custom'; // Track the current code type
+let currentCodeType = 'onoff'; // Track the current code type
 
 let sharedSimulationState = null; // To access robot sensors and track
 
@@ -236,6 +236,9 @@ export function getCurrentCodeType() {
 document.addEventListener('DOMContentLoaded', () => {
     const simulationCodeSelect = document.getElementById('simulationCodeSelect');
     if (simulationCodeSelect) {
+        // Set initial code type display
+        updateCodeTypeDisplay('onoff');
+        
         simulationCodeSelect.addEventListener('change', (e) => {
             const selectedType = e.target.value;
             if (selectedType !== 'custom') {
