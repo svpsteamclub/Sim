@@ -27,9 +27,48 @@
     <main>
         <!-- Introducción Tab -->
         <div id="introduccion" class="tab-content active">
-            <div style="max-width:600px;margin:2em auto 0 auto;text-align:center;">
+            <div style="max-width:700px;margin:2em auto 0 auto;text-align:left;">
                 <h2>Introducción</h2>
-                <p>Explora el mundo de los robots seguidores de líneas. Aprende, experimenta y simula sin hardware real. Usa las pestañas para navegar por las funciones del simulador.</p>
+                <h1>🤖 Explorando el Mundo de los Robots Seguidores de Líneas y Nuestro Simulador</h1>
+                <p>¡Bienvenido a la sección de aprendizaje de nuestro simulador de robots seguidores de líneas! Aquí descubrirás qué son estos fascinantes robots, cómo funcionan, cómo se programan con Arduino y, lo más importante, cómo puedes usar nuestro simulador para diseñar, probar y optimizar tus propios robots virtuales.</p>
+                <hr>
+                <h2>¿Qué es un Robot Seguidor de Líneas?</h2>
+                <p>Un <strong>robot seguidor de líneas</strong> es un vehículo autónomo diseñado para detectar y seguir una línea dibujada en el suelo. Esta línea suele ser de un color que contrasta fuertemente con la superficie (por ejemplo, una línea negra sobre un fondo blanco, o viceversa). Estos robots son muy populares en el ámbito educativo y en competencias de robótica, ya que introducen conceptos fundamentales de sensado, lógica de control y actuación.</p>
+                <p>Su funcionamiento se basa en un bucle constante de:</p>
+                <ol>
+                    <li><strong>Sensar:</strong> Detectar la posición de la línea con respecto al robot.</li>
+                    <li><strong>Decidir:</strong> Aplicar una lógica de control para determinar cómo debe moverse el robot.</li>
+                    <li><strong>Actuar:</strong> Mover los motores para corregir la trayectoria y mantenerse sobre la línea.</li>
+                </ol>
+                <hr>
+                <h2>Componentes Típicos de un Robot Seguidor de Líneas Físico</h2>
+                <p>Aunque nuestro simulador es virtual, es útil conocer los componentes de un robot real para entender mejor su funcionamiento:</p>
+                <ul>
+                    <li><strong>Chasis:</strong> Es la estructura física del robot que sostiene todos los demás componentes. Su diseño (material, forma, tamaño) puede influir en el rendimiento.</li>
+                    <li><strong>Microcontrolador (Arduino):</strong> Actúa como el "cerebro" del robot. Una placa Arduino (como Arduino UNO) es comúnmente utilizada debido a su facilidad de programación y versatilidad. Recibe información de los sensores y envía comandos a los motores.</li>
+                    <li><strong>Sensores Infrarrojos (IR):</strong> Son los "ojos" del robot. Típicamente se usan pares de emisor-detector infrarrojo (como el CNY70 o módulos TCRT5000). El emisor envía luz IR y el detector mide cuánta luz se refleja. Una superficie blanca refleja más luz IR que una negra. Con varios sensores, el robot puede saber si está centrado, a la izquierda o a la derecha de la línea.</li>
+                    <li><strong>Motores y Ruedas:</strong> Proporcionan el movimiento. Generalmente se usan dos motores de corriente continua (DC) con ruedas, permitiendo giros diferenciales (una rueda gira más rápido que la otra, o en sentido contrario, para cambiar de dirección).</li>
+                    <li><strong>Controlador de Motores (Puente H):</strong> Un microcontrolador como Arduino no puede suministrar directamente la corriente que necesitan los motores. Un controlador de motores (por ejemplo, el L293D o L298N) actúa como un intermediario, permitiendo al Arduino controlar la velocidad y dirección de los motores.</li>
+                    <li><strong>Fuente de Alimentación:</strong> Baterías o un paquete de pilas que proporcionan la energía necesaria para todos los componentes electrónicos.</li>
+                    <li><strong>Rueda Loca o Deslizador:</strong> Un tercer punto de apoyo (además de las dos ruedas motrices) que permite al robot girar con facilidad.</li>
+                </ul>
+                <hr>
+                <h2>Programación con Arduino IDE</h2>
+                <p>Los robots seguidores de líneas basados en Arduino se programan utilizando el <strong>Arduino IDE (Entorno de Desarrollo Integrado)</strong>. El lenguaje de programación es una variante de C/C++.</p>
+                <p>La lógica básica de control en el código de Arduino suele seguir estos pasos dentro de la función <code>loop()</code> (que se ejecuta continuamente):</p>
+                <ol>
+                    <li><strong>Leer los Sensores:</strong> Obtener los valores digitales (NEGRO/BLANCO) o analógicos (niveles de reflexión) de los sensores de línea.</li>
+                    <li><strong>Tomar Decisiones:</strong> Basándose en las lecturas de los sensores, determinar la posición del robot respecto a la línea:
+                        <ul>
+                            <li>Si el sensor izquierdo detecta la línea negra y el derecho blanco: el robot está desviado a la derecha, necesita girar a la izquierda.</li>
+                            <li>Si el sensor derecho detecta la línea negra y el izquierdo blanco: el robot está desviado a la izquierda, necesita girar a la derecha.</li>
+                            <li>Si ambos sensores (o el central, si se usan más) detectan la línea: el robot está centrado, debe avanzar.</li>
+                            <li>Si ningún sensor detecta la línea: el robot se ha salido (o es una sección sin línea), puede detenerse o implementar una rutina de búsqueda.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Controlar los Motores:</strong> Enviar las señales adecuadas al controlador de motores para que las ruedas giren a la velocidad y dirección deseadas para ejecutar la corrección.</li>
+                </ol>
+                <p>En el editor de código del simulador podrás usar un lenguaje parecido al usado en Arduino, pero simplificado.</p>
             </div>
         </div>
 
