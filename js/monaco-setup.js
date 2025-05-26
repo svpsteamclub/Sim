@@ -5,27 +5,24 @@ const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
-
-const SPEED = 200;      // Velocidad de los motores
+const MOTOR_RIGHT_PWM = 6;    // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 5;   // analogWrite para velocidad del motor izquierdo
 
 function setup() {
     Serial.begin(9600);
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(CENTER_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. Custom Code.");
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. On/Off Control.");
 }
 
 async function loop() {
-    // Escribe aquí el código de lectura de sensores y lógica de control
     
-    // Funciones mínimas para el accionamiento de motores (ambos adelante)
-    analogWrite(MOTOR_LEFT_PWM, SPEED);
-    analogWrite(MOTOR_RIGHT_PWM, SPEED);          
+        analogWrite(MOTOR_RIGHT_PWM, 70);
+        analogWrite(MOTOR_LEFT_PWM, 70);
+    
     await delay(10);
 }
 
