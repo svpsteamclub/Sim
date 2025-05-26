@@ -38,90 +38,90 @@ export class Simulation {
         this.isOutOfTrack = false;
     }
 
-    // Generate a random start line on the track
-    _generateRandomStartLine() {
-        console.log('[RandomStart] Entrando a la función de generación aleatoria');
-        if (!this.track.imageData) return null;
-
-        // Trabajar en píxeles para asegurar que la línea esté dentro del área visible
-        const width_px = this.track.width_px;
-        const height_px = this.track.height_px;
-        const lineLength_px = this.robot.wheelbase_m * 1.5 * PIXELS_PER_METER; // en píxeles
-        const halfLength_px = lineLength_px / 2;
-        const checkDistance_px = 0.02 * PIXELS_PER_METER; // 2cm en píxeles
-
-        console.log('[RandomStart] width_px:', width_px, 'height_px:', height_px, 'lineLength_px:', lineLength_px);
-
-        const maxAttempts = 50;
-        for (let attempt = 0; attempt < maxAttempts; attempt++) {
-            // Generar posición aleatoria en píxeles
-            const x_px = Math.random() * width_px;
-            const y_px = Math.random() * height_px;
-            console.log(`[RandomStart] Intento ${attempt + 1}: x_px=${x_px}, y_px=${y_px}`);
-
-            // Verificar si la posición está sobre la línea
-            if (this.track.isPixelOnLine(x_px, y_px)) {
-                // Buscar la dirección de la línea en ese punto
-                let dx = 0, dy = 0;
-                for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-                    const checkX = x_px + checkDistance_px * Math.cos(angle);
-                    const checkY = y_px + checkDistance_px * Math.sin(angle);
-                    if (
-                        checkX >= 0 && checkX < width_px &&
-                        checkY >= 0 && checkY < height_px &&
-                        this.track.isPixelOnLine(checkX, checkY)
-                    ) {
-                        dx = Math.cos(angle);
-                        dy = Math.sin(angle);
-                        break;
-                    }
+    // Generate a start line at a connection between pieces (preferred)
+    _generateStartLineFromConnection() {
+        // Accede a la grilla del editor
+        const grid = window.trackEditorInstance?.grid;
+        if (!grid) {
+            console.warn('[RandomStart] No se encontró la grilla de piezas.');
+            return null;
+        }
+        const rows = grid.length;
+        const cols = grid[0].length;
+        if (!rows || !cols) {
+            console.warn('[RandomStart] Grilla vacía.');
+            return null;
+        }
+        // Lista de conexiones válidas
+        const conexiones = [];
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const pieza = grid[r][c];
+                if (!pieza) continue;
+                // Conexión Este
+                if (c < cols - 1 && grid[r][c + 1]) {
+                    conexiones.push({ r1: r, c1: c, r2: r, c2: c + 1 });
                 }
-                if (dx !== 0 || dy !== 0) {
-                    // Calcular dirección perpendicular para la línea de inicio
-                    const perpAngle = Math.atan2(dy, dx) + Math.PI / 2;
-                    const dx_perp = Math.cos(perpAngle) * halfLength_px;
-                    const dy_perp = Math.sin(perpAngle) * halfLength_px;
-
-                    // Calcular los extremos de la línea de inicio
-                    const x1_px = x_px - dx_perp;
-                    const y1_px = y_px - dy_perp;
-                    const x2_px = x_px + dx_perp;
-                    const y2_px = y_px + dy_perp;
-
-                    // Verificar que ambos extremos estén dentro del área y sobre la línea y que no sean negativos
-                    if (
-                        x1_px >= 0 && x1_px < width_px &&
-                        y1_px >= 0 && y1_px < height_px &&
-                        x2_px >= 0 && x2_px < width_px &&
-                        y2_px >= 0 && y2_px < height_px &&
-                        this.track.isPixelOnLine(x1_px, y1_px) &&
-                        this.track.isPixelOnLine(x2_px, y2_px)
-                    ) {
-                        console.log('[RandomStart] Línea encontrada:', { x1_px, y1_px, x2_px, y2_px });
-                        // Convertir a metros para la posición y ángulo del robot
-                        return {
-                            startLine: {
-                                x1: x1_px / PIXELS_PER_METER,
-                                y1: y1_px / PIXELS_PER_METER,
-                                x2: x2_px / PIXELS_PER_METER,
-                                y2: y2_px / PIXELS_PER_METER
-                            },
-                            startX: x_px / PIXELS_PER_METER,
-                            startY: y_px / PIXELS_PER_METER,
-                            startAngle: perpAngle
-                        };
-                    } else {
-                        console.log('[RandomStart] Línea descartada por estar fuera de límites o no estar sobre la pista.');
-                    }
-                } else {
-                    console.log('[RandomStart] No se encontró dirección de línea en el punto.');
+                // Conexión Sur
+                if (r < rows - 1 && grid[r + 1][c]) {
+                    conexiones.push({ r1: r, c1: c, r2: r + 1, c2: c });
                 }
-            } else {
-                console.log('[RandomStart] Punto no está sobre la línea.');
             }
         }
-        // Si no se encuentra una posición válida
-        console.warn('[RandomStart] No se pudo encontrar una línea de inicio válida tras', maxAttempts, 'intentos.');
+        if (conexiones.length === 0) {
+            console.warn('[RandomStart] No se encontraron conexiones entre piezas.');
+            return null;
+        }
+        // Elige una conexión aleatoria
+        const idx = Math.floor(Math.random() * conexiones.length);
+        const { r1, c1, r2, c2 } = conexiones[idx];
+        // Calcula el centro de cada celda en píxeles
+        const cellSize_px = this.track.width_px / cols;
+        const x1 = (c1 + 0.5) * cellSize_px;
+        const y1 = (r1 + 0.5) * cellSize_px;
+        const x2 = (c2 + 0.5) * cellSize_px;
+        const y2 = (r2 + 0.5) * cellSize_px;
+        // Centro de la conexión
+        const cx = (x1 + x2) / 2;
+        const cy = (y1 + y2) / 2;
+        // Ángulo de la línea que une los centros
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        // Perpendicular para la línea de inicio
+        const perpAngle = angle + Math.PI / 2;
+        const lineLength_px = this.robot.wheelbase_m * 1.5 * PIXELS_PER_METER;
+        const halfLength_px = lineLength_px / 2;
+        const dx = Math.cos(perpAngle) * halfLength_px;
+        const dy = Math.sin(perpAngle) * halfLength_px;
+        // Extremos de la línea de inicio
+        const x1_line = cx - dx;
+        const y1_line = cy - dy;
+        const x2_line = cx + dx;
+        const y2_line = cy + dy;
+        // Devuelve en metros
+        return {
+            startLine: {
+                x1: x1_line / PIXELS_PER_METER,
+                y1: y1_line / PIXELS_PER_METER,
+                x2: x2_line / PIXELS_PER_METER,
+                y2: y2_line / PIXELS_PER_METER
+            },
+            startX: cx / PIXELS_PER_METER,
+            startY: cy / PIXELS_PER_METER,
+            startAngle: perpAngle
+        };
+    }
+
+    // Reemplaza la generación aleatoria por la de conexión si es posible
+    _generateRandomStartLine() {
+        // Intenta primero con la conexión entre piezas
+        const fromConnection = this._generateStartLineFromConnection();
+        if (fromConnection) {
+            console.log('[RandomStart] Línea generada en conexión entre piezas:', fromConnection);
+            return fromConnection;
+        }
+        // Si no es posible, usa la lógica anterior como respaldo
+        // ... (puedes dejar aquí la lógica anterior si lo deseas, o solo retornar null)
+        console.warn('[RandomStart] No se pudo generar una línea en conexión, usando lógica anterior o null.');
         return null;
     }
 
