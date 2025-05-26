@@ -139,6 +139,15 @@
                         </div>
                     </div>
                 </div>
+                <div class="robot-editor-help" style="align-self: flex-start; max-width: 340px; margin-top: 0.5em;">
+                    <h4 style="margin-top:0;">¿Cómo usar el editor?</h4>
+                    <ul style="font-size:0.98em; margin:0 0 0 1em; padding:0 0 0 1em;">
+                        <li>Haz <b>click y arrastra</b> desde la paleta para ubicar piezas decorativas en el robot.</li>
+                        <li>Haz <b>click y arrastra</b> sobre una pieza ya colocada para moverla.</li>
+                        <li>Haz <b>doble click</b> sobre una pieza para girarla 90°.</li>
+                        <li>Activa <b>Modo Borrar</b> y luego haz <b>doble click</b> sobre una pieza para eliminarla.</li>
+                    </ul>
+                </div>
                 <div class="robot-parameters">
                     <h3>Geometría del Robot (en metros)</h3>
                     <label for="robotWidth">
@@ -147,7 +156,7 @@
                     </label>
                     
                     <label for="sensorOffset">
-                        Offset Sensores Delante (m):
+                        Ubicacion de Sensores (m):
                         <input type="number" id="sensorOffset" value="0.05" step="0.005" min="0">
                     </label>
                     
@@ -157,7 +166,7 @@
                     </label>
                     
                     <label for="sensorDiameter">
-                        Diámetro Sensor (m):
+                        Diámetro Zona de Detección (m):
                         <input type="number" id="sensorDiameter" value="0.005" step="0.001" min="0.001">
                     </label>
                     
