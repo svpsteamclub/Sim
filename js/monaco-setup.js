@@ -203,8 +203,8 @@ const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
 const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
 
 // PID Constants - Tune these!
-let Kp = 50.0;
-let Ki = 0.1;
+let Kp = 90.0;
+let Ki = 0.75;
 let Kd = 25.0;
 
 const BASE_SPEED = 150;      // Base speed for both motors
@@ -265,11 +265,11 @@ async function loop() {
     analogWrite(MOTOR_LEFT_PWM, leftMotorSpeed);
     analogWrite(MOTOR_RIGHT_PWM, rightMotorSpeed);
 
-    Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
-    Serial.print(" | E:" + error + " P:" + (Kp*error).toFixed(1) + " I:" + (Ki*integral).toFixed(1) + " D:" + (Kd*derivative).toFixed(1));
-    Serial.println(" | L:" + leftMotorSpeed + " R:" + rightMotorSpeed);
+    //Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
+    //Serial.print(" | E:" + error + " P:" + (Kp*error).toFixed(1) + " I:" + (Ki*integral).toFixed(1) + " D:" + (Kd*derivative).toFixed(1));
+    //Serial.println(" | L:" + leftMotorSpeed + " R:" + rightMotorSpeed);
     
-    await delay(20); // Simulation step time, matches sim param by default
+    await delay(5); // Simulation step time, matches sim param by default
 }
 
 function constrain(value, minVal, maxVal) {
