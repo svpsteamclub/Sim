@@ -38,6 +38,60 @@ export class Simulation {
         this.isOutOfTrack = false;
     }
 
+    // Generate a random start line on the track
+    _generateRandomStartLine() {
+        if (!this.track.imageData) return null;
+
+        // Get track dimensions in meters
+        const trackWidth_m = this.track.width_px / PIXELS_PER_METER;
+        const trackHeight_m = this.track.height_px / PIXELS_PER_METER;
+
+        // Try to find a valid start line position
+        const maxAttempts = 50;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+            // Generate random position on the track
+            const x = Math.random() * trackWidth_m;
+            const y = Math.random() * trackHeight_m;
+
+            // Check if the position is on a line
+            if (this.track.isPixelOnLine(x * PIXELS_PER_METER, y * PIXELS_PER_METER)) {
+                // Generate a random angle for the start line
+                const angle = Math.random() * Math.PI * 2;
+                
+                // Calculate line endpoints (perpendicular to the track line)
+                const lineLength = this.robot.wheelbase_m * 1.5; // Make line slightly wider than robot
+                const halfLength = lineLength / 2;
+                
+                // Calculate perpendicular direction
+                const perpAngle = angle + Math.PI/2;
+                const dx = Math.cos(perpAngle) * halfLength;
+                const dy = Math.sin(perpAngle) * halfLength;
+
+                // Create start line
+                const startLine = {
+                    x1: x - dx,
+                    y1: y - dy,
+                    x2: x + dx,
+                    y2: y + dy
+                };
+
+                // Check if both endpoints are on the track
+                if (this.track.isPixelOnLine(startLine.x1 * PIXELS_PER_METER, startLine.y1 * PIXELS_PER_METER) &&
+                    this.track.isPixelOnLine(startLine.x2 * PIXELS_PER_METER, startLine.y2 * PIXELS_PER_METER)) {
+                    return {
+                        startLine,
+                        startX: x,
+                        startY: y,
+                        startAngle: angle
+                    };
+                }
+            }
+        }
+
+        // If no valid position found, return null
+        return null;
+    }
+
     // Update simulation parameters (from UI)
     updateParameters(newParams) {
         if (newParams.robotGeometry) {
@@ -67,6 +121,14 @@ export class Simulation {
                     startX_m = parseFloat(source.dataset.startX);
                     startY_m = parseFloat(source.dataset.startY);
                     startAngle_rad = parseFloat(source.dataset.startAngle);
+                } else {
+                    // Generate random start line if no start position is provided
+                    const randomStart = this._generateRandomStartLine();
+                    if (randomStart) {
+                        startX_m = randomStart.startX;
+                        startY_m = randomStart.startY;
+                        startAngle_rad = randomStart.startAngle;
+                    }
                 }
                 
                 // Reset simulation state first
@@ -118,7 +180,7 @@ export class Simulation {
                 }
             }
             if (callback) callback(success, trackWidthPx, trackHeightPx);
-        }, source instanceof HTMLCanvasElement, source instanceof File ? source.name : "track_url");
+        }, source instanceof HTMLCanvasElement);
     }
     
     resetSimulationState(startX_m, startY_m, startAngle_rad, newGeometry = null) {
