@@ -55,35 +55,56 @@ export class Simulation {
 
             // Check if the position is on a line
             if (this.track.isPixelOnLine(x * PIXELS_PER_METER, y * PIXELS_PER_METER)) {
-                // Generate a random angle for the start line
-                const angle = Math.random() * Math.PI * 2;
-                
-                // Calculate line endpoints (perpendicular to the track line)
-                const lineLength = this.robot.wheelbase_m * 1.5; // Make line slightly wider than robot
-                const halfLength = lineLength / 2;
-                
-                // Calculate perpendicular direction
-                const perpAngle = angle + Math.PI/2;
-                const dx = Math.cos(perpAngle) * halfLength;
-                const dy = Math.sin(perpAngle) * halfLength;
+                // Check if this position is in a C1.01 or C2.08 part
+                // We'll check a small area around the point to see if it matches the pattern of these parts
+                const checkRadius = 0.05; // 5cm radius to check
+                const pointsToCheck = 8; // Number of points to check in a circle
+                let matchesPattern = false;
 
-                // Create start line
-                const startLine = {
-                    x1: x - dx,
-                    y1: y - dy,
-                    x2: x + dx,
-                    y2: y + dy
-                };
+                for (let i = 0; i < pointsToCheck; i++) {
+                    const angle = (i * 2 * Math.PI) / pointsToCheck;
+                    const checkX = x + checkRadius * Math.cos(angle);
+                    const checkY = y + checkRadius * Math.sin(angle);
+                    
+                    // Check if this point is on the line
+                    if (this.track.isPixelOnLine(checkX * PIXELS_PER_METER, checkY * PIXELS_PER_METER)) {
+                        matchesPattern = true;
+                        break;
+                    }
+                }
 
-                // Check if both endpoints are on the track
-                if (this.track.isPixelOnLine(startLine.x1 * PIXELS_PER_METER, startLine.y1 * PIXELS_PER_METER) &&
-                    this.track.isPixelOnLine(startLine.x2 * PIXELS_PER_METER, startLine.y2 * PIXELS_PER_METER)) {
-                    return {
-                        startLine,
-                        startX: x,
-                        startY: y,
-                        startAngle: angle
+                if (matchesPattern) {
+                    // Calculate the angle of the line at this point
+                    // We'll use the direction of the line to determine the start angle
+                    const angle = Math.random() * Math.PI * 2;
+                    
+                    // Calculate line endpoints (perpendicular to the track line)
+                    const lineLength = this.robot.wheelbase_m * 1.5; // Make line slightly wider than robot
+                    const halfLength = lineLength / 2;
+                    
+                    // Calculate perpendicular direction
+                    const perpAngle = angle + Math.PI/2;
+                    const dx = Math.cos(perpAngle) * halfLength;
+                    const dy = Math.sin(perpAngle) * halfLength;
+
+                    // Create start line
+                    const startLine = {
+                        x1: x - dx,
+                        y1: y - dy,
+                        x2: x + dx,
+                        y2: y + dy
                     };
+
+                    // Check if both endpoints are on the track
+                    if (this.track.isPixelOnLine(startLine.x1 * PIXELS_PER_METER, startLine.y1 * PIXELS_PER_METER) &&
+                        this.track.isPixelOnLine(startLine.x2 * PIXELS_PER_METER, startLine.y2 * PIXELS_PER_METER)) {
+                        return {
+                            startLine,
+                            startX: x,
+                            startY: y,
+                            startAngle: angle
+                        };
+                    }
                 }
             }
         }
