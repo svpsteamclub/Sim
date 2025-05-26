@@ -328,7 +328,7 @@ export class Simulation {
             const y1 = this.lapTimer.startLine.y1 * PIXELS_PER_METER;
             const x2 = this.lapTimer.startLine.x2 * PIXELS_PER_METER;
             const y2 = this.lapTimer.startLine.y2 * PIXELS_PER_METER;
-
+            console.log('Dibujando línea de inicio:', { x1, y1, x2, y2 });
             displayCtx.save();
             displayCtx.setLineDash([]); // solid line
             displayCtx.strokeStyle = "#FF9999"; // light red
