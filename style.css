@@ -98,7 +98,7 @@ main {
     flex-grow: 1;
     padding: var(--spacing-md);
     max-width: 1400px;
-    margin: 0 auto;
+    margin: 0;
     width: 100%;
 }
 

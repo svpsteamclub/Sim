@@ -49,11 +49,14 @@ export class Simulation {
         const halfLength_px = lineLength_px / 2;
         const checkDistance_px = 0.02 * PIXELS_PER_METER; // 2cm en píxeles
 
+        console.log('[RandomStart] width_px:', width_px, 'height_px:', height_px, 'lineLength_px:', lineLength_px);
+
         const maxAttempts = 50;
         for (let attempt = 0; attempt < maxAttempts; attempt++) {
             // Generar posición aleatoria en píxeles
             const x_px = Math.random() * width_px;
             const y_px = Math.random() * height_px;
+            console.log(`[RandomStart] Intento ${attempt + 1}: x_px=${x_px}, y_px=${y_px}`);
 
             // Verificar si la posición está sobre la línea
             if (this.track.isPixelOnLine(x_px, y_px)) {
@@ -84,7 +87,7 @@ export class Simulation {
                     const x2_px = x_px + dx_perp;
                     const y2_px = y_px + dy_perp;
 
-                    // Verificar que ambos extremos estén dentro del área y sobre la línea
+                    // Verificar que ambos extremos estén dentro del área y sobre la línea y que no sean negativos
                     if (
                         x1_px >= 0 && x1_px < width_px &&
                         y1_px >= 0 && y1_px < height_px &&
@@ -93,6 +96,7 @@ export class Simulation {
                         this.track.isPixelOnLine(x1_px, y1_px) &&
                         this.track.isPixelOnLine(x2_px, y2_px)
                     ) {
+                        console.log('[RandomStart] Línea encontrada:', { x1_px, y1_px, x2_px, y2_px });
                         // Convertir a metros para la posición y ángulo del robot
                         return {
                             startLine: {
@@ -105,11 +109,18 @@ export class Simulation {
                             startY: y_px / PIXELS_PER_METER,
                             startAngle: perpAngle
                         };
+                    } else {
+                        console.log('[RandomStart] Línea descartada por estar fuera de límites o no estar sobre la pista.');
                     }
+                } else {
+                    console.log('[RandomStart] No se encontró dirección de línea en el punto.');
                 }
+            } else {
+                console.log('[RandomStart] Punto no está sobre la línea.');
             }
         }
         // Si no se encuentra una posición válida
+        console.warn('[RandomStart] No se pudo encontrar una línea de inicio válida tras', maxAttempts, 'intentos.');
         return null;
     }
 
