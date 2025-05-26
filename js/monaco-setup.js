@@ -56,6 +56,81 @@ async function loop() {
     await delay(20);
 }`,
 
+    'continuous-turn': `// Pin Definitions (as used in the simulator)
+const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
+const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+
+const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
+const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+
+const TURN_SPEED = 200;      // Velocidad de giro
+const FORWARD_SPEED = 150;   // Velocidad hacia adelante
+
+// Variable para recordar la última dirección de giro
+let lastTurnDirection = 0;   // -1 = izquierda, 1 = derecha
+
+function setup() {
+    Serial.begin(9600);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. Continuous Turn Control.");
+}
+
+async function loop() {
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = on line, 1 = off line
+    let sC = digitalRead(CENTER_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+
+    // Control On/Off con giro continuo
+    if (sC === 0) {  // Sensor central en línea
+        // Avanzar recto
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        lastTurnDirection = 0;  // Resetear dirección de giro
+    }
+    else if (sL === 0) {  // Sensor izquierdo en línea
+        // Girar a la izquierda
+        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        lastTurnDirection = -1;  // Recordar que giramos a la izquierda
+    }
+    else if (sR === 0) {  // Sensor derecho en línea
+        // Girar a la derecha
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, 0);
+        lastTurnDirection = 1;  // Recordar que giramos a la derecha
+    }
+    else {  // Ningún sensor en línea
+        // Continuar girando en la última dirección conocida
+        if (lastTurnDirection === -1) {
+            // Seguir girando a la izquierda
+            analogWrite(MOTOR_LEFT_PWM, 0);
+            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        } else if (lastTurnDirection === 1) {
+            // Seguir girando a la derecha
+            analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+            analogWrite(MOTOR_RIGHT_PWM, 0);
+        } else {
+            // Si no hay dirección previa, girar a la derecha por defecto
+            analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+            analogWrite(MOTOR_RIGHT_PWM, 0);
+            lastTurnDirection = 1;
+        }
+    }
+
+    Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
+    Serial.println(" | L:" + (sL === 0 ? "ON" : "OFF") + 
+                   " C:" + (sC === 0 ? "ON" : "OFF") + 
+                   " R:" + (sR === 0 ? "ON" : "OFF") +
+                   " | Último giro: " + (lastTurnDirection === -1 ? "IZQ" : lastTurnDirection === 1 ? "DER" : "NONE"));
+    
+    await delay(20);
+}`,
+
     proportional: `// Pin Definitions (as used in the simulator)
 const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
 const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
@@ -205,7 +280,11 @@ function constrain(value, minVal, maxVal) {
 // Textos explicativos para cada plantilla
 const codeExplanations = {
     onoff: `🌟 <b>Control On/Off</b>\n\nEste código es como un semáforo sencillo para tu robot. Si el sensor del medio ve la línea negra, el robot avanza. Si la pierde por la izquierda o la derecha, gira para buscarla.\n\nEs fácil de entender y perfecto para tus primeras pruebas. Pero, ¡ojo! En curvas muy cerradas puede que el robot se salga un poco.\n\n<b>¿Cuándo usarlo?</b>\nCuando quieres que tu robot siga la línea de forma simple y rápida.\n\n<b>¿Qué puedes probar?</b>\n- Cambia la velocidad para ver si el robot va más rápido o más lento.\n- Prueba diferentes pistas y mira cómo reacciona.`,
+
+    'continuous-turn': `🌟 <b>Control On/Off con Giro Continuo</b>\n\nEste código es similar al control On/Off simple, pero con una mejora importante: cuando el robot pierde la línea, en lugar de avanzar lentamente, continúa girando en la última dirección que estaba usando.\n\n<b>¿Por qué es útil?</b>\n- Ayuda a recuperar la línea más rápido cuando el robot se desvía\n- Es más efectivo en curvas cerradas\n- Evita que el robot se salga de la pista cuando pierde la línea\n\n<b>¿Qué puedes probar?</b>\n- Compara su comportamiento con el control On/Off simple\n- Prueba diferentes velocidades de giro\n- Observa cómo se comporta en curvas cerradas`,
+
     proportional: `🌟 <b>Control Proporcional</b>\n\nEste código es un poco más inteligente. El robot calcula "qué tan lejos" está de la línea y corrige su camino suavemente. Así, no gira de golpe, sino que ajusta la velocidad de cada motor para seguir la línea como un experto.\n\n<b>¿Por qué es mejor?</b>\nHace que el robot se mueva más suave y no "zigzaguee" tanto.\n\n<b>¿Qué puedes probar?</b>\n- Cambia el número <b>Kp</b> para ver si el robot gira más o menos fuerte.\n- Haz pistas con curvas y observa cómo las toma.`,
+
     pid: `🌟 <b>Control PID</b>\n\n¡Este es el código más avanzado! El robot piensa en tres cosas: dónde está ahora (P), cuánto se ha desviado antes (I) y qué tan rápido cambia el error (D). Así puede seguir la línea incluso en curvas difíciles y no se sale casi nunca.\n\n<b>¿Por qué es genial?</b>\nPorque el robot aprende a corregirse solo, como si tuviera reflejos.\n\n<b>¿Qué puedes probar?</b>\n- Juega con los valores <b>Kp</b>, <b>Ki</b> y <b>Kd</b> para ver cómo cambia el comportamiento.\n- Haz pistas con muchas curvas y pon a prueba tu robot.\n\n¡Con este código, tu robot será un campeón de las pistas!`
 };
 
