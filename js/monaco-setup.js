@@ -53,7 +53,7 @@ async function loop() {
                    " C:" + (sC === 0 ? "ON" : "OFF") + 
                    " R:" + (sR === 0 ? "ON" : "OFF"));
     
-    await delay(20);
+    await delay(10);
 }`,
 
     'continuous-turn': `// Pin Definitions (as used in the simulator)
@@ -128,7 +128,7 @@ async function loop() {
                    " R:" + (sR === 0 ? "ON" : "OFF") +
                    " | Último giro: " + (lastTurnDirection === -1 ? "IZQ" : lastTurnDirection === 1 ? "DER" : "NONE"));
     
-    await delay(20);
+    await delay(10);
 }`,
 
     proportional: `// Pin Definitions (as used in the simulator)
@@ -191,7 +191,7 @@ async function loop() {
     Serial.print(" | Error:" + error);
     Serial.println(" | L:" + leftSpeed.toFixed(0) + " R:" + rightSpeed.toFixed(0));
     
-    await delay(20);
+    await delay(10);
 }`,
 
     pid: `// Pin Definitions (as used in the simulator)

@@ -40,6 +40,7 @@ export class Simulation {
 
     // Generate a random start line on the track
     _generateRandomStartLine() {
+        console.log('[RandomStart] Entrando a la función de generación aleatoria');
         if (!this.track.imageData) return null;
 
         // Trabajar en píxeles para asegurar que la línea esté dentro del área visible
@@ -154,12 +155,15 @@ export class Simulation {
                     startY_m = parseFloat(source.dataset.startY);
                     startAngle_rad = parseFloat(source.dataset.startAngle);
                 } else {
+                    console.log('[RandomStart] No hay línea de inicio en el editor, generando aleatoria...');
                     // Generate random start line if no start position is provided
                     const randomStart = this._generateRandomStartLine();
                     if (randomStart) {
                         startX_m = randomStart.startX;
                         startY_m = randomStart.startY;
                         startAngle_rad = randomStart.startAngle;
+                    } else {
+                        console.warn('[RandomStart] No se pudo generar una línea aleatoria, usando valores por defecto.');
                     }
                 }
                 
