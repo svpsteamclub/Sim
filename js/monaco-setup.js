@@ -37,8 +37,8 @@ const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
 const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
-const TURN_SPEED = 200;      // Velocidad de giro
-const FORWARD_SPEED = 150;   // Velocidad hacia adelante
+const TURN_SPEED = 250;      // Velocidad de giro
+const FORWARD_SPEED = 70;   // Velocidad hacia adelante
 
 function setup() {
     Serial.begin(9600);
