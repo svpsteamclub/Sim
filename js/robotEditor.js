@@ -405,9 +405,9 @@ async function initRobotSelectionDropdown() {
             
             if (robotData.parts && window.restorePlacedPartsRaw) {
                 window.restorePlacedPartsRaw(robotData.parts);
+                // Asegurarse de que las partes decorativas se dibujen
+                renderRobotPreview();
             }
-            
-            renderRobotPreview();
             
             // Notificar a la simulación
             if (mainAppInterface && typeof mainAppInterface.updateRobotGeometry === 'function') {
