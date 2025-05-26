@@ -213,7 +213,7 @@ h2 {
     font-size: 0.875rem;
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 80px;
+    max-height: 400px;
     overflow-y: auto;
     margin-top: var(--spacing-xs);
 }
