@@ -29,7 +29,7 @@ export class LapTimer {
         } else {
             // Define start/finish line based on start pose and robot dimensions
             // Line is perpendicular to robot's starting angle, centered on robot's rear axle
-            const halfWidth = this.robotWidth_m * 2; // Make line wider than robot
+            const halfWidth = this.robotWidth_m; // Make line same width as robot
             const backOffset = -this.robotLength_m / 2; // Line at the back of the robot
 
             const cosA = Math.cos(startPose.angle_rad);
