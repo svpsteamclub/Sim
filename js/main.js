@@ -140,6 +140,18 @@ document.addEventListener('DOMContentLoaded', () => {
             initRobotEditor(mainAppInterface);
             initTrackEditor(mainAppInterface); // Track editor might generate a default track
 
+            // Esperar a que el editor cargue la pista por defecto y exportarla al simulador
+            setTimeout(() => {
+                const elems = getDOMElements();
+                // Exportar la pista del editor al simulador
+                if (window.trackEditorInstance && typeof exportTrackAsCanvas === 'function') {
+                    const exportedCanvas = exportTrackAsCanvas();
+                    if (exportedCanvas) {
+                        mainAppInterface.loadTrackFromEditor(exportedCanvas, 0, 0, 0);
+                    }
+                }
+            }, 500); // Espera breve para asegurar que la pista esté cargada
+
             // Load a default track or wait for user
             // For now, let's assume track editor handles its default view.
             // Simulation will start with no track until one is exported from editor.

@@ -92,17 +92,11 @@ export function initTrackEditor(appInterface) {
         // Setup initial grid with proper sizing
         console.log("[TrackEditor] Setting up initial grid...");
         setupGrid();
-
-        // Generate initial track after ensuring canvas is properly sized
+        // Cargar pista por defecto en vez de generar aleatoria
         setTimeout(() => {
-            console.log("[TrackEditor] Generating initial random track...");
-            generateRandomTrackWithRetry();
-            
-            const exportedCanvas = exportTrackAsCanvas();
-            if (exportedCanvas) {
-                mainAppInterface.loadTrackFromEditor(exportedCanvas, 0, 0, 0);
-            }
-        }, 100); // Small delay to ensure layout is complete
+            loadDefaultTrackDesign(elems.trackGridSizeSelect, elems.trackEditorTrackNameInput);
+            // No generamos pista aleatoria ni exportamos al simulador aquí
+        }, 100);
     });
 
     // Setup event listeners
@@ -814,4 +808,41 @@ function restoreEditorState() {
             renderEditor();
         }
     }
+}
+
+function loadDefaultTrackDesign(gridSizeSelect, trackNameInput) {
+    fetch('assets/tracks/PistaPorDefecto.json')
+        .then(response => response.json())
+        .then(designData => {
+            if (!designData.gridSize || !designData.gridParts) {
+                throw new Error("Formato de archivo de diseño de pista inválido.");
+            }
+            currentGridSize.rows = designData.gridSize.rows || 3;
+            currentGridSize.cols = designData.gridSize.cols || 3;
+            if (gridSizeSelect) {
+                gridSizeSelect.value = `${currentGridSize.rows}x${currentGridSize.cols}`;
+            }
+            if (trackNameInput && designData.trackName) {
+                trackNameInput.value = designData.trackName;
+            }
+            setupGrid();
+            designData.gridParts.forEach(partData => {
+                if (partData.r < currentGridSize.rows && partData.c < currentGridSize.cols) {
+                    const originalPartInfo = AVAILABLE_TRACK_PARTS.find(p => p.file === partData.partFile);
+                    const partImage = trackPartsImages[partData.partFile];
+                    if (originalPartInfo && partImage) {
+                        grid[partData.r][partData.c] = {
+                            ...originalPartInfo,
+                            image: partImage,
+                            rotation_deg: partData.rotation || 0
+                        };
+                    }
+                }
+            });
+            renderEditor();
+        })
+        .catch(error => {
+            console.error("Error al cargar la pista por defecto:", error);
+            alert("No se pudo cargar la pista por defecto. Revisa la consola.");
+        });
 }
