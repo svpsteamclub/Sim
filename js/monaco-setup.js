@@ -41,7 +41,7 @@ const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 const MOTOR_LEFT_PWM = 6;    // analogWrite para velocidad del motor izquierdo
 const MOTOR_RIGHT_PWM = 5;   // analogWrite para velocidad del motor derecho
 
-const TURN_SPEED = 250;      // Velocidad de giro
+const TURN_SPEED = 140;      // Velocidad de giro
 const FORWARD_SPEED = 70;   // Velocidad hacia adelante
 
 function setup() {
@@ -67,18 +67,18 @@ async function loop() {
     }
     else if (sL === 0) {  // Sensor izquierdo en línea
         // Girar a la izquierda
-        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
         analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
     }
     else if (sR === 0) {  // Sensor derecho en línea
         // Girar a la derecha
         analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_RIGHT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
     }
     else {  // Ningún sensor en línea
         // Avanzar lento buscando la línea
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED/2);
-        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED/2);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
     }
 
     Serial.print("sL:" + sL + " sC:" + sC + " sR:" + sR);
