@@ -42,6 +42,9 @@ export function initRobotEditor(appInterface) {
     // Initialize robot parts
     initRobotParts();
 
+    // Initialize robot selection dropdown
+    initRobotSelectionDropdown();
+
     // Event listeners
     elems.applyRobotGeometryButton.addEventListener('click', () => {
         console.log("Applying robot geometry...");
@@ -346,4 +349,61 @@ export async function loadDefaultRobotJSON() {
     } catch (err) {
         console.warn('No se pudo cargar el robot por defecto:', err);
     }
+}
+
+async function initRobotSelectionDropdown() {
+    const elems = getDOMElements();
+    const dropdown = elems.robotSelectionDropdown;
+    
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Seleccionar robot...';
+    dropdown.appendChild(defaultOption);
+
+    // Add predefined robots
+    const robots = [
+        { name: 'SL Genérico', file: 'SL Generico.json' },
+        { name: 'SLC SVP 2025', file: 'SLC_SVP_2025.json' }
+    ];
+
+    robots.forEach(robot => {
+        const option = document.createElement('option');
+        option.value = robot.file;
+        option.textContent = robot.name;
+        dropdown.appendChild(option);
+    });
+
+    // Add change event listener
+    dropdown.addEventListener('change', async (event) => {
+        const selectedFile = event.target.value;
+        if (!selectedFile) return;
+
+        try {
+            const response = await fetch(`assets/robots/${selectedFile}`);
+            if (!response.ok) throw new Error(`No se pudo cargar ${selectedFile}`);
+            const robotData = await response.json();
+            
+            if (robotData.geometry) {
+                setFormValues(robotData.geometry);
+                currentGeometry = getFormValues();
+                previewRobot.updateGeometry(currentGeometry);
+            }
+            
+            if (robotData.parts && window.restorePlacedPartsRaw) {
+                window.restorePlacedPartsRaw(robotData.parts);
+            }
+            
+            renderRobotPreview();
+            
+            // Notificar a la simulación
+            if (mainAppInterface && typeof mainAppInterface.updateRobotGeometry === 'function') {
+                const decorativeParts = window.getPlacedParts ? window.getPlacedParts() : [];
+                mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
+            }
+        } catch (err) {
+            console.error('Error al cargar el robot:', err);
+            alert('Error al cargar el robot seleccionado');
+        }
+    });
 }

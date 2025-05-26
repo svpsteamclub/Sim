@@ -233,7 +233,8 @@ export function getPlacedParts() {
             name: part.name,
             img: part.img, // Keep the image reference
             x: rotated.x,
-            y: rotated.y
+            y: rotated.y,
+            rotation: (part.rotation || 0) + Math.PI/2 // Add 90 degrees to the rotation
         };
     });
 }
