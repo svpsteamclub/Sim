@@ -80,16 +80,16 @@ const arduinoAPI = {
         return 1; // Default to HIGH (off line) for unmapped pins
     },
     analogWrite: (pin, value) => {
-        const pwmValue = Math.max(0, Math.min(255, Math.round(value)));
+        const pwmValue = Math.max(-255, Math.min(255, Math.round(value)));
         if (pin === SIM_MOTOR_LEFT_PWM_PIN) {
             _motorPWMValues[SIM_MOTOR_LEFT_PWM_PIN] = pwmValue;
-            if (sharedSimulationState && sharedSimulationState.robot) { // Update robot's target PWM directly
-                 sharedSimulationState.robot.motorPWMSpeeds.left = pwmValue;
+            if (sharedSimulationState && sharedSimulationState.robot) {
+                sharedSimulationState.robot.motorPWMSpeeds.left = pwmValue;
             }
         } else if (pin === SIM_MOTOR_RIGHT_PWM_PIN) {
             _motorPWMValues[SIM_MOTOR_RIGHT_PWM_PIN] = pwmValue;
-             if (sharedSimulationState && sharedSimulationState.robot) { // Update robot's target PWM directly
-                 sharedSimulationState.robot.motorPWMSpeeds.right = pwmValue;
+            if (sharedSimulationState && sharedSimulationState.robot) {
+                sharedSimulationState.robot.motorPWMSpeeds.right = pwmValue;
             }
         } else {
             // ArduinoSerial.println(`Warning: analogWrite to unmapped pin ${pin} with value ${pwmValue}.`);
