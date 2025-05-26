@@ -4,14 +4,14 @@ import { PIXELS_PER_METER } from './config.js';
 import { renderRobotPreview } from './robotEditor.js';
 
 const PARTS = [
-    { id: 'antenna', name: 'Antena', src: 'parts/antenna.png' },
-    { id: 'lights', name: 'Luces', src: 'parts/lights.png' },
-    { id: 'decals', name: 'Calcomanías', src: 'parts/decals.png' },
-    { id: 'bumper', name: 'Parachoques', src: 'parts/bumper.png' },
-    { id: 'arduino_uno', name: 'Arduino Uno', src: 'parts/arduino_uno.png' },
-    { id: 'l298n', name: 'L298N Driver', src: 'parts/l298n.png' },
+    { id: 'chassis3', name: 'Chassis 3', src: 'parts/Chassis3.png' },
+    { id: '18650', name: 'Batería 18650', src: 'parts/18650.png' },
+    { id: 'motor', name: 'Motor DC con Reductor', src: 'parts/MotorDCwithGearBox.png' },
+    { id: 'chassis2', name: 'Chassis 2', src: 'parts/Chassis2.png' },
     { id: 'sensor', name: 'Sensor', src: 'parts/sensor.png' },
-    { id: 'robot_body', name: 'Cuerpo Robot', src: 'parts/robot_body.png' }
+    { id: 'robot_body', name: 'Cuerpo Robot', src: 'parts/robot_body.png' },
+    { id: 'arduino_uno', name: 'Arduino Uno', src: 'parts/arduino_uno.png' },
+    { id: 'l298n', name: 'L298N Driver', src: 'parts/l298n.png' }
 ];
 
 let partsPalette;
