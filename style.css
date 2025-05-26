@@ -510,6 +510,18 @@ hr {
 
 .robot-parameters .file-input-label {
     margin-top: var(--spacing-md);
+    height: 100%;
+    color: white !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.robot-parameters button#saveRobotButton {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .robot-parts-palette {
