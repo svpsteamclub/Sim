@@ -508,6 +508,10 @@ hr {
     margin-top: var(--spacing-md);
 }
 
+.robot-parameters .file-input-label {
+    margin-top: var(--spacing-md);
+}
+
 .robot-parts-palette {
     background-color: var(--surface-color);
     padding: var(--spacing-sm);
