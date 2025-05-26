@@ -1,8 +1,8 @@
 // js/main.js
-import { getDOMElements, setupTabs, updateTelemetry, updateLapTimerDisplay } from './ui.js';
+import { getDOMElements, setupTabs, updateTelemetry, updateLapTimerDisplay, updateCodeTypeDisplay } from './ui.js';
 import { DEFAULT_ROBOT_GEOMETRY, PIXELS_PER_METER } from './config.js';
 import { Simulation } from './simulation.js';
-import { initCodeEditor, loadUserCode, executeUserSetup, executeUserLoop, getMotorPWMOutputs, getSerialOutput, clearSerial } from './codeEditor.js';
+import { initCodeEditor, loadUserCode, executeUserSetup, executeUserLoop, getMotorPWMOutputs, getSerialOutput, clearSerial, getCurrentCodeType } from './codeEditor.js';
 import { initRobotEditor, getCurrentRobotGeometry } from './robotEditor.js';
 import { initTrackEditor } from './trackEditor.js';
 import { loadAndScaleImage, getAssetPath } from './utils.js';
@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!codeLoaded) {
                 throw new Error("Error al cargar el código inicial del robot.");
             }
+            updateCodeTypeDisplay(getCurrentCodeType()); // Update code type display
 
             initRobotEditor(mainAppInterface);
             initTrackEditor(mainAppInterface); // Track editor might generate a default track
@@ -144,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Simulation will start with no track until one is exported from editor.
             elems.simulationDisplayCanvas.width = 700; // Default size
             elems.simulationDisplayCanvas.height = 500;
-            drawCurrentSimulationState(); // Draw empty state initially
+            drawCurrentSimulationState();
             updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData()); // Initial lap display
 
         } catch (err) {
@@ -215,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
              alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
              return;
         }
+        updateCodeTypeDisplay(getCurrentCodeType()); // Update code type display
         
         // Ensure latest simulation parameters are applied
         applySimulationParameters(); 

@@ -3,6 +3,7 @@ import { getDOMElements } from './ui.js';
 
 let userSetupFunction = () => {};
 let userLoopFunction = async () => {};
+let currentCodeType = 'custom'; // Track the current code type
 
 let sharedSimulationState = null; // To access robot sensors and track
 
@@ -125,6 +126,19 @@ export function loadUserCode(code) {
     _pinModes = {};
     _motorPWMValues = {[SIM_MOTOR_LEFT_PWM_PIN]: 0, [SIM_MOTOR_RIGHT_PWM_PIN]: 0};
 
+    // Check if the code matches any of the templates
+    if (code.includes('Robot Setup Complete. On/Off Control.')) {
+        currentCodeType = 'onoff';
+    } else if (code.includes('Robot Setup Complete. Continuous Turn Control.')) {
+        currentCodeType = 'continuous-turn';
+    } else if (code.includes('Robot Setup Complete. Proportional Control.')) {
+        currentCodeType = 'proportional';
+    } else if (code.includes('Robot Setup Complete. PID Line Follower.')) {
+        currentCodeType = 'pid';
+    } else {
+        currentCodeType = 'custom';
+    }
+
     try {
         // Create a function scope for the user's code, injecting the Arduino API
         // The user code should define setup() and loop()
@@ -152,8 +166,8 @@ export function loadUserCode(code) {
             arduinoAPI.constrain = (value, minVal, maxVal) => Math.min(Math.max(value, minVal), maxVal);
         }
 
-
         ArduinoSerial.println("Código de usuario cargado y parseado con éxito.");
+        ArduinoSerial.println(`Tipo de código: ${currentCodeType}`);
         return true;
     } catch (e) {
         console.error("Error procesando código de usuario:", e);
@@ -203,4 +217,8 @@ export function getSerialOutput() {
 
 export function clearSerial() {
     ArduinoSerial.clear();
+}
+
+export function getCurrentCodeType() {
+    return currentCodeType;
 }

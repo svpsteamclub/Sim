@@ -22,6 +22,7 @@ export function getDOMElements() {
         applySimParamsButton: document.getElementById('applySimParamsButton'),
         telemetryOutput: document.getElementById('telemetryOutput'),
         lapTimerOutput: document.getElementById('lapTimerOutput'),
+        currentCodeType: document.getElementById('currentCodeType'),
 
         // Code Editor Tab
         codeEditorArea: document.getElementById('codeEditorArea'),
@@ -126,4 +127,28 @@ export function updateLapTimerDisplay(lapData) {
     }
     
     elems.lapTimerOutput.textContent = output;
+}
+
+export function updateCodeTypeDisplay(codeType) {
+    const elems = getDOMElements();
+    if (!elems.currentCodeType) return;
+
+    let displayText = 'Tipo: ';
+    switch (codeType) {
+        case 'onoff':
+            displayText += 'Control On/Off';
+            break;
+        case 'continuous-turn':
+            displayText += 'Control Giro Continuo';
+            break;
+        case 'proportional':
+            displayText += 'Control Proporcional';
+            break;
+        case 'pid':
+            displayText += 'Control PID';
+            break;
+        default:
+            displayText += 'Código Personalizado';
+    }
+    elems.currentCodeType.textContent = displayText;
 }
