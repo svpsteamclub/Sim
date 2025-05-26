@@ -49,7 +49,13 @@ export function initRobotParts() {
         eraseBtn.classList.toggle('active', eraseMode);
         eraseBtn.style.background = eraseMode ? '#e66' : '';
     };
-    partsPalette.parentNode.appendChild(eraseBtn);
+    // Insertar después del texto de ayuda si existe
+    const helpDiv = partsPalette.parentNode.querySelector('.robot-editor-help');
+    if (helpDiv) {
+        helpDiv.parentNode.insertBefore(eraseBtn, helpDiv.nextSibling);
+    } else {
+        partsPalette.parentNode.appendChild(eraseBtn);
+    }
 
     console.log("Loading parts into palette...");
     // Load parts into palette
