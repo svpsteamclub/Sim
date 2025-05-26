@@ -111,9 +111,18 @@ export function updateLapTimerDisplay(lapData) {
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:${String(ms).padStart(3, '0')}`;
     };
     
-    elems.lapTimerOutput.textContent = 
-        `Vueltas: ${lapData.lapCount}\n` +
-        `Mejor: ${formatTime(lapData.bestLapTime_ms)}\n` +
-        `Última: ${formatTime(lapData.lastLapTime_ms)}\n` +
-        `Actual: ${formatTime(lapData.currentLapTime_ms)}`;
+    let output = `Vueltas: ${lapData.lapCount}\n`;
+    output += `Mejor: ${formatTime(lapData.bestLapTime_ms)}\n`;
+    output += `Última: ${formatTime(lapData.lastLapTime_ms)}\n`;
+    output += `Actual: ${formatTime(lapData.currentLapTime_ms)}\n\n`;
+    
+    // Add lap history
+    if (lapData.lapHistory && lapData.lapHistory.length > 0) {
+        output += "Últimas 10 vueltas:\n";
+        lapData.lapHistory.forEach((lapTime, index) => {
+            output += `${index + 1}. ${formatTime(lapTime)}\n`;
+        });
+    }
+    
+    elems.lapTimerOutput.textContent = output;
 }

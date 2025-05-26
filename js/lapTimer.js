@@ -10,6 +10,7 @@ export class LapTimer {
         this.lastLapTime_ms = null;
         this.bestLapTime_ms = null;
         this.onPositiveSide = false; // Which side of the line the robot is on
+        this.lapHistory = []; // Array to store the last 10 lap times
     }
 
     initialize(startPose, currentTime_s, customStartLine = null) {
@@ -102,14 +103,19 @@ export class LapTimer {
                 completedLapTime = lapDuration_s * 1000; // to ms
                 this.lastLapTime_ms = completedLapTime;
 
+                // Add lap time to history
+                this.lapHistory.unshift(completedLapTime); // Add new lap time at the beginning
+                if (this.lapHistory.length > 10) { // Keep only last 10 laps
+                    this.lapHistory.pop();
+                }
+
                 if (this.bestLapTime_ms === null || completedLapTime < this.bestLapTime_ms) {
                     this.bestLapTime_ms = completedLapTime;
                 }
                 this.currentLapStartTime_s = currentRealTime_s;
                 newLapCompleted = true;
-                // console.log(`Lap ${this.lapCount} completed: ${formatTime(completedLapTime)}`);
             }
-             this.onPositiveSide = currentSideIsPositive; // Update side
+            this.onPositiveSide = currentSideIsPositive; // Update side
         }
         return { newLapCompleted, completedLapTime };
     }
@@ -122,7 +128,8 @@ export class LapTimer {
             lastLapTime_ms: this.lastLapTime_ms,
             bestLapTime_ms: this.bestLapTime_ms,
             currentLapTime_ms: this.lapCount > 0 || this.isActive ? currentLapDuration_s * 1000 : null,
-            isTiming: this.isActive
+            isTiming: this.isActive,
+            lapHistory: this.lapHistory // Include lap history in display data
         };
     }
 }
