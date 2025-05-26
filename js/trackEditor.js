@@ -116,19 +116,6 @@ export function initTrackEditor(appInterface) {
         generateRandomTrackWithRetry(); 
     });
 
-    // Agregar botón de limpiar
-    const clearTrackButton = document.createElement('button');
-    clearTrackButton.textContent = 'Limpiar Pista';
-    clearTrackButton.className = 'editor-button';
-    elems.trackEditorControls.appendChild(clearTrackButton);
-
-    clearTrackButton.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres limpiar toda la pista?')) {
-            setupGrid();
-            renderEditor();
-        }
-    });
-
     elems.exportTrackToSimulatorButton.addEventListener('click', () => {
         const trackValidation = validateTrack();
         if (!trackValidation.isValid) { 
@@ -143,6 +130,19 @@ export function initTrackEditor(appInterface) {
         if (exportedCanvas) {
             mainAppInterface.loadTrackFromEditor(exportedCanvas, 0, 0, 0);
             alert("Pista del editor cargada en el simulador. Ve a la pestaña 'Simulación'.");
+        }
+    });
+
+    // Crear botón de limpiar junto al botón de exportar
+    const clearTrackButton = document.createElement('button');
+    clearTrackButton.textContent = 'Limpiar Pista';
+    clearTrackButton.className = 'editor-button';
+    elems.exportTrackToSimulatorButton.parentNode.insertBefore(clearTrackButton, elems.exportTrackToSimulatorButton.nextSibling);
+
+    clearTrackButton.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que quieres limpiar toda la pista?')) {
+            setupGrid();
+            renderEditor();
         }
     });
 

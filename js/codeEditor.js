@@ -130,7 +130,7 @@ function setup() {
     pinMode(RIGHT_SENSOR_PIN, INPUT);
     pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. Continuous Turn Control.");
+    Serial.println("Robot Setup Complete. Custom Code.");
 }
 
 async function loop() {

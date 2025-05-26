@@ -1,5 +1,34 @@
 // Code templates
 const codeTemplates = {
+    custom: `// Pin Definitions (as used in the simulator)
+const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
+const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
+const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+
+const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
+const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+
+const SPEED = 200;      // Velocidad de velocidad de motores
+
+function setup() {
+    Serial.begin(9600);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. Custom Code.");
+}
+
+async function loop() {
+    //Escribe aqui el codigo de lectura de sensores y logica de control
+    
+    //Fuciones minimas para el accionamiento de motores (ambos adelane)
+    analogWrite(MOTOR_LEFT_PWM, SPEED);
+    analogWrite(MOTOR_RIGHT_PWM, SPEED);          
+    await delay(10);
+}`,
+
     onoff: `// Pin Definitions (as used in the simulator)
 const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
 const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
@@ -279,6 +308,8 @@ function constrain(value, minVal, maxVal) {
 
 // Textos explicativos para cada plantilla
 const codeExplanations = {
+    custom: `🌟 <b>Código Personalizado</b>\n\nEste es un template base para que puedas escribir tu propio código de control. Incluye todas las definiciones necesarias de pines y una estructura básica para que puedas empezar a programar.\n\n<b>¿Qué incluye?</b>\n- Definición de todos los pines necesarios\n- Configuración básica en setup()\n- Estructura del loop() con lectura de sensores\n- Control básico de motores\n\n<b>¿Qué puedes hacer?</b>\n- Escribe tu propia lógica de control\n- Experimenta con diferentes estrategias\n- Aprende cómo funciona cada parte del código\n\n¡Es tu oportunidad de ser creativo y hacer que el robot se comporte como tú quieras!`,
+
     onoff: `🌟 <b>Control On/Off</b>\n\nEste código es como un semáforo sencillo para tu robot. Si el sensor del medio ve la línea negra, el robot avanza. Si la pierde por la izquierda o la derecha, gira para buscarla.\n\nEs fácil de entender y perfecto para tus primeras pruebas. Pero, ¡ojo! En curvas muy cerradas puede que el robot se salga un poco.\n\n<b>¿Cuándo usarlo?</b>\nCuando quieres que tu robot siga la línea de forma simple y rápida.\n\n<b>¿Qué puedes probar?</b>\n- Cambia la velocidad para ver si el robot va más rápido o más lento.\n- Prueba diferentes pistas y mira cómo reacciona.`,
 
     'continuous-turn': `🌟 <b>Control On/Off con Giro Continuo</b>\n\nEste código es similar al control On/Off simple, pero con una mejora importante: cuando el robot pierde la línea, en lugar de avanzar lentamente, continúa girando en la última dirección que estaba usando.\n\n<b>¿Por qué es útil?</b>\n- Ayuda a recuperar la línea más rápido cuando el robot se desvía\n- Es más efectivo en curvas cerradas\n- Evita que el robot se salga de la pista cuando pierde la línea\n\n<b>¿Qué puedes probar?</b>\n- Compara su comportamiento con el control On/Off simple\n- Prueba diferentes velocidades de giro\n- Observa cómo se comporta en curvas cerradas`,
