@@ -7,8 +7,8 @@ const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 const FAR_LEFT_SENSOR_PIN = 5; // Digital (Conectado al sensor más a la izquierda, si existe)
 const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Conectado al sensor más a la derecha, si existe)
 
-const MOTOR_LEFT_PWM = 9;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 10;  // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 9;  // analogWrite para velocidad del motor derecho
 
 function setup() {
     Serial.begin(9600);
@@ -39,8 +39,8 @@ const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 const FAR_LEFT_SENSOR_PIN = 5; // Digital (Conectado al sensor más a la izquierda, si existe)
 const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Conectado al sensor más a la derecha, si existe)
 
-const MOTOR_LEFT_PWM = 9;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 10;  // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 9;  // analogWrite para velocidad del motor derecho
 
 const TURN_SPEED = 140;      // Velocidad de giro
 const FORWARD_SPEED = 70;   // Velocidad hacia adelante
@@ -96,8 +96,8 @@ const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
 const FAR_LEFT_SENSOR_PIN = 5; // Digital (Conectado al sensor más a la izquierda, si existe)
 const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Conectado al sensor más a la derecha, si existe)
 
-const MOTOR_LEFT_PWM = 9;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 10;  // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 9;  // analogWrite para velocidad del motor derecho
 
 const TURN_SPEED = 200;      // Velocidad de giro
 const FORWARD_SPEED = 150;   // Velocidad hacia adelante
