@@ -160,9 +160,13 @@ export function initRobotEditor(appInterface) {
 
 // Agrega partes decorativas 'sensor' en las posiciones de los sensores
 function syncDecorativeSensorsWithGeometry() {
-    // Elimina partes 'sensor' existentes
+    // Elimina partes 'sensor' existentes sin reemplazar el array
     if (window.placedParts) {
-        window.placedParts = window.placedParts.filter(p => p.id !== 'sensor');
+        for (let i = window.placedParts.length - 1; i >= 0; i--) {
+            if (window.placedParts[i].id === 'sensor') {
+                window.placedParts.splice(i, 1);
+            }
+        }
     }
     // Obtiene posiciones de sensores en metros (relativo al robot centrado)
     const sensorPositions = previewRobot.getSensorPositions_world_m();
