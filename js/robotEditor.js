@@ -75,6 +75,7 @@ export function initRobotEditor(appInterface) {
         input.addEventListener('input', () => {
             currentGeometry = getFormValues();
             previewRobot.updateGeometry(currentGeometry);
+            syncDecorativeSensorsWithGeometry();
             renderRobotPreview();
         });
     });
@@ -159,8 +160,11 @@ function syncDecorativeSensorsWithGeometry() {
             }
         }
     }
-    // Obtiene posiciones de sensores en metros (ya en el sistema del robot, que en el editor está rotado -90°)
-    const sensorPositions = previewRobot.getSensorPositions_world_m();
+    // Usa la geometría actualizada
+    const geometry = getFormValues();
+    const sensorCount = geometry.sensorCount;
+    const spread = geometry.sensorSpread_m;
+    const offset = geometry.sensorOffset_m;
     const centerX = previewCanvas.width / 2;
     const centerY = previewCanvas.height / 2;
     // Carga la imagen del sensor
@@ -172,21 +176,29 @@ function syncDecorativeSensorsWithGeometry() {
     }
     // Ángulo de rotación del robot en el editor
     const editorAngle = -Math.PI / 2;
-    // Para cada sensor, agrega una parte decorativa
-    Object.keys(sensorPositions).forEach((key) => {
-        const pos = sensorPositions[key];
-        // No rotar la posición, solo convertir a píxeles
-        const px = pos.x_m * PIXELS_PER_METER + centerX;
-        const py = pos.y_m * PIXELS_PER_METER + centerY;
+    // Calcula la posición de cada sensor igual que en el dibujo
+    for (let i = 0; i < sensorCount; i++) {
+        let x = 0, y = 0;
+        if (sensorCount === 1) {
+            x = 0;
+        } else if (sensorCount === 2) {
+            x = (i === 0 ? -1 : 1) * spread;
+        } else {
+            x = ((i / (sensorCount - 1)) * 2 - 1) * spread;
+        }
+        y = -offset;
+        // Convierte a píxeles
+        const px = x * PIXELS_PER_METER + centerX;
+        const py = y * PIXELS_PER_METER + centerY;
         window.placedParts.push({
             id: 'sensor',
             name: 'Sensor',
             img,
             x: px,
             y: py,
-            rotation: editorAngle // Alinea la imagen igual que el robot
+            rotation: editorAngle
         });
-    });
+    }
 }
 
 function getFormValues() {
