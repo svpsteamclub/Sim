@@ -387,6 +387,7 @@ export class Simulation {
             sensorOffset_m: this.robot.sensorForwardProtrusion_m,
             sensorSpread_m: this.robot.sensorSideSpread_m,
             sensorDiameter_m: this.robot.sensorDiameter_m,
+            sensorCount: this.robot.sensorCount // <-- Mantener la cantidad de sensores
         };
     }
 }
