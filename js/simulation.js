@@ -245,7 +245,11 @@ export class Simulation {
         this.isOutOfTrack = false;
         this.lapTimer.reset(); // Reset lap data, but don't re-initialize line until new track/start
         if (this.track.imageData) { // Re-initialize if track already loaded
-             this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
+             this.lapTimer.initialize(
+                { x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad },
+                this.totalSimTime_s,
+                this.lapTimer.startLine // <-- Mantener la línea de comienzo actual
+            );
         }
     }
 
