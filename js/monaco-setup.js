@@ -166,77 +166,54 @@ const CENTER_SENSOR_PIN = 4;     // Sensor Central
 const RIGHT_SENSOR_PIN = 5;      // Sensor Derecho
 const FAR_RIGHT_SENSOR_PIN = 6;  // Sensor Extremo Derecho
 
-const MOTOR_RIGHT_PWM = 10;       // analogWrite para velocidad del motor derecho
-const MOTOR_LEFT_PWM = 9;        // analogWrite para velocidad del motor izquierdo
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
 
-const BASE_SPEED = 80;           // Velocidad base hacia adelante
-const TURN_FACTOR = 40;          // Factor para ajustar la velocidad de giro (mayor valor = giro más pronunciado)
-const MAX_TURN_SPEED = 150;      // Velocidad máxima para los giros
+const TURN_SPEED = 140;      // Velocidad de giro
+const FORWARD_SPEED = 70;    // Velocidad hacia adelante
 
 function setup() {
     Serial.begin(9600);
-    // Configuración de pines de sensores como INPUT
     pinMode(FAR_LEFT_SENSOR_PIN, INPUT);
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(CENTER_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
     pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
-    // Configuración de pines de motores como OUTPUT
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
     pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. Line Follower with 5 Sensors.");
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. On/Off 5 Sensores.");
 }
 
 async function loop() {
-    // Lectura de los 5 sensores
-    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);  // 0 = en línea, 1 = fuera de línea
+    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);
     let sL = digitalRead(LEFT_SENSOR_PIN);
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
     let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
-
-    // Calculamos un 'error' basado en la posición de la línea
-    let error = 0;
-    if (sFL === 0) error -= 2; // Mucho a la izquierda
-    if (sL === 0) error -= 1;  // Un poco a la izquierda
-    // sC === 0 no añade error, es el centro
-    if (sR === 0) error += 1;  // Un poco a la derecha
-    if (sFR === 0) error += 2; // Mucho a la derecha
-
-    let left_motor_speed;
-    let right_motor_speed;
-
-    // Si ningún sensor detecta la línea
-    if (sFL === 1 && sL === 1 && sC === 1 && sR === 1 && sFR === 1) {
-        // Se perdió la línea, intentar avanzar recto o una estrategia de búsqueda
-        left_motor_speed = BASE_SPEED;
-        right_motor_speed = BASE_SPEED;
-        Serial.println(" --- Line Lost! Going Straight ---");
+    if (sC === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
+    } else if (sL === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+    } else if (sR === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
+    } else if (sFL === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+    } else if (sFR === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
     } else {
-        // Calcular la velocidad de giro basándose en el error
-        let turn_adjustment = error * TURN_FACTOR;
-
-        // Calcular las velocidades de los motores
-        left_motor_speed = BASE_SPEED + turn_adjustment;
-        right_motor_speed = BASE_SPEED - turn_adjustment;
-
-        // Limitar las velocidades para que no excedan los valores permitidos
-        left_motor_speed = constrain(left_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
-        right_motor_speed = constrain(right_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
     }
-
-    // Aplicar las velocidades a los motores
-    analogWrite(MOTOR_LEFT_PWM, left_motor_speed);
-    analogWrite(MOTOR_RIGHT_PWM, right_motor_speed);
-
-    // Impresión de depuración en el Serial Monitor
     Serial.print("sFL:" + sFL + " sL:" + sL + " sC:" + sC + " sR:" + sR + " sFR:" + sFR);
-    Serial.println(" | L_mot_spd:" + left_motor_speed + " R_mot_spd:" + right_motor_speed + " Error:" + error);
-    
-    await delay(10); // Pequeña pausa
+    Serial.println(" | FL:" + (sFL === 0 ? "ON" : "OFF") + " L:" + (sL === 0 ? "ON" : "OFF") + " C:" + (sC === 0 ? "ON" : "OFF") + " R:" + (sR === 0 ? "ON" : "OFF") + " FR:" + (sFR === 0 ? "ON" : "OFF"));
+    await delay(10);
 }
 
-// Función auxiliar para limitar un valor entre un mínimo y un máximo
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
@@ -247,12 +224,11 @@ const LEFT_SENSOR_PIN = 3;       // Sensor Izquierdo
 const RIGHT_SENSOR_PIN = 4;      // Sensor Derecho
 const FAR_RIGHT_SENSOR_PIN = 5;  // Sensor Extremo Derecho
 
-const MOTOR_RIGHT_PWM = 10;       // analogWrite para velocidad del motor derecho
-const MOTOR_LEFT_PWM = 9;        // analogWrite para velocidad del motor izquierdo
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
 
-const BASE_SPEED = 80;           // Velocidad base hacia adelante
-const TURN_FACTOR = 50;          // Factor para ajustar la velocidad de giro
-const MAX_TURN_SPEED = 150;      // Velocidad máxima para los giros
+const TURN_SPEED = 140;      // Velocidad de giro
+const FORWARD_SPEED = 70;    // Velocidad hacia adelante
 
 function setup() {
     Serial.begin(9600);
@@ -260,9 +236,9 @@ function setup() {
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
     pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
     pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. Line Follower with 4 Sensors.");
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. On/Off 4 Sensores.");
 }
 
 async function loop() {
@@ -270,29 +246,24 @@ async function loop() {
     let sL = digitalRead(LEFT_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
     let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
-
-    let error = 0;
-    if (sFL === 0) error -= 2;
-    if (sL === 0) error -= 1;
-    if (sR === 0) error += 1;
-    if (sFR === 0) error += 2;
-
-    let left_motor_speed, right_motor_speed;
-    if (sFL === 1 && sL === 1 && sR === 1 && sFR === 1) {
-        left_motor_speed = BASE_SPEED;
-        right_motor_speed = BASE_SPEED;
-        Serial.println(" --- Line Lost! Going Straight ---");
+    if (sL === 0 && sR === 1 && sFL === 1 && sFR === 1) {
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+    } else if (sR === 0 && sL === 1 && sFL === 1 && sFR === 1) {
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
+    } else if (sFL === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+    } else if (sFR === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
     } else {
-        let turn_adjustment = error * TURN_FACTOR;
-        left_motor_speed = BASE_SPEED + turn_adjustment;
-        right_motor_speed = BASE_SPEED - turn_adjustment;
-        left_motor_speed = constrain(left_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
-        right_motor_speed = constrain(right_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
     }
-    analogWrite(MOTOR_LEFT_PWM, left_motor_speed);
-    analogWrite(MOTOR_RIGHT_PWM, right_motor_speed);
     Serial.print("sFL:" + sFL + " sL:" + sL + " sR:" + sR + " sFR:" + sFR);
-    Serial.println(" | L_mot_spd:" + left_motor_speed + " R_mot_spd:" + right_motor_speed + " Error:" + error);
+    Serial.println(" | FL:" + (sFL === 0 ? "ON" : "OFF") + " L:" + (sL === 0 ? "ON" : "OFF") + " R:" + (sR === 0 ? "ON" : "OFF") + " FR:" + (sFR === 0 ? "ON" : "OFF"));
     await delay(10);
 }
 
@@ -304,41 +275,36 @@ function constrain(value, min, max) {
 const LEFT_SENSOR_PIN = 2;   // Sensor Izquierdo
 const RIGHT_SENSOR_PIN = 3;  // Sensor Derecho
 
-const MOTOR_RIGHT_PWM = 10;   // analogWrite para velocidad del motor derecho
-const MOTOR_LEFT_PWM = 9;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
 
-const BASE_SPEED = 80;       // Velocidad base hacia adelante
-const TURN_SPEED = 120;      // Velocidad de giro
+const TURN_SPEED = 140;      // Velocidad de giro
+const FORWARD_SPEED = 70;    // Velocidad hacia adelante
 
 function setup() {
     Serial.begin(9600);
     pinMode(LEFT_SENSOR_PIN, INPUT);
     pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
     pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. Line Follower with 2 Sensors.");
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. On/Off 2 Sensores.");
 }
 
 async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
     let sR = digitalRead(RIGHT_SENSOR_PIN);
-    let left_motor_speed = BASE_SPEED;
-    let right_motor_speed = BASE_SPEED;
     if (sL === 0 && sR === 1) {
-        left_motor_speed = BASE_SPEED - TURN_SPEED;
-        right_motor_speed = BASE_SPEED + TURN_SPEED;
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
     } else if (sL === 1 && sR === 0) {
-        left_motor_speed = BASE_SPEED + TURN_SPEED;
-        right_motor_speed = BASE_SPEED - TURN_SPEED;
-    } else if (sL === 1 && sR === 1) {
-        left_motor_speed = BASE_SPEED;
-        right_motor_speed = BASE_SPEED;
-        Serial.println(" --- Line Lost! Going Straight ---");
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+    } else {
+        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
     }
-    analogWrite(MOTOR_LEFT_PWM, left_motor_speed);
-    analogWrite(MOTOR_RIGHT_PWM, right_motor_speed);
     Serial.print("sL:" + sL + " sR:" + sR);
-    Serial.println(" | L_mot_spd:" + left_motor_speed + " R_mot_spd:" + right_motor_speed);
+    Serial.println(" | L:" + (sL === 0 ? "ON" : "OFF") + " R:" + (sR === 0 ? "ON" : "OFF"));
     await delay(10);
 }
 
