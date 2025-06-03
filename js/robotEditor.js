@@ -50,6 +50,7 @@ export function initRobotEditor(appInterface) {
         console.log("Applying robot geometry...");
         currentGeometry = getFormValues();
         previewRobot.updateGeometry(currentGeometry);
+        syncDecorativeSensorsWithGeometry();
         renderRobotPreview();
         // Get decorative parts and pass them to the simulation
         const decorativeParts = getPlacedParts();
@@ -63,6 +64,7 @@ export function initRobotEditor(appInterface) {
         elems.sensorCountSelect.addEventListener('change', () => {
             currentGeometry.sensorCount = parseInt(elems.sensorCountSelect.value);
             previewRobot.updateGeometry(currentGeometry);
+            syncDecorativeSensorsWithGeometry();
             renderRobotPreview();
         });
     }
@@ -156,6 +158,42 @@ export function initRobotEditor(appInterface) {
     });
 }
 
+// Agrega partes decorativas 'sensor' en las posiciones de los sensores
+function syncDecorativeSensorsWithGeometry() {
+    // Elimina partes 'sensor' existentes
+    if (window.placedParts) {
+        window.placedParts = window.placedParts.filter(p => p.id !== 'sensor');
+    }
+    // Obtiene posiciones de sensores en metros (relativo al robot centrado)
+    const sensorPositions = previewRobot.getSensorPositions_world_m();
+    const sensorDiameter = previewRobot.sensorDiameter_m || 0.02;
+    const previewCanvas = document.getElementById('robotPreviewCanvas');
+    const centerX = previewCanvas.width / 2;
+    const centerY = previewCanvas.height / 2;
+    // Carga la imagen del sensor
+    const partInfo = window.PARTS ? window.PARTS.find(pt => pt.id === 'sensor') : null;
+    let img = null;
+    if (partInfo) {
+        img = new window.Image();
+        img.src = window.getAssetPath(partInfo.src);
+    }
+    // Para cada sensor, agrega una parte decorativa
+    Object.keys(sensorPositions).forEach((key) => {
+        const pos = sensorPositions[key];
+        // Convierte metros a pixeles y ajusta al centro del canvas
+        const px = pos.x_m * PIXELS_PER_METER + centerX;
+        const py = pos.y_m * PIXELS_PER_METER + centerY;
+        window.placedParts.push({
+            id: 'sensor',
+            name: 'Sensor',
+            img,
+            x: px,
+            y: py,
+            rotation: 0
+        });
+    });
+}
+
 function getFormValues() {
     const elems = getDOMElements();
     return {
@@ -176,6 +214,7 @@ function setFormValues(geometry) {
     if (elems.sensorCountSelect && geometry.sensorCount) {
         elems.sensorCountSelect.value = geometry.sensorCount;
     }
+    syncDecorativeSensorsWithGeometry();
 }
 
 function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {

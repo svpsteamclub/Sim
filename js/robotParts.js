@@ -19,6 +19,7 @@ let previewCanvas;
 let previewCtx;
 let draggedPart = null;
 let placedParts = [];
+window.placedParts = placedParts;
 let selectedPart = null;
 let isDragging = false;
 let wasDragging = false;
@@ -293,9 +294,8 @@ export function getPlacedPartsRaw() {
 }
 
 window.PARTS = PARTS;
-window.placedParts = placedParts;
 window.clearPlacedParts = clearPlacedParts;
 window.getAssetPath = getAssetPath;
 window.getPlacedParts = getPlacedParts;
 window.restorePlacedPartsRaw = restorePlacedPartsRaw;
-window.getPlacedPartsRaw = getPlacedPartsRaw; 
+window.getPlacedPartsRaw = getPlacedPartsRaw;
