@@ -335,26 +335,46 @@ export class Robot {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             let pinNumber = '';
-            if (key === 'farLeft') pinNumber = '2';
-            else if (key === 'left') pinNumber = '3';
-            else if (key === 'center') pinNumber = '4';
-            else if (key === 'right') pinNumber = (this.sensorCount === 2 ? '3' : this.sensorCount === 3 ? '4' : this.sensorCount === 4 ? '4' : '5');
-            else if (key === 'farRight') pinNumber = (this.sensorCount === 4 ? '5' : '6');
+            if (this.sensorCount === 2) {
+                if (key === 'left') pinNumber = '2';
+                else if (key === 'right') pinNumber = '3';
+            } else if (this.sensorCount === 3) {
+                if (key === 'left') pinNumber = '2';
+                else if (key === 'center') pinNumber = '3';
+                else if (key === 'right') pinNumber = '4';
+            } else if (this.sensorCount === 4) {
+                if (key === 'farLeft') pinNumber = '2';
+                else if (key === 'left') pinNumber = '3';
+                else if (key === 'right') pinNumber = '4';
+                else if (key === 'farRight') pinNumber = '5';
+            } else if (this.sensorCount === 5) {
+                if (key === 'farLeft') pinNumber = '2';
+                else if (key === 'left') pinNumber = '3';
+                else if (key === 'center') pinNumber = '4';
+                else if (key === 'right') pinNumber = '5';
+                else if (key === 'farRight') pinNumber = '6';
+            }
             ctx.fillText(pinNumber, pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER);
             ctx.restore();
         }
-        // Mostrar pines de motores cerca de las ruedas
-        // Necesitamos calcular wheelLengthPx y wheelYOffsetPx aquí
-        const wheelLengthPx = (typeof WHEEL_LENGTH_M !== 'undefined' ? WHEEL_LENGTH_M : 0.04) * PIXELS_PER_METER;
-        const wheelYOffsetPx = (this.wheelbase_m / 2) * PIXELS_PER_METER;
-        const wheelWidthPx = (typeof WHEEL_WIDTH_M !== 'undefined' ? WHEEL_WIDTH_M : 0.015) * PIXELS_PER_METER;
+        // Mostrar pines de motores cerca de las ruedas (ajustar para que estén a la izquierda y derecha del robot, y con orientación del chasis)
         ctx.save();
         ctx.fillStyle = 'blue';
         ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText('10', -wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2 - 5);
-        ctx.fillText('9', -wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2 - 5);
+        ctx.textBaseline = 'middle';
+        // Motor izquierdo (pin 10)
+        ctx.save();
+        ctx.translate(-this.wheelbase_m / 2 * PIXELS_PER_METER - 18, 0);
+        ctx.rotate(0); // Ya está en el sistema del robot, así que 0
+        ctx.fillText('10', 0, 0);
+        ctx.restore();
+        // Motor derecho (pin 9)
+        ctx.save();
+        ctx.translate(this.wheelbase_m / 2 * PIXELS_PER_METER + 18, 0);
+        ctx.rotate(0); // Ya está en el sistema del robot, así que 0
+        ctx.fillText('9', 0, 0);
+        ctx.restore();
         ctx.restore();
     }
 }
