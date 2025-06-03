@@ -9,8 +9,8 @@ let sharedSimulationState = null; // To access robot sensors and track
 
 // Arduino Pin constants from user's code (will be defined there)
 // We need to know which PWM pins map to which motor. This is hardcoded for now.
-const SIM_MOTOR_LEFT_PWM_PIN = 6;
-const SIM_MOTOR_RIGHT_PWM_PIN = 5;
+const SIM_MOTOR_LEFT_PWM_PIN = 9;
+const SIM_MOTOR_RIGHT_PWM_PIN = 10;
 const SIM_LEFT_SENSOR_PIN = 2;
 const SIM_CENTER_SENSOR_PIN = 3;
 const SIM_RIGHT_SENSOR_PIN = 4;
