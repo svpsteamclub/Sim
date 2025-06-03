@@ -354,6 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Mouse Events ---
     elems.simulationDisplayCanvas.addEventListener('mousedown', (event) => {
         if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track.imageData) return;
 
@@ -432,6 +433,101 @@ document.addEventListener('DOMContentLoaded', () => {
         // Redraw final state
         drawCurrentSimulationState();
     });
+
+    // --- Touch Events for Mobile ---
+    elems.simulationDisplayCanvas.addEventListener('touchstart', (event) => {
+        if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track.imageData) return;
+        if (event.touches.length !== 1) return;
+
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const scale = elems.simulationDisplayCanvas.width / rect.width;
+        const touch = event.touches[0];
+        const x = (touch.clientX - rect.left) * scale;
+        const y = (touch.clientY - rect.top) * scale;
+
+        startLineStartPoint = { x, y };
+        event.preventDefault();
+    }, { passive: false });
+
+    elems.simulationDisplayCanvas.addEventListener('touchmove', (event) => {
+        if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
+        if (event.touches.length !== 1) return;
+
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const scale = elems.simulationDisplayCanvas.width / rect.width;
+        const touch = event.touches[0];
+        const x = (touch.clientX - rect.left) * scale;
+        const y = (touch.clientY - rect.top) * scale;
+
+        // Draw current track state
+        const ctx = elems.simulationDisplayCanvas.getContext('2d');
+        simulationInstance.draw(ctx, elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
+
+        // Draw preview line
+        ctx.save();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = "#FF00FF";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(startLineStartPoint.x, startLineStartPoint.y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.restore();
+        event.preventDefault();
+    }, { passive: false });
+
+    elems.simulationDisplayCanvas.addEventListener('touchend', (event) => {
+        if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
+
+        // Use changedTouches if available, otherwise use last known position
+        let x, y;
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const scale = elems.simulationDisplayCanvas.width / rect.width;
+        if (event.changedTouches && event.changedTouches.length > 0) {
+            const touch = event.changedTouches[0];
+            x = (touch.clientX - rect.left) * scale;
+            y = (touch.clientY - rect.top) * scale;
+        } else {
+            x = startLineStartPoint.x;
+            y = startLineStartPoint.y;
+        }
+
+        // Convert to meters for simulation
+        const x1_m = startLineStartPoint.x / PIXELS_PER_METER;
+        const y1_m = startLineStartPoint.y / PIXELS_PER_METER;
+        const x2_m = x / PIXELS_PER_METER;
+        const y2_m = y / PIXELS_PER_METER;
+
+        // Calculate angle for robot orientation (perpendicular to line)
+        const dx = x2_m - x1_m;
+        const dy = y2_m - y1_m;
+        const angle_rad = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
+
+        // Calculate center point of line for robot position
+        const center_x_m = (x1_m + x2_m) / 2;
+        const center_y_m = (y1_m + y2_m) / 2;
+
+        // Reset simulation with new start position
+        simulationInstance.resetSimulationState(center_x_m, center_y_m, angle_rad);
+        
+        // Initialize lap timer with new start line
+        simulationInstance.lapTimer.initialize(
+            { x_m: center_x_m, y_m: center_y_m, angle_rad: angle_rad },
+            simulationInstance.totalSimTime_s,
+            { x1: x1_m, y1: y1_m, x2: x2_m, y2: y2_m }
+        );
+
+        // Exit placement mode
+        isPlacingStartLineSim = false;
+        placeStartLineSimButton.textContent = 'Ubicar Línea de Comienzo';
+        placeStartLineSimButton.style.backgroundColor = '';
+        elems.simulationDisplayCanvas.style.cursor = 'default';
+        startLineStartPoint = null;
+
+        // Redraw final state
+        drawCurrentSimulationState();
+        event.preventDefault();
+    }, { passive: false });
     
     // --- Start Everything ---
     initializeSimulator().then(() => {
