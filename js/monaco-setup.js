@@ -158,6 +158,193 @@ async function loop() {
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
+`,
+    'onoff-5sensors': `// Definición de pines para 5 sensores
+const FAR_LEFT_SENSOR_PIN = 2;   // Sensor Extremo Izquierdo
+const LEFT_SENSOR_PIN = 3;       // Sensor Izquierdo
+const CENTER_SENSOR_PIN = 4;     // Sensor Central
+const RIGHT_SENSOR_PIN = 5;      // Sensor Derecho
+const FAR_RIGHT_SENSOR_PIN = 6;  // Sensor Extremo Derecho
+
+const MOTOR_RIGHT_PWM = 9;       // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 10;        // analogWrite para velocidad del motor izquierdo
+
+const BASE_SPEED = 80;           // Velocidad base hacia adelante
+const TURN_FACTOR = 40;          // Factor para ajustar la velocidad de giro (mayor valor = giro más pronunciado)
+const MAX_TURN_SPEED = 150;      // Velocidad máxima para los giros
+
+function setup() {
+    Serial.begin(9600);
+    // Configuración de pines de sensores como INPUT
+    pinMode(FAR_LEFT_SENSOR_PIN, INPUT);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
+    // Configuración de pines de motores como OUTPUT
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. Line Follower with 5 Sensors.");
+}
+
+async function loop() {
+    // Lectura de los 5 sensores
+    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);  // 0 = en línea, 1 = fuera de línea
+    let sL = digitalRead(LEFT_SENSOR_PIN);
+    let sC = digitalRead(CENTER_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+    let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
+
+    // Calculamos un 'error' basado en la posición de la línea
+    let error = 0;
+    if (sFL === 0) error -= 2; // Mucho a la izquierda
+    if (sL === 0) error -= 1;  // Un poco a la izquierda
+    // sC === 0 no añade error, es el centro
+    if (sR === 0) error += 1;  // Un poco a la derecha
+    if (sFR === 0) error += 2; // Mucho a la derecha
+
+    let left_motor_speed;
+    let right_motor_speed;
+
+    // Si ningún sensor detecta la línea
+    if (sFL === 1 && sL === 1 && sC === 1 && sR === 1 && sFR === 1) {
+        // Se perdió la línea, intentar avanzar recto o una estrategia de búsqueda
+        left_motor_speed = BASE_SPEED;
+        right_motor_speed = BASE_SPEED;
+        Serial.println(" --- Line Lost! Going Straight ---");
+    } else {
+        // Calcular la velocidad de giro basándose en el error
+        let turn_adjustment = error * TURN_FACTOR;
+
+        // Calcular las velocidades de los motores
+        left_motor_speed = BASE_SPEED + turn_adjustment;
+        right_motor_speed = BASE_SPEED - turn_adjustment;
+
+        // Limitar las velocidades para que no excedan los valores permitidos
+        left_motor_speed = constrain(left_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
+        right_motor_speed = constrain(right_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
+    }
+
+    // Aplicar las velocidades a los motores
+    analogWrite(MOTOR_LEFT_PWM, left_motor_speed);
+    analogWrite(MOTOR_RIGHT_PWM, right_motor_speed);
+
+    // Impresión de depuración en el Serial Monitor
+    Serial.print("sFL:" + sFL + " sL:" + sL + " sC:" + sC + " sR:" + sR + " sFR:" + sFR);
+    Serial.println(" | L_mot_spd:" + left_motor_speed + " R_mot_spd:" + right_motor_speed + " Error:" + error);
+    
+    await delay(10); // Pequeña pausa
+}
+
+// Función auxiliar para limitar un valor entre un mínimo y un máximo
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+`,
+    'onoff-4sensors': `// Definición de pines para 4 sensores
+const FAR_LEFT_SENSOR_PIN = 2;   // Sensor Extremo Izquierdo
+const LEFT_SENSOR_PIN = 3;       // Sensor Izquierdo
+const RIGHT_SENSOR_PIN = 4;      // Sensor Derecho
+const FAR_RIGHT_SENSOR_PIN = 5;  // Sensor Extremo Derecho
+
+const MOTOR_RIGHT_PWM = 9;       // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 10;        // analogWrite para velocidad del motor izquierdo
+
+const BASE_SPEED = 80;           // Velocidad base hacia adelante
+const TURN_FACTOR = 50;          // Factor para ajustar la velocidad de giro
+const MAX_TURN_SPEED = 150;      // Velocidad máxima para los giros
+
+function setup() {
+    Serial.begin(9600);
+    pinMode(FAR_LEFT_SENSOR_PIN, INPUT);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. Line Follower with 4 Sensors.");
+}
+
+async function loop() {
+    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);
+    let sL = digitalRead(LEFT_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+    let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
+
+    let error = 0;
+    if (sFL === 0) error -= 2;
+    if (sL === 0) error -= 1;
+    if (sR === 0) error += 1;
+    if (sFR === 0) error += 2;
+
+    let left_motor_speed, right_motor_speed;
+    if (sFL === 1 && sL === 1 && sR === 1 && sFR === 1) {
+        left_motor_speed = BASE_SPEED;
+        right_motor_speed = BASE_SPEED;
+        Serial.println(" --- Line Lost! Going Straight ---");
+    } else {
+        let turn_adjustment = error * TURN_FACTOR;
+        left_motor_speed = BASE_SPEED + turn_adjustment;
+        right_motor_speed = BASE_SPEED - turn_adjustment;
+        left_motor_speed = constrain(left_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
+        right_motor_speed = constrain(right_motor_speed, -MAX_TURN_SPEED, MAX_TURN_SPEED);
+    }
+    analogWrite(MOTOR_LEFT_PWM, left_motor_speed);
+    analogWrite(MOTOR_RIGHT_PWM, right_motor_speed);
+    Serial.print("sFL:" + sFL + " sL:" + sL + " sR:" + sR + " sFR:" + sFR);
+    Serial.println(" | L_mot_spd:" + left_motor_speed + " R_mot_spd:" + right_motor_speed + " Error:" + error);
+    await delay(10);
+}
+
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+`,
+    'onoff-2sensors': `// Definición de pines para 2 sensores
+const LEFT_SENSOR_PIN = 2;   // Sensor Izquierdo
+const RIGHT_SENSOR_PIN = 3;  // Sensor Derecho
+
+const MOTOR_RIGHT_PWM = 9;   // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+
+const BASE_SPEED = 80;       // Velocidad base hacia adelante
+const TURN_SPEED = 120;      // Velocidad de giro
+
+function setup() {
+    Serial.begin(9600);
+    pinMode(LEFT_SENSOR_PIN, INPUT);
+    pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
+    pinMode(MOTOR_LEFT_PWM, OUTPUT);
+    Serial.println("Robot Setup Complete. Line Follower with 2 Sensors.");
+}
+
+async function loop() {
+    let sL = digitalRead(LEFT_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+    let left_motor_speed = BASE_SPEED;
+    let right_motor_speed = BASE_SPEED;
+    if (sL === 0 && sR === 1) {
+        left_motor_speed = BASE_SPEED - TURN_SPEED;
+        right_motor_speed = BASE_SPEED + TURN_SPEED;
+    } else if (sL === 1 && sR === 0) {
+        left_motor_speed = BASE_SPEED + TURN_SPEED;
+        right_motor_speed = BASE_SPEED - TURN_SPEED;
+    } else if (sL === 1 && sR === 1) {
+        left_motor_speed = BASE_SPEED;
+        right_motor_speed = BASE_SPEED;
+        Serial.println(" --- Line Lost! Going Straight ---");
+    }
+    analogWrite(MOTOR_LEFT_PWM, left_motor_speed);
+    analogWrite(MOTOR_RIGHT_PWM, right_motor_speed);
+    Serial.print("sL:" + sL + " sR:" + sR);
+    Serial.println(" | L_mot_spd:" + left_motor_speed + " R_mot_spd:" + right_motor_speed);
+    await delay(10);
+}
+
+function constrain(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
 `
 };
 
@@ -167,7 +354,13 @@ const codeExplanations = {
 
     onoff: `🌟 <b>Control On/Off</b>\n\nEste código es como un semáforo sencillo para tu robot. Si el sensor del medio ve la línea negra, el robot avanza. Si la pierde por la izquierda o la derecha, gira para buscarla.\n\nEs fácil de entender y perfecto para tus primeras pruebas. Pero, ¡ojo! En curvas muy cerradas puede que el robot se salga un poco.\n\n<b>¿Cuándo usarlo?</b>\nCuando quieres que tu robot siga la línea de forma simple y rápida.\n\n<b>¿Qué puedes probar?</b>\n- Cambia la velocidad para ver si el robot va más rápido o más lento.\n- Prueba diferentes pistas y mira cómo reacciona.`,
 
-    'continuous-turn': `🌟 <b>Control On/Off con Giro Continuo</b>\n\nEste código es similar al control On/Off simple, pero con una mejora importante: cuando el robot pierde la línea, en lugar de avanzar lentamente, continúa girando en la última dirección que estaba usando.\n\n<b>¿Por qué es útil?</b>\n- Ayuda a recuperar la línea más rápido cuando el robot se desvía\n- Es más efectivo en curvas cerradas\n- Evita que el robot se salga de la pista cuando pierde la línea\n\n<b>¿Qué puedes probar?</b>\n- Compara su comportamiento con el control On/Off simple\n- Prueba diferentes velocidades de giro\n- Observa cómo se comporta en curvas cerradas`
+    'continuous-turn': `🌟 <b>Control On/Off con Giro Continuo</b>\n\nEste código es similar al control On/Off simple, pero con una mejora importante: cuando el robot pierde la línea, en lugar de avanzar lentamente, continúa girando en la última dirección que estaba usando.\n\n<b>¿Por qué es útil?</b>\n- Ayuda a recuperar la línea más rápido cuando el robot se desvía\n- Es más efectivo en curvas cerradas\n- Evita que el robot se salga de la pista cuando pierde la línea\n\n<b>¿Qué puedes probar?</b>\n- Compara su comportamiento con el control On/Off simple\n- Prueba diferentes velocidades de giro\n- Observa cómo se comporta en curvas cerradas`,
+
+    'onoff-5sensors': `🌟 <b>On/Off para 5 Sensores</b>\n\nEste código implementa un seguidor de línea usando 5 sensores. Calcula un 'error' según la posición de la línea y ajusta la velocidad de los motores para mantener el robot sobre la pista.\n\n<b>¿Qué hace?</b>\n- Usa los sensores extremos para detectar desvíos grandes y los intermedios para correcciones suaves.\n- Si ningún sensor detecta la línea, el robot avanza recto como estrategia de búsqueda.\n- Ajusta la velocidad de cada motor proporcionalmente al error calculado.\n\n<b>¿Qué puedes probar?</b>\n- Cambia el TURN_FACTOR para ver cómo afecta la agresividad del giro.\n- Modifica BASE_SPEED y MAX_TURN_SPEED para adaptar la velocidad a tu pista.\n- Observa en el Serial Monitor cómo varía el error y la velocidad de los motores.\n\nIdeal para pistas con curvas pronunciadas y para experimentar con estrategias de control más precisas.`,
+
+    'onoff-4sensors': `🌟 <b>On/Off para 4 Sensores</b>\n\nEste código implementa un seguidor de línea usando 4 sensores (dos extremos y dos intermedios). Calcula un 'error' según la posición de la línea y ajusta la velocidad de los motores para mantener el robot sobre la pista.\n\n<b>¿Qué hace?</b>\n- Usa los sensores extremos para detectar desvíos grandes y los intermedios para correcciones suaves.\n- Si ningún sensor detecta la línea, el robot avanza recto como estrategia de búsqueda.\n- Ajusta la velocidad de cada motor proporcionalmente al error calculado.\n\n<b>¿Qué puedes probar?</b>\n- Cambia el TURN_FACTOR para ver cómo afecta la agresividad del giro.\n- Modifica BASE_SPEED y MAX_TURN_SPEED para adaptar la velocidad a tu pista.\n- Observa en el Serial Monitor cómo varía el error y la velocidad de los motores.\n\nIdeal para pistas con curvas y para experimentar con estrategias de control sencillas y efectivas.`,
+
+    'onoff-2sensors': `🌟 <b>On/Off para 2 Sensores</b>\n\nEste código implementa un seguidor de línea básico usando solo dos sensores (izquierdo y derecho). Si uno de los sensores detecta la línea, el robot gira hacia el lado contrario. Si ambos pierden la línea, avanza recto.\n\n<b>¿Qué hace?</b>\n- Gira a la izquierda o derecha según el sensor que detecta la línea.\n- Si ambos sensores pierden la línea, el robot avanza recto como estrategia de búsqueda.\n\n<b>¿Qué puedes probar?</b>\n- Ajusta BASE_SPEED y TURN_SPEED para ver cómo responde el robot.\n- Prueba en pistas sencillas y observa el comportamiento.\n\nIdeal para aprender los conceptos básicos de seguimiento de línea y para robots con hardware limitado.`
 };
 
 // Initialize Monaco Editor
