@@ -176,15 +176,13 @@ function syncDecorativeSensorsWithGeometry() {
     }
     // Ángulo de rotación del robot en el editor
     const editorAngle = -Math.PI / 2;
-    // Calcula la posición de cada sensor igual que en el dibujo
+    // Distribución centrada de sensores
     for (let i = 0; i < sensorCount; i++) {
         let x = 0, y = 0;
         if (sensorCount === 1) {
             x = 0;
-        } else if (sensorCount === 2) {
-            x = (i === 0 ? -1 : 1) * spread;
         } else {
-            x = ((i / (sensorCount - 1)) * 2 - 1) * spread;
+            x = ((i - (sensorCount - 1) / 2) / ((sensorCount - 1) / 2)) * spread;
         }
         y = -offset;
         // Convierte a píxeles
