@@ -160,11 +160,8 @@ function syncDecorativeSensorsWithGeometry() {
             }
         }
     }
-    // Usa la geometría actualizada
-    const geometry = getFormValues();
-    const sensorCount = geometry.sensorCount;
-    const spread = geometry.sensorSpread_m;
-    const offset = geometry.sensorOffset_m;
+    // Obtiene las posiciones exactas de los sensores (en metros, sistema del robot)
+    const sensorPositions = previewRobot.getSensorPositions_world_m();
     const centerX = previewCanvas.width / 2;
     const centerY = previewCanvas.height / 2;
     // Carga la imagen del sensor
@@ -176,18 +173,10 @@ function syncDecorativeSensorsWithGeometry() {
     }
     // Ángulo de rotación del robot en el editor
     const editorAngle = -Math.PI / 2;
-    // Distribución equiespaciada de sensores entre -spread y +spread
-    for (let i = 0; i < sensorCount; i++) {
-        let x = 0, y = 0;
-        if (sensorCount === 1) {
-            x = 0;
-        } else {
-            x = -spread + i * (2 * spread / (sensorCount - 1));
-        }
-        y = -offset;
-        // Convierte a píxeles
-        const px = x * PIXELS_PER_METER + centerX;
-        const py = y * PIXELS_PER_METER + centerY;
+    // Coloca cada parte decorativa exactamente donde va el círculo de sensor
+    Object.values(sensorPositions).forEach(pos => {
+        const px = pos.x_m * PIXELS_PER_METER + centerX;
+        const py = pos.y_m * PIXELS_PER_METER + centerY;
         window.placedParts.push({
             id: 'sensor',
             name: 'Sensor',
@@ -196,7 +185,7 @@ function syncDecorativeSensorsWithGeometry() {
             y: py,
             rotation: editorAngle
         });
-    }
+    });
 }
 
 function getFormValues() {
