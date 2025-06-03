@@ -171,10 +171,10 @@ function syncDecorativeSensorsWithGeometry() {
     }
     // Ángulo de rotación del robot en el editor
     const editorAngle = -Math.PI / 2;
-    // Coloca cada parte decorativa exactamente donde va el círculo de sensor
+    // Coloca cada parte decorativa exactamente donde va el círculo de sensor, pero 1cm (0.01m) más abajo
     Object.values(sensorPositions).forEach(pos => {
         const px = pos.x_m * PIXELS_PER_METER;
-        const py = pos.y_m * PIXELS_PER_METER;
+        const py = (pos.y_m + 0.01) * PIXELS_PER_METER; // 1cm más abajo
         window.placedParts.push({
             id: 'sensor',
             name: 'Sensor',
