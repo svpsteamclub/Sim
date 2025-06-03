@@ -56,6 +56,11 @@ export function initRobotParts() {
         return;
     }
 
+    // --- BLOQUEAR SCROLL Y GESTOS EN MOBILE DURANTE TOUCH ---
+    // Esto previene el scroll y zoom nativo durante interacción touch
+    partsPalette.style.touchAction = 'none';
+    previewCanvas.style.touchAction = 'none';
+
     // Add erase mode button under the palette
     let eraseBtn = document.createElement('button');
     eraseBtn.textContent = 'Modo Borrar';
