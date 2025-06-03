@@ -42,8 +42,40 @@ export function initTrackEditor(appInterface) {
         }
     });
 
-    // Setup tab change observer
+    // Ajuste inicial del canvas al cargar la pestaña del editor de pista
+    function resizeTrackEditorCanvas() {
+        if (!editorCanvas) return;
+        const container = editorCanvas.parentElement;
+        if (!container) return;
+        const containerRect = container.getBoundingClientRect();
+        const size = Math.max(containerRect.width, 320); // Mínimo para mobile
+        editorCanvas.width = size;
+        editorCanvas.height = size;
+        editorCanvas.style.width = size + 'px';
+        editorCanvas.style.height = size + 'px';
+        const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+        renderEditor(cellSize);
+    }
+
+    // Llamar al ajuste inicial cuando se activa la pestaña del editor de pista
     const trackEditorTab = document.getElementById('track-editor');
+    if (trackEditorTab) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    if (trackEditorTab.classList.contains('active')) {
+                        resizeTrackEditorCanvas();
+                    }
+                }
+            });
+        });
+        observer.observe(trackEditorTab, { attributes: true });
+    }
+
+    // También llamar al ajuste inicial al terminar la carga de assets
+    window.addEventListener('load', resizeTrackEditorCanvas);
+
+    // Setup tab change observer
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.attributeName === 'class') {
@@ -149,6 +181,24 @@ export function initTrackEditor(appInterface) {
 
     editorCanvas.addEventListener('dblclick', (event) => {
         onGridDoubleClick(event);
+    });
+
+    // Responsive resize for track editor canvas
+    window.addEventListener('resize', () => {
+        if (!editorCanvas) return;
+        // Get container size and use width for both dimensions
+        const container = editorCanvas.parentElement;
+        if (!container) return;
+        const containerRect = container.getBoundingClientRect();
+        // Use the smallest dimension for square aspect ratio
+        const size = Math.max(containerRect.width, 320); // Minimum for mobile
+        editorCanvas.width = size;
+        editorCanvas.height = size;
+        editorCanvas.style.width = size + 'px';
+        editorCanvas.style.height = size + 'px';
+        // Calculate dynamic cell size and re-render
+        const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+        renderEditor(cellSize);
     });
 }
 
