@@ -168,10 +168,12 @@ function syncDecorativeSensorsWithGeometry() {
             }
         }
     }
-    // Obtiene posiciones de sensores en metros (relativo al robot centrado)
+    // Obtiene posiciones de sensores en metros (relativo al robot centrado, sin rotar)
     const sensorPositions = previewRobot.getSensorPositions_world_m();
     const sensorDiameter = previewRobot.sensorDiameter_m || 0.02;
-    const previewCanvas = document.getElementById('robotPreviewCanvas');
+    // El robot en el editor está centrado y con ángulo -Math.PI/2
+    // Por lo tanto, para el editor, X = x_m * PIXELS_PER_METER + centerX
+    // y Y = y_m * PIXELS_PER_METER + centerY
     const centerX = previewCanvas.width / 2;
     const centerY = previewCanvas.height / 2;
     // Carga la imagen del sensor
@@ -184,7 +186,7 @@ function syncDecorativeSensorsWithGeometry() {
     // Para cada sensor, agrega una parte decorativa
     Object.keys(sensorPositions).forEach((key) => {
         const pos = sensorPositions[key];
-        // Convierte metros a pixeles y ajusta al centro del canvas
+        // No aplicar rotación ni swap de ejes
         const px = pos.x_m * PIXELS_PER_METER + centerX;
         const py = pos.y_m * PIXELS_PER_METER + centerY;
         window.placedParts.push({
