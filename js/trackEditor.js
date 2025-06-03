@@ -22,6 +22,21 @@ const DIRECTIONS = [
 // Main application interface for communication (e.g., loading track to simulator)
 let mainAppInterface;
 
+// Ajuste inicial del canvas al cargar la pestaña del editor de pista
+function resizeTrackEditorCanvas() {
+    if (!editorCanvas) return;
+    const container = editorCanvas.parentElement;
+    if (!container) return;
+    const containerRect = container.getBoundingClientRect();
+    const size = Math.max(containerRect.width, 320); // Mínimo para mobile
+    editorCanvas.width = size;
+    editorCanvas.height = size;
+    editorCanvas.style.width = size + 'px';
+    editorCanvas.style.height = size + 'px';
+    const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
+    renderEditor(cellSize);
+}
+
 export function initTrackEditor(appInterface) {
     console.log("[TrackEditor] Starting initialization...");
     mainAppInterface = appInterface;
@@ -41,21 +56,6 @@ export function initTrackEditor(appInterface) {
             restoreEditorState();
         }
     });
-
-    // Ajuste inicial del canvas al cargar la pestaña del editor de pista
-    function resizeTrackEditorCanvas() {
-        if (!editorCanvas) return;
-        const container = editorCanvas.parentElement;
-        if (!container) return;
-        const containerRect = container.getBoundingClientRect();
-        const size = Math.max(containerRect.width, 320); // Mínimo para mobile
-        editorCanvas.width = size;
-        editorCanvas.height = size;
-        editorCanvas.style.width = size + 'px';
-        editorCanvas.style.height = size + 'px';
-        const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
-        renderEditor(cellSize);
-    }
 
     // Llamar al ajuste inicial cuando se activa la pestaña del editor de pista
     const trackEditorTab = document.getElementById('track-editor');
@@ -456,7 +456,7 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
         const generationResult = generateRandomLoopTrackLogic();
         if (generationResult.success) {
             console.log(`Pista aleatoria generada con éxito en intento ${i + 1}`);
-            renderEditor(); // Make sure grid is re-rendered
+            resizeTrackEditorCanvas(); // <-- Ajustar canvas tras generar pista
             return;
         }
     }
