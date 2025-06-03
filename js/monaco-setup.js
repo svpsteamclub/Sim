@@ -166,8 +166,8 @@ const CENTER_SENSOR_PIN = 4;     // Sensor Central
 const RIGHT_SENSOR_PIN = 5;      // Sensor Derecho
 const FAR_RIGHT_SENSOR_PIN = 6;  // Sensor Extremo Derecho
 
-const MOTOR_RIGHT_PWM = 9;       // analogWrite para velocidad del motor derecho
-const MOTOR_LEFT_PWM = 10;        // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 10;       // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 9;        // analogWrite para velocidad del motor izquierdo
 
 const BASE_SPEED = 80;           // Velocidad base hacia adelante
 const TURN_FACTOR = 40;          // Factor para ajustar la velocidad de giro (mayor valor = giro más pronunciado)
@@ -247,8 +247,8 @@ const LEFT_SENSOR_PIN = 3;       // Sensor Izquierdo
 const RIGHT_SENSOR_PIN = 4;      // Sensor Derecho
 const FAR_RIGHT_SENSOR_PIN = 5;  // Sensor Extremo Derecho
 
-const MOTOR_RIGHT_PWM = 9;       // analogWrite para velocidad del motor derecho
-const MOTOR_LEFT_PWM = 10;        // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 10;       // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 9;        // analogWrite para velocidad del motor izquierdo
 
 const BASE_SPEED = 80;           // Velocidad base hacia adelante
 const TURN_FACTOR = 50;          // Factor para ajustar la velocidad de giro
@@ -304,8 +304,8 @@ function constrain(value, min, max) {
 const LEFT_SENSOR_PIN = 2;   // Sensor Izquierdo
 const RIGHT_SENSOR_PIN = 3;  // Sensor Derecho
 
-const MOTOR_RIGHT_PWM = 9;   // analogWrite para velocidad del motor derecho
-const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
+const MOTOR_RIGHT_PWM = 10;   // analogWrite para velocidad del motor derecho
+const MOTOR_LEFT_PWM = 9;    // analogWrite para velocidad del motor izquierdo
 
 const BASE_SPEED = 80;       // Velocidad base hacia adelante
 const TURN_SPEED = 120;      // Velocidad de giro
