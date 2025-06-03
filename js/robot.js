@@ -344,14 +344,16 @@ export class Robot {
             ctx.restore();
         }
         // Mostrar pines de motores cerca de las ruedas
-        // Izquierda
+        // Necesitamos calcular wheelLengthPx y wheelYOffsetPx aquí
+        const wheelLengthPx = (typeof WHEEL_LENGTH_M !== 'undefined' ? WHEEL_LENGTH_M : 0.04) * PIXELS_PER_METER;
+        const wheelYOffsetPx = (this.wheelbase_m / 2) * PIXELS_PER_METER;
+        const wheelWidthPx = (typeof WHEEL_WIDTH_M !== 'undefined' ? WHEEL_WIDTH_M : 0.015) * PIXELS_PER_METER;
         ctx.save();
         ctx.fillStyle = 'blue';
         ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
         ctx.fillText('10', -wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2 - 5);
-        // Derecha
         ctx.fillText('9', -wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2 - 5);
         ctx.restore();
     }
