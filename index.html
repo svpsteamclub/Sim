@@ -224,6 +224,18 @@
                             <li><strong>(...)</strong> y <strong>Serial.println(...)</strong>: Muestra mensajes en el Monitor Serial.</li>
                             <li><strong>delay(ms)</strong>: Espera el tiempo que le digas (en milisegundos).</li>
                         </ul>
+                        <div style="margin-top:1em; font-size:0.98em; color:#234e70; background:#f8f9fa; border-radius:8px; padding:0.8em 1em;">
+                            <strong>¿Cómo referenciar los sensores en tu código?</strong><br>
+                            <ul style="margin:0.5em 0 0 1.2em; padding:0;">
+                                <li><b>Para 2 sensores:</b> <code>LEFT_SENSOR_PIN</code> (2), <code>RIGHT_SENSOR_PIN</code> (3)</li>
+                                <li><b>Para 3 sensores:</b> <code>LEFT_SENSOR_PIN</code> (2), <code>CENTER_SENSOR_PIN</code> (3), <code>RIGHT_SENSOR_PIN</code> (4)</li>
+                                <li><b>Para 4 sensores:</b> <code>FAR_LEFT_SENSOR_PIN</code> (2), <code>LEFT_SENSOR_PIN</code> (3), <code>RIGHT_SENSOR_PIN</code> (4), <code>FAR_RIGHT_SENSOR_PIN</code> (5)</li>
+                                <li><b>Para 5 sensores:</b> <code>FAR_LEFT_SENSOR_PIN</code> (2), <code>LEFT_SENSOR_PIN</code> (3), <code>CENTER_SENSOR_PIN</code> (4), <code>RIGHT_SENSOR_PIN</code> (5), <code>FAR_RIGHT_SENSOR_PIN</code> (6)</li>
+                            </ul>
+                            <p>Usa solo los pines que correspondan a la cantidad de sensores de tu robot. Por ejemplo, si tienes 4 sensores, puedes leerlos así:<br>
+                            <code>let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);<br>let sL = digitalRead(LEFT_SENSOR_PIN);<br>let sR = digitalRead(RIGHT_SENSOR_PIN);<br>let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);</code></p>
+                            <p>Si tienes 2 o 3 sensores, simplemente ignora los que no existen. El simulador asigna los pines automáticamente según la cantidad de sensores seleccionada en el editor de robot.</p>
+                        </div>
                         <p>¡Diviértete probando y aprendiendo cómo hacer que tu robot siga la línea!</p>
                     </div>
                 </div>
