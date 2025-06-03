@@ -160,10 +160,8 @@ function syncDecorativeSensorsWithGeometry() {
             }
         }
     }
-    // Obtiene las posiciones exactas de los sensores (en metros, sistema del robot)
+    // Obtiene las posiciones exactas de los sensores (en metros, sistema del canvas)
     const sensorPositions = previewRobot.getSensorPositions_world_m();
-    const centerX = previewCanvas.width / 2;
-    const centerY = previewCanvas.height / 2;
     // Carga la imagen del sensor
     const partInfo = window.PARTS ? window.PARTS.find(pt => pt.id === 'sensor') : null;
     let img = null;
@@ -175,8 +173,8 @@ function syncDecorativeSensorsWithGeometry() {
     const editorAngle = -Math.PI / 2;
     // Coloca cada parte decorativa exactamente donde va el círculo de sensor
     Object.values(sensorPositions).forEach(pos => {
-        const px = pos.x_m * PIXELS_PER_METER + centerX;
-        const py = pos.y_m * PIXELS_PER_METER + centerY;
+        const px = pos.x_m * PIXELS_PER_METER;
+        const py = pos.y_m * PIXELS_PER_METER;
         window.placedParts.push({
             id: 'sensor',
             name: 'Sensor',
