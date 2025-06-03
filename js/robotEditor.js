@@ -188,21 +188,27 @@ function syncDecorativeSensorsWithGeometry() {
 
 function getFormValues() {
     const elems = getDOMElements();
+    // Leer valores en milímetros y convertir a metros
     return {
-        width_m: parseFloat(elems.robotWidthInput.value) || DEFAULT_ROBOT_GEOMETRY.width_m,
-        sensorOffset_m: parseFloat(elems.sensorOffsetInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorOffset_m,
-        sensorSpread_m: parseFloat(elems.sensorSpreadInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorSpread_m,
-        sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorDiameter_m,
+        width_m: parseFloat(elems.robotWidthInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.width_m,
+        sensorOffset_m: parseFloat(elems.sensorOffsetInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.sensorOffset_m,
+        sensorSpread_m: parseFloat(elems.sensorSpreadInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.sensorSpread_m,
+        sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.sensorDiameter_m,
         sensorCount: parseInt(elems.sensorCountSelect?.value) || 3
     };
 }
 
 function setFormValues(geometry) {
     const elems = getDOMElements();
-    elems.robotWidthInput.value = geometry.width_m.toFixed(3);
-    elems.sensorOffsetInput.value = geometry.sensorOffset_m.toFixed(3);
-    elems.sensorSpreadInput.value = geometry.sensorSpread_m.toFixed(3);
-    elems.sensorDiameterInput.value = geometry.sensorDiameter_m.toFixed(3);
+    // Mostrar valores en milímetros en los inputs
+    elems.robotWidthInput.value = (geometry.width_m * 1000).toFixed(1);
+    elems.robotWidthInput.placeholder = 'Ancho (mm)';
+    elems.sensorOffsetInput.value = (geometry.sensorOffset_m * 1000).toFixed(1);
+    elems.sensorOffsetInput.placeholder = 'Offset sensores (mm)';
+    elems.sensorSpreadInput.value = (geometry.sensorSpread_m * 1000).toFixed(1);
+    elems.sensorSpreadInput.placeholder = 'Separación sensores (mm)';
+    elems.sensorDiameterInput.value = (geometry.sensorDiameter_m * 1000).toFixed(1);
+    elems.sensorDiameterInput.placeholder = 'Diámetro sensor (mm)';
     if (elems.sensorCountSelect && geometry.sensorCount) {
         elems.sensorCountSelect.value = geometry.sensorCount;
     }
