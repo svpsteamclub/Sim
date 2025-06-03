@@ -328,6 +328,31 @@ export class Robot {
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
             ctx.stroke();
+            // Mostrar número de pin dentro del círculo
+            ctx.save();
+            ctx.fillStyle = 'black';
+            ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            let pinNumber = '';
+            if (key === 'farLeft') pinNumber = '2';
+            else if (key === 'left') pinNumber = '3';
+            else if (key === 'center') pinNumber = '4';
+            else if (key === 'right') pinNumber = (this.sensorCount === 2 ? '3' : this.sensorCount === 3 ? '4' : this.sensorCount === 4 ? '4' : '5');
+            else if (key === 'farRight') pinNumber = (this.sensorCount === 4 ? '5' : '6');
+            ctx.fillText(pinNumber, pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER);
+            ctx.restore();
         }
+        // Mostrar pines de motores cerca de las ruedas
+        // Izquierda
+        ctx.save();
+        ctx.fillStyle = 'blue';
+        ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('10', -wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2 - 5);
+        // Derecha
+        ctx.fillText('9', -wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2 - 5);
+        ctx.restore();
     }
 }

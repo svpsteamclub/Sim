@@ -171,6 +171,7 @@ const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
 
 const TURN_SPEED = 140;      // Velocidad de giro
 const FORWARD_SPEED = 70;    // Velocidad hacia adelante
+const HARD_TURN_SPEED = 180; // Giro fuerte para sensores extremos
 
 function setup() {
     Serial.begin(9600);
@@ -200,11 +201,11 @@ async function loop() {
         analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
         analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
     } else if (sFL === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, -HARD_TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, HARD_TURN_SPEED);
     } else if (sFR === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, HARD_TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, -HARD_TURN_SPEED);
     } else {
         analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
         analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
