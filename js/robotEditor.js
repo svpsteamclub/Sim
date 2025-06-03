@@ -69,15 +69,6 @@ export function initRobotEditor(appInterface) {
         });
     }
 
-    elems.resetRobotGeometryButton.addEventListener('click', () => {
-        currentGeometry = { ...DEFAULT_ROBOT_GEOMETRY };
-        setFormValues(currentGeometry);
-        previewRobot.updateGeometry(currentGeometry);
-        renderRobotPreview();
-        mainAppInterface.updateRobotGeometry(currentGeometry, []);
-        alert("Geometría del robot restaurada a valores por defecto.");
-    });
-
     // Update preview dynamically as user types
     const inputs = [elems.robotWidthInput, elems.sensorOffsetInput, elems.sensorSpreadInput, elems.sensorDiameterInput];
     inputs.forEach(input => {
