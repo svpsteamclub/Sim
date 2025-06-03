@@ -163,7 +163,6 @@ function syncDecorativeSensorsWithGeometry() {
     // Usa la geometría actualizada
     const geometry = getFormValues();
     const sensorCount = geometry.sensorCount;
-    // spread es la MITAD de la distancia total (igual que en el robot)
     const spread = geometry.sensorSpread_m;
     const offset = geometry.sensorOffset_m;
     const centerX = previewCanvas.width / 2;
@@ -177,13 +176,13 @@ function syncDecorativeSensorsWithGeometry() {
     }
     // Ángulo de rotación del robot en el editor
     const editorAngle = -Math.PI / 2;
-    // Distribución centrada de sensores (spread es la mitad)
+    // Distribución equiespaciada de sensores entre -spread y +spread
     for (let i = 0; i < sensorCount; i++) {
         let x = 0, y = 0;
         if (sensorCount === 1) {
             x = 0;
         } else {
-            x = ((i / (sensorCount - 1)) * 2 - 1) * spread;
+            x = -spread + i * (2 * spread / (sensorCount - 1));
         }
         y = -offset;
         // Convierte a píxeles
