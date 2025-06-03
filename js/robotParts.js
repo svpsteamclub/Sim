@@ -27,6 +27,23 @@ let dragOffset = { x: 0, y: 0 };
 let eraseMode = false;
 let suppressNextClick = false;
 
+// --- TOUCH SUPPORT FOR MOBILE ---
+let touchDragPart = null;
+let touchDragImg = null;
+let touchDragOffset = { x: 0, y: 0 };
+let lastTapTime = 0;
+let tapTimeout = null;
+
+// Helper: get touch position relative to an element
+function getTouchPos(e, el) {
+    const rect = el.getBoundingClientRect();
+    const t = e.touches[0] || e.changedTouches[0];
+    return {
+        x: t.clientX - rect.left,
+        y: t.clientY - rect.top
+    };
+}
+
 export function initRobotParts() {
     console.log("Initializing robot parts...");
     const elems = getDOMElements();
@@ -197,6 +214,122 @@ export function initRobotParts() {
                 break;
             }
         }
+    });
+
+    // Touch drag from palette
+    partsPalette.addEventListener('touchstart', function(e) {
+        const target = e.target.closest('img[data-part-id]');
+        if (!target) return;
+        e.preventDefault();
+        const partId = target.dataset.partId;
+        const partInfo = PARTS.find(pt => pt.id === partId);
+        if (!partInfo) return;
+        touchDragPart = partInfo;
+        // Create drag image for feedback
+        touchDragImg = document.createElement('img');
+        touchDragImg.src = getAssetPath(partInfo.src);
+        touchDragImg.style.position = 'fixed';
+        touchDragImg.style.pointerEvents = 'none';
+        touchDragImg.style.opacity = '0.7';
+        touchDragImg.style.zIndex = '9999';
+        touchDragImg.style.width = '40px';
+        touchDragImg.style.height = '40px';
+        document.body.appendChild(touchDragImg);
+        const pos = getTouchPos(e, document.body);
+        touchDragImg.style.left = (pos.x - 20) + 'px';
+        touchDragImg.style.top = (pos.y - 20) + 'px';
+        touchDragOffset = { x: 20, y: 20 };
+    }, { passive: false });
+
+    partsPalette.addEventListener('touchmove', function(e) {
+        if (!touchDragImg) return;
+        e.preventDefault();
+        const pos = getTouchPos(e, document.body);
+        touchDragImg.style.left = (pos.x - touchDragOffset.x) + 'px';
+        touchDragImg.style.top = (pos.y - touchDragOffset.y) + 'px';
+    }, { passive: false });
+
+    partsPalette.addEventListener('touchend', function(e) {
+        if (!touchDragPart || !touchDragImg) return;
+        const pos = getTouchPos(e, previewCanvas);
+        // Check if touch ended over the canvas
+        const rect = previewCanvas.getBoundingClientRect();
+        const t = e.changedTouches[0];
+        if (t.clientX >= rect.left && t.clientX <= rect.right && t.clientY >= rect.top && t.clientY <= rect.bottom) {
+            // Drop part on canvas
+            placedParts.push({
+                id: touchDragPart.id,
+                name: touchDragPart.name,
+                img: new window.Image(),
+                x: pos.x,
+                y: pos.y
+            });
+            placedParts[placedParts.length-1].img.src = getAssetPath(touchDragPart.src);
+            drawRobotPreview();
+        }
+        document.body.removeChild(touchDragImg);
+        touchDragImg = null;
+        touchDragPart = null;
+    }, { passive: false });
+
+    partsPalette.addEventListener('touchcancel', function() {
+        if (touchDragImg) document.body.removeChild(touchDragImg);
+        touchDragImg = null;
+        touchDragPart = null;
+    });
+
+    // Touch move/drag for parts already on canvas
+    let touchMovePart = null;
+    let touchMoveOffset = { x: 0, y: 0 };
+    previewCanvas.addEventListener('touchstart', function(e) {
+        if (e.touches.length > 1) return; // Ignore multi-touch
+        const pos = getTouchPos(e, previewCanvas);
+        // Check if touching a part
+        for (let i = placedParts.length - 1; i >= 0; i--) {
+            const part = placedParts[i];
+            const partSize = 40;
+            if (Math.abs(pos.x - part.x) < partSize/2 && Math.abs(pos.y - part.y) < partSize/2) {
+                touchMovePart = part;
+                touchMoveOffset = { x: pos.x - part.x, y: pos.y - part.y };
+                // Double tap detection for rotate/erase
+                const now = Date.now();
+                if (now - lastTapTime < 350) {
+                    clearTimeout(tapTimeout);
+                    lastTapTime = 0;
+                    if (eraseMode) {
+                        placedParts.splice(i, 1);
+                    } else {
+                        part.rotation = ((part.rotation || 0) + Math.PI/2) % (2*Math.PI);
+                    }
+                    drawRobotPreview();
+                    e.preventDefault();
+                    return;
+                } else {
+                    lastTapTime = now;
+                    tapTimeout = setTimeout(() => { lastTapTime = 0; }, 400);
+                }
+                e.preventDefault();
+                break;
+            }
+        }
+    }, { passive: false });
+
+    previewCanvas.addEventListener('touchmove', function(e) {
+        if (!touchMovePart) return;
+        e.preventDefault();
+        const pos = getTouchPos(e, previewCanvas);
+        touchMovePart.x = pos.x - touchMoveOffset.x;
+        touchMovePart.y = pos.y - touchMoveOffset.y;
+        drawRobotPreview();
+    }, { passive: false });
+
+    previewCanvas.addEventListener('touchend', function(e) {
+        if (touchMovePart) {
+            touchMovePart = null;
+        }
+    });
+    previewCanvas.addEventListener('touchcancel', function() {
+        touchMovePart = null;
     });
 }
 
