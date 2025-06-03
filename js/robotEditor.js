@@ -58,6 +58,15 @@ export function initRobotEditor(appInterface) {
         alert("Geometría del robot actualizada y aplicada a la simulación (requiere reinicio de sim).");
     });
 
+    // --- Sensor count dropdown logic ---
+    if (elems.sensorCountSelect) {
+        elems.sensorCountSelect.addEventListener('change', () => {
+            currentGeometry.sensorCount = parseInt(elems.sensorCountSelect.value);
+            previewRobot.updateGeometry(currentGeometry);
+            renderRobotPreview();
+        });
+    }
+
     elems.resetRobotGeometryButton.addEventListener('click', () => {
         currentGeometry = { ...DEFAULT_ROBOT_GEOMETRY };
         setFormValues(currentGeometry);
@@ -154,6 +163,7 @@ function getFormValues() {
         sensorOffset_m: parseFloat(elems.sensorOffsetInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorOffset_m,
         sensorSpread_m: parseFloat(elems.sensorSpreadInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorSpread_m,
         sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value) || DEFAULT_ROBOT_GEOMETRY.sensorDiameter_m,
+        sensorCount: parseInt(elems.sensorCountSelect?.value) || 3
     };
 }
 
@@ -163,6 +173,9 @@ function setFormValues(geometry) {
     elems.sensorOffsetInput.value = geometry.sensorOffset_m.toFixed(3);
     elems.sensorSpreadInput.value = geometry.sensorSpread_m.toFixed(3);
     elems.sensorDiameterInput.value = geometry.sensorDiameter_m.toFixed(3);
+    if (elems.sensorCountSelect && geometry.sensorCount) {
+        elems.sensorCountSelect.value = geometry.sensorCount;
+    }
 }
 
 function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {

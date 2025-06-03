@@ -34,6 +34,7 @@ export function getDOMElements() {
         sensorOffsetInput: document.getElementById('sensorOffset'),
         sensorSpreadInput: document.getElementById('sensorSpread'),
         sensorDiameterInput: document.getElementById('sensorDiameter'),
+        sensorCountSelect: document.getElementById('sensorCount'),
         applyRobotGeometryButton: document.getElementById('applyRobotGeometryButton'),
         resetRobotGeometryButton: document.getElementById('resetRobotGeometryButton'),
         robotPartsPalette: document.getElementById('robotPartsPalette'),

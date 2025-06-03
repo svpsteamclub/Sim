@@ -8,12 +8,11 @@ export class Robot {
         this.y_m = initialY_m;
         this.angle_rad = initialAngle_rad; // Angle in radians, 0 is along positive X-axis
 
-        // Robot state for user code (sensors are digital: 0 for on line, 1 for off line)
-        this.sensors = {
-            left: 1,   // Digital input, 0 = on line (black), 1 = off line (white)
-            center: 1,
-            right: 1
-        };
+        // Default to 3 sensors if not specified
+        const sensorCount = geometry && geometry.sensorCount ? geometry.sensorCount : 3;
+        this.sensorCount = sensorCount;
+        this.sensors = {};
+        this._initSensorState();
         // Motor speeds as PWM values (0-255), set by user's analogWrite
         this.motorPWMSpeeds = {
             left: 0,
@@ -34,6 +33,34 @@ export class Robot {
         this.decorativeParts = []; // Array to store decorative parts
     }
 
+    _initSensorState() {
+        // Always use keys: left, center, right, farLeft, farRight (for up to 5 sensors)
+        // For 2 sensors: left, right
+        // For 3 sensors: left, center, right
+        // For 4 sensors: farLeft, left, right, farRight
+        // For 5 sensors: farLeft, left, center, right, farRight
+        this.sensors = {};
+        if (this.sensorCount === 2) {
+            this.sensors.left = 1;
+            this.sensors.right = 1;
+        } else if (this.sensorCount === 3) {
+            this.sensors.left = 1;
+            this.sensors.center = 1;
+            this.sensors.right = 1;
+        } else if (this.sensorCount === 4) {
+            this.sensors.farLeft = 1;
+            this.sensors.left = 1;
+            this.sensors.right = 1;
+            this.sensors.farRight = 1;
+        } else if (this.sensorCount === 5) {
+            this.sensors.farLeft = 1;
+            this.sensors.left = 1;
+            this.sensors.center = 1;
+            this.sensors.right = 1;
+            this.sensors.farRight = 1;
+        }
+    }
+
     setImages(wheelImg) {
         this.wheelImage = wheelImg;
     }
@@ -50,6 +77,8 @@ export class Robot {
         this.sensorForwardProtrusion_m = geometry.sensorOffset_m;
         this.sensorSideSpread_m = geometry.sensorSpread_m;
         this.sensorDiameter_m = geometry.sensorDiameter_m;
+        this.sensorCount = geometry.sensorCount || 3;
+        this._initSensorState();
         
         if (resetTrails) this.resetTrails();
     }
@@ -63,7 +92,7 @@ export class Robot {
         this.currentApplied_vL_mps = 0;
         this.currentApplied_vR_mps = 0;
         this.motorPWMSpeeds = { left: 0, right: 0 };
-        this.sensors = { left: 1, center: 1, right: 1 };
+        this._initSensorState();
         this.resetTrails();
     }
 
@@ -127,34 +156,87 @@ export class Robot {
     }
 
     // Gets sensor positions in meters, relative to robot's origin (center of axle line) and orientation
-    // Sensors are typically at the "front" of the robot.
+    // Returns an object with keys matching this.sensors
     getSensorPositions_world_m() {
-        // Sensor line center in robot's local frame (x positive forward)
-        // Solo usamos el offset hacia adelante, sin considerar el largo del robot
-        const localSensorLineCenterX = this.sensorForwardProtrusion_m;
-        
-        // Transform to world coordinates
+        const count = this.sensorCount || 3;
+        const offset = this.sensorForwardProtrusion_m;
+        const spread = this.sensorSideSpread_m;
         const cosA = Math.cos(this.angle_rad);
         const sinA = Math.sin(this.angle_rad);
-
-        // Center sensor
-        const cX_world = this.x_m + localSensorLineCenterX * cosA;
-        const cY_world = this.y_m + localSensorLineCenterX * sinA;
-
-        // Left sensor (robot's left is positive y in local frame if x is forward)
-        // Spread is along robot's local y-axis (perpendicular to robot's forward direction)
-        const lX_world = cX_world - this.sensorSideSpread_m * sinA;
-        const lY_world = cY_world + this.sensorSideSpread_m * cosA;
-        
-        // Right sensor
-        const rX_world = cX_world + this.sensorSideSpread_m * sinA;
-        const rY_world = cY_world - this.sensorSideSpread_m * cosA;
-            
-        return {
-            left:   { x_m: lX_world, y_m: lY_world },
-            center: { x_m: cX_world, y_m: cY_world },
-            right:  { x_m: rX_world, y_m: rY_world }
-        };
+        // Positions along the y axis (robot local frame)
+        let positions = {};
+        if (count === 2) {
+            // left/right only
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.left = {
+                x_m: x - ySpread * sinA,
+                y_m: y + ySpread * cosA
+            };
+            positions.right = {
+                x_m: x + ySpread * sinA,
+                y_m: y - ySpread * cosA
+            };
+        } else if (count === 3) {
+            // left, center, right
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.left = {
+                x_m: x - ySpread * sinA,
+                y_m: y + ySpread * cosA
+            };
+            positions.center = { x_m: x, y_m: y };
+            positions.right = {
+                x_m: x + ySpread * sinA,
+                y_m: y - ySpread * cosA
+            };
+        } else if (count === 4) {
+            // farLeft, left, right, farRight
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.farLeft = {
+                x_m: x - 1.5 * ySpread * sinA,
+                y_m: y + 1.5 * ySpread * cosA
+            };
+            positions.left = {
+                x_m: x - 0.5 * ySpread * sinA,
+                y_m: y + 0.5 * ySpread * cosA
+            };
+            positions.right = {
+                x_m: x + 0.5 * ySpread * sinA,
+                y_m: y - 0.5 * ySpread * cosA
+            };
+            positions.farRight = {
+                x_m: x + 1.5 * ySpread * sinA,
+                y_m: y - 1.5 * ySpread * cosA
+            };
+        } else if (count === 5) {
+            // farLeft, left, center, right, farRight
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.farLeft = {
+                x_m: x - 2 * ySpread * sinA,
+                y_m: y + 2 * ySpread * cosA
+            };
+            positions.left = {
+                x_m: x - ySpread * sinA,
+                y_m: y + ySpread * cosA
+            };
+            positions.center = { x_m: x, y_m: y };
+            positions.right = {
+                x_m: x + ySpread * sinA,
+                y_m: y - ySpread * cosA
+            };
+            positions.farRight = {
+                x_m: x + 2 * ySpread * sinA,
+                y_m: y - 2 * ySpread * cosA
+            };
+        }
+        return positions;
     }
 
     draw(ctx, displaySensorStates = null) {
@@ -233,22 +315,19 @@ export class Robot {
         }
     }
 
-    drawSensorsForDisplay(ctx, sensorReadings) { // sensorReadings are {left, center, right} booleans (true if off line)
+    drawSensorsForDisplay(ctx, sensorReadings) {
         const sensorPositions_m = this.getSensorPositions_world_m();
         const sensorRadiusPx = Math.max(2, (this.sensorDiameter_m / 2) * PIXELS_PER_METER);
-        
-        const drawOneSensor = (pos_m, isOffLine) => {
+        for (const key in sensorPositions_m) {
+            const pos_m = sensorPositions_m[key];
+            const isOffLine = sensorReadings[key];
             ctx.beginPath();
             ctx.arc(pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER, sensorRadiusPx, 0, 2 * Math.PI);
-            ctx.fillStyle = isOffLine ? 'gray' : 'lime'; // Lime for ON line, gray for OFF line
+            ctx.fillStyle = isOffLine ? 'gray' : 'lime';
             ctx.fill();
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
             ctx.stroke();
-        };
-
-        drawOneSensor(sensorPositions_m.left, sensorReadings.left);
-        drawOneSensor(sensorPositions_m.center, sensorReadings.center);
-        drawOneSensor(sensorPositions_m.right, sensorReadings.right);
+        }
     }
 }

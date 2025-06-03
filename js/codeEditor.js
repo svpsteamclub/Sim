@@ -14,7 +14,8 @@ const SIM_MOTOR_RIGHT_PWM_PIN = 5;
 const SIM_LEFT_SENSOR_PIN = 2;
 const SIM_CENTER_SENSOR_PIN = 3;
 const SIM_RIGHT_SENSOR_PIN = 4;
-
+const SIM_FAR_LEFT_SENSOR_PIN = 5;
+const SIM_FAR_RIGHT_SENSOR_PIN = 6;
 
 // Store pin modes (not strictly necessary for this sim, but good for API completeness)
 let _pinModes = {};
@@ -75,6 +76,8 @@ const arduinoAPI = {
         if (pin === SIM_LEFT_SENSOR_PIN) return sharedSimulationState.robot.sensors.left;
         if (pin === SIM_CENTER_SENSOR_PIN) return sharedSimulationState.robot.sensors.center;
         if (pin === SIM_RIGHT_SENSOR_PIN) return sharedSimulationState.robot.sensors.right;
+        if (pin === SIM_FAR_LEFT_SENSOR_PIN) return sharedSimulationState.robot.sensors.farLeft;
+        if (pin === SIM_FAR_RIGHT_SENSOR_PIN) return sharedSimulationState.robot.sensors.farRight;
         
         // ArduinoSerial.println(`Warning: digitalRead from unmapped pin ${pin}. Returning HIGH.`);
         return 1; // Default to HIGH (off line) for unmapped pins
@@ -115,8 +118,10 @@ const arduinoAPI = {
 // Define the custom code template
 const customCodeTemplate = `// Pin Definitions (as used in the simulator)
 const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor)
+const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor, if present)
 const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
+const FAR_LEFT_SENSOR_PIN = 5; // Digital (Connected to Robot's Far Left Sensor, if present)
+const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Connected to Robot's Far Right Sensor, if present)
 
 const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
 const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
@@ -126,8 +131,10 @@ const SPEED = 200;      // Velocidad de velocidad de motores
 function setup() {
     Serial.begin(9600);
     pinMode(LEFT_SENSOR_PIN, INPUT);
-    pinMode(CENTER_SENSOR_PIN, INPUT);
+    pinMode(CENTER_SENSOR_PIN, INPUT); // Only if using 3 or 5 sensors
     pinMode(RIGHT_SENSOR_PIN, INPUT);
+    pinMode(FAR_LEFT_SENSOR_PIN, INPUT); // Only if using 4 or 5 sensors
+    pinMode(FAR_RIGHT_SENSOR_PIN, INPUT); // Only if using 4 or 5 sensors
     pinMode(MOTOR_LEFT_PWM, OUTPUT);
     pinMode(MOTOR_RIGHT_PWM, OUTPUT);
     Serial.println("Robot Setup Complete. Custom Code.");
@@ -135,8 +142,7 @@ function setup() {
 
 async function loop() {
     //Escribe aqui el codigo de lectura de sensores y logica de control
-    
-    //Fuciones minimas para el accionamiento de motores (ambos adelane)
+    // Usa digitalRead(LEFT_SENSOR_PIN), digitalRead(CENTER_SENSOR_PIN), etc.
     analogWrite(MOTOR_LEFT_PWM, SPEED);
     analogWrite(MOTOR_RIGHT_PWM, SPEED);          
     await delay(10);

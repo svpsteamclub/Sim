@@ -313,52 +313,40 @@ export class Simulation {
 
     _updateRobotSensors() {
         if (!this.track.imageData) {
-            this.robot.sensors = { left: 1, center: 1, right: 1 }; // All off line if no track
+            // All off line if no track
+            this.robot._initSensorState();
+            for (const key in this.robot.sensors) {
+                this.robot.sensors[key] = 1;
+            }
             return;
         }
-
         const sensorPositions_m = this.robot.getSensorPositions_world_m();
-        
-        // Convert world meter positions to track image pixel positions
-        const sL_pos_track_px = { x: sensorPositions_m.left.x_m * PIXELS_PER_METER, y: sensorPositions_m.left.y_m * PIXELS_PER_METER };
-        const sC_pos_track_px = { x: sensorPositions_m.center.x_m * PIXELS_PER_METER, y: sensorPositions_m.center.y_m * PIXELS_PER_METER };
-        const sR_pos_track_px = { x: sensorPositions_m.right.x_m * PIXELS_PER_METER, y: sensorPositions_m.right.y_m * PIXELS_PER_METER };
-
-        let sL_onLine = this.track.isPixelOnLine(sL_pos_track_px.x, sL_pos_track_px.y);
-        let sC_onLine = this.track.isPixelOnLine(sC_pos_track_px.x, sC_pos_track_px.y);
-        let sR_onLine = this.track.isPixelOnLine(sR_pos_track_px.x, sR_pos_track_px.y);
-
-        // Apply sensor noise if enabled
-        if (this.params.sensorNoiseProb > 0) {
-            if (Math.random() < this.params.sensorNoiseProb) sL_onLine = !sL_onLine;
-            if (Math.random() < this.params.sensorNoiseProb) sC_onLine = !sC_onLine;
-            if (Math.random() < this.params.sensorNoiseProb) sR_onLine = !sR_onLine;
+        // For each sensor, compute state
+        for (const key in sensorPositions_m) {
+            const pos = sensorPositions_m[key];
+            const px = pos.x_m * PIXELS_PER_METER;
+            const py = pos.y_m * PIXELS_PER_METER;
+            let onLine = this.track.isPixelOnLine(px, py);
+            // Apply sensor noise if enabled
+            if (this.params.sensorNoiseProb > 0 && Math.random() < this.params.sensorNoiseProb) {
+                onLine = !onLine;
+            }
+            // 0 = on line, 1 = off line
+            this.robot.sensors[key] = onLine ? 0 : 1;
         }
-        
-        // Update robot's internal sensor state (0 = on line, 1 = off line for user code)
-        this.robot.sensors.left = sL_onLine ? 0 : 1;
-        this.robot.sensors.center = sC_onLine ? 0 : 1;
-        this.robot.sensors.right = sR_onLine ? 0 : 1;
     }
 
-    // Draw the current state of the simulation
     draw(displayCtx, displayCanvasWidth, displayCanvasHeight) {
         if (!displayCtx) return;
-
-        // Clear canvas handled by track.draw usually
-        // displayCtx.clearRect(0, 0, displayCanvasWidth, displayCanvasHeight);
-        
         if (this.track) {
             this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight);
         }
-        
-        if (this.robot && this.track && this.track.imageData) { // Only draw robot if track is loaded
-            // Pass current sensor states (0=online, 1=offline) for visual drawing (lime/gray)
-            const displaySensorStates = {
-                left: this.robot.sensors.left === 1, // true if off line for drawing
-                center: this.robot.sensors.center === 1,
-                right: this.robot.sensors.right === 1
-            };
+        if (this.robot && this.track && this.track.imageData) {
+            // Pass all sensor states for display
+            const displaySensorStates = {};
+            for (const key in this.robot.sensors) {
+                displaySensorStates[key] = this.robot.sensors[key] === 1;
+            }
             this.robot.draw(displayCtx, displaySensorStates);
         }
 
