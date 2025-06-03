@@ -32,6 +32,16 @@ export const AVAILABLE_TRACK_PARTS = [
     { name: "C1.06-MCS", file: "C1.06-MCS.png", connections: { N: false, S: true, E: true, W: false } },
     { name: "C2.07-RCI", file: "C2.07-RCI.png", connections: { N: false, S: true, E: true, W: false } },
     { name: "C2.08-MCS", file: "C2.08-MCS.png", connections: { N: true, S: true, E: false, W: false } },
+    { name: "C2.09-MCI", file: "C2.09-MCI.png", connections: { N: true, S: true, E: flase, W: true } },
+    { name: "C2.10-RDS", file: "C2.10-RDS.png", connections: { N: true, S: true, E: false, W: false } },
+    { name: "C2.11-RCI", file: "C2.11-RCI.png", connections: { N: true, S: true, E: false, W: false } },
+    { name: "C3.12-MCI", file: "C3.12-MCI.png", connections: { N: true, S: true, E: false, W: false } },
+    { name: "C3.13-RCI", file: "C3.13-RCI.png", connections: { N: true, S: true, E: false, W: true } },
+    { name: "C3.14-MDS", file: "C3.14-MDS.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C3.15-CDS", file: "C3.15-CDS.png", connections: { N: false, S: true, E: true, W: false } },
+    { name: "C3.16-MCI", file: "C3.16-MCI.png", connections: { N: false, S: true, E: false, W: false } },
+    { name: "C3.17-MCI", file: "C3.17-MCI.png", connections: { N: false, S: true, E: false, W: true } },
+    { name: "C3.18-MCI", file: "C3.18-MCI.png", connections: { N: false, S: false, E: true, W: true } }
 ];
 
 
