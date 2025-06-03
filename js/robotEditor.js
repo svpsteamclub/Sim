@@ -159,9 +159,8 @@ function syncDecorativeSensorsWithGeometry() {
             }
         }
     }
-    // Obtiene posiciones de sensores en metros (relativo al robot centrado, sin rotar)
+    // Obtiene posiciones de sensores en metros (ya en el sistema del robot, que en el editor está rotado -90°)
     const sensorPositions = previewRobot.getSensorPositions_world_m();
-    const sensorDiameter = previewRobot.sensorDiameter_m || 0.02;
     const centerX = previewCanvas.width / 2;
     const centerY = previewCanvas.height / 2;
     // Carga la imagen del sensor
@@ -176,11 +175,9 @@ function syncDecorativeSensorsWithGeometry() {
     // Para cada sensor, agrega una parte decorativa
     Object.keys(sensorPositions).forEach((key) => {
         const pos = sensorPositions[key];
-        // Rotar la posición igual que el robot en el editor
-        const x_rot = pos.x_m * Math.cos(editorAngle) - pos.y_m * Math.sin(editorAngle);
-        const y_rot = pos.x_m * Math.sin(editorAngle) + pos.y_m * Math.cos(editorAngle);
-        const px = x_rot * PIXELS_PER_METER + centerX;
-        const py = y_rot * PIXELS_PER_METER + centerY;
+        // No rotar la posición, solo convertir a píxeles
+        const px = pos.x_m * PIXELS_PER_METER + centerX;
+        const py = pos.y_m * PIXELS_PER_METER + centerY;
         window.placedParts.push({
             id: 'sensor',
             name: 'Sensor',
