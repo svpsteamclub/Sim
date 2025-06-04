@@ -255,20 +255,24 @@ require(['vs/editor/editor.main'], function () {
 
 // --- Descargar y cargar código desde archivo ---
 document.getElementById('downloadCodeButton').addEventListener('click', function() {
+    let code = '';
     if (window.editor && typeof window.editor.getValue === 'function') {
-        const code = window.editor.getValue();
-        const blob = new Blob([code], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'codigo_robot.txt';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }, 0);
+        code = window.editor.getValue();
+    } else if (typeof editor !== 'undefined' && typeof editor.getValue === 'function') {
+        code = editor.getValue();
     }
+    if (!code) return;
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'codigo_robot.txt';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
 });
 
 document.getElementById('uploadCodeInput').addEventListener('change', function(e) {
