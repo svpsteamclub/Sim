@@ -253,6 +253,36 @@ require(['vs/editor/editor.main'], function () {
     }
 });
 
+// --- Descargar y cargar código desde archivo ---
+document.getElementById('downloadCodeButton').addEventListener('click', function() {
+    if (window.editor && typeof window.editor.getValue === 'function') {
+        const code = window.editor.getValue();
+        const blob = new Blob([code], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'codigo_robot.txt';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 0);
+    }
+});
+
+document.getElementById('uploadCodeInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        if (window.editor && typeof window.editor.setValue === 'function') {
+            window.editor.setValue(evt.target.result);
+        }
+    };
+    reader.readAsText(file);
+});
+
 // Handle window resize
 window.addEventListener('resize', function() {
     if (editor) {
