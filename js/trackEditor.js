@@ -140,37 +140,34 @@ export function initTrackEditor(appInterface) {
         });
     }
 
+    // --- Limitar piezas realmente usadas en la generación aleatoria ---
+    function getLimitedTrackPartsByMode() {
+        if (trackMode === 'aventura') return AVAILABLE_TRACK_PARTS.slice(0, 9);
+        if (trackMode === 'desafio') return AVAILABLE_TRACK_PARTS.slice(0, 13);
+        return AVAILABLE_TRACK_PARTS;
+    }
+
     // Redefinir generateRandomTrackWithRetry para usar el modo de pista
     function generateRandomTrackWithRetry_Modo(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 50 : 20)) {
         // Limitar piezas según modo
-        let maxParts = 9;
-        if (trackMode === 'desafio') maxParts = 13;
-        else if (trackMode === 'innovacion') maxParts = AVAILABLE_TRACK_PARTS.length;
-
-        // Guardar referencia original
-        const originalParts = [...AVAILABLE_TRACK_PARTS];
-        // Limitar piezas
-        let limitedParts = originalParts.slice(0, maxParts);
-        // Parche: modificar global temporalmente
-        window.AVAILABLE_TRACK_PARTS = limitedParts;
-        // Generar pista
+        const limitedParts = getLimitedTrackPartsByMode();
+        // Parche: pasar como argumento a la lógica de generación
         for (let i = 0; i < maxRetries; i++) {
-            const generationResult = generateRandomLoopTrackLogic();
+            const generationResult = generateRandomLoopTrackLogic(limitedParts);
             if (generationResult.success) {
                 resizeTrackEditorCanvas();
-                window.AVAILABLE_TRACK_PARTS = originalParts;
                 return;
             }
         }
-        window.AVAILABLE_TRACK_PARTS = originalParts;
         alert("No se pudo generar una pista válida tras varios intentos. Prueba otro tamaño o modo.");
         setupGrid();
     }
 
     // Reemplazar handler del botón por la nueva función
     if (elems.generateRandomTrackButton) {
-        elems.generateRandomTrackButton.removeEventListener('click', generateRandomTrackWithRetry);
-        elems.generateRandomTrackButton.addEventListener('click', () => { generateRandomTrackWithRetry_Modo(); });
+        elems.generateRandomTrackButton.replaceWith(elems.generateRandomTrackButton.cloneNode(true)); // Remove all listeners
+        const newBtn = document.getElementById('generateRandomTrack');
+        newBtn.addEventListener('click', () => { generateRandomTrackWithRetry_Modo(); });
     }
 
     // Setup event listeners
@@ -596,17 +593,18 @@ function generateCellPathAndConnections() {
     return pathWithConnections;
 }
 
-function generateRandomLoopTrackLogic() {
+function generateRandomLoopTrackLogic(limitedParts = AVAILABLE_TRACK_PARTS) {
     setupGrid(); // Clear existing grid content but keep canvas size
     
-    const loopParts = AVAILABLE_TRACK_PARTS.filter(p => {
+    // Usar la lista limitada de piezas
+    const loopParts = limitedParts.filter(p => {
         if (!p.connections) return false;
         const connCount = Object.values(p.connections).filter(conn => conn === true).length;
         return connCount === 2;
     });
 
     if (loopParts.length === 0) {
-        console.error("No track parts with exactly 2 connections found for loop generation.");
+        console.error("No track parts with exactamente 2 conexiones para generación de loop.");
         return { success: false };
     }
 
