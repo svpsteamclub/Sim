@@ -58,9 +58,9 @@ function constrain(value, min, max) {
 }
 `,
     onoff: `// Definición de pines (como se usa en el simulador)
-const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const LEFT_SENSOR_PIN = 4;   // Digital (Conectado al sensor izquierdo del robot)
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
+const RIGHT_SENSOR_PIN = 2;  // Digital (Conectado al sensor derecho del robot)
 const FAR_LEFT_SENSOR_PIN = 5; // Digital (Conectado al sensor más a la izquierda, si existe)
 const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Conectado al sensor más a la derecha, si existe)
 
@@ -93,12 +93,12 @@ async function loop() {
         analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
     }
     else if (sL === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-    }
-    else if (sR === 0) {
         analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
         analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
+    }
+    else if (sR === 0) {
+        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
     }
     else {
         analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
@@ -116,9 +116,9 @@ function constrain(value, min, max) {
 }
 `,
     'continuous-turn': `// Definición de pines (como se usa en el simulador)
-const LEFT_SENSOR_PIN = 2;   // Digital (Conectado al sensor izquierdo del robot)
+const LEFT_SENSOR_PIN = 4;   // Digital (Conectado al sensor izquierdo del robot)
 const CENTER_SENSOR_PIN = 3; // Digital (Conectado al sensor central del robot)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Conectado al sensor derecho del robot)
+const RIGHT_SENSOR_PIN = 2;  // Digital (Conectado al sensor derecho del robot)
 const FAR_LEFT_SENSOR_PIN = 5; // Digital (Conectado al sensor más a la izquierda, si existe)
 const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Conectado al sensor más a la derecha, si existe)
 
@@ -151,25 +151,25 @@ async function loop() {
         lastTurnDirection = 0;
     }
     else if (sL === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, 0);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+        analogWrite(MOTOR_LEFT_PWM, 0);
         lastTurnDirection = -1;
     }
     else if (sR === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, 0);
+        analogWrite(MOTOR_RIGHT_PWM, 0);
+        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
         lastTurnDirection = 1;
     }
     else {
         if (lastTurnDirection === -1) {
+            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
+            analogWrite(MOTOR_LEFT_PWM, 0);
+        } else if (lastTurnDirection === 1) {
             analogWrite(MOTOR_RIGHT_PWM, 0);
             analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-        } else if (lastTurnDirection === 1) {
-            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-            analogWrite(MOTOR_LEFT_PWM, 0);
         } else {
-            analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-            analogWrite(MOTOR_LEFT_PWM, 0);
+            analogWrite(MOTOR_RIGHT_PWM, 0);
+            analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
             lastTurnDirection = 1;
         }
     }
