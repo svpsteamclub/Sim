@@ -51,7 +51,8 @@ export function getDOMElements() {
         loadTrackDesignInput: document.getElementById('loadTrackDesignInput'),
         exportTrackToSimulatorButton: document.getElementById('exportTrackToSimulator'),
         trackPartsPalette: document.getElementById('trackPartsPalette'),
-        trackEditorControls: document.querySelector('.track-editor-controls')
+        trackEditorControls: document.querySelector('.track-editor-controls'),
+        trackModeDropdown: document.getElementById('trackModeDropdown')
     };
 }
 

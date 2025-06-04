@@ -337,6 +337,12 @@ if (digitalRead(CENTER_SENSOR_PIN) === 0) {
                         <option value="4x4" selected>4x4</option>
                         <option value="5x5">5x5</option>
                     </select>
+                    <label for="trackModeDropdown">Modo de Pista:</label>
+                    <select id="trackModeDropdown">
+                        <option value="aventura">Aventura</option>
+                        <option value="desafio">Desafío</option>
+                        <option value="innovacion">Innovación</option>
+                    </select>
                     <button id="generateRandomTrack">Generar Pista Aleatoria (Loop)</button>
                     <button id="exportTrackToSimulator">Usar en Simulación</button>
                     <button id="clearTrackButton" class="danger" style="margin-top:0.5em;">Limpiar Pista</button>

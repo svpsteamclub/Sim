@@ -131,6 +131,48 @@ export function initTrackEditor(appInterface) {
         }, 100);
     });
 
+    // --- NUEVO: Lógica para limitar piezas según modo de pista ---
+    let trackMode = 'aventura'; // valor por defecto
+    if (elems.trackModeDropdown) {
+        elems.trackModeDropdown.value = 'aventura';
+        elems.trackModeDropdown.addEventListener('change', (e) => {
+            trackMode = e.target.value;
+        });
+    }
+
+    // Redefinir generateRandomTrackWithRetry para usar el modo de pista
+    function generateRandomTrackWithRetry_Modo(maxRetries = (currentGridSize.rows * currentGridSize.cols <= 9 ? 50 : 20)) {
+        // Limitar piezas según modo
+        let maxParts = 9;
+        if (trackMode === 'desafio') maxParts = 13;
+        else if (trackMode === 'innovacion') maxParts = AVAILABLE_TRACK_PARTS.length;
+
+        // Guardar referencia original
+        const originalParts = [...AVAILABLE_TRACK_PARTS];
+        // Limitar piezas
+        let limitedParts = originalParts.slice(0, maxParts);
+        // Parche: modificar global temporalmente
+        window.AVAILABLE_TRACK_PARTS = limitedParts;
+        // Generar pista
+        for (let i = 0; i < maxRetries; i++) {
+            const generationResult = generateRandomLoopTrackLogic();
+            if (generationResult.success) {
+                resizeTrackEditorCanvas();
+                window.AVAILABLE_TRACK_PARTS = originalParts;
+                return;
+            }
+        }
+        window.AVAILABLE_TRACK_PARTS = originalParts;
+        alert("No se pudo generar una pista válida tras varios intentos. Prueba otro tamaño o modo.");
+        setupGrid();
+    }
+
+    // Reemplazar handler del botón por la nueva función
+    if (elems.generateRandomTrackButton) {
+        elems.generateRandomTrackButton.removeEventListener('click', generateRandomTrackWithRetry);
+        elems.generateRandomTrackButton.addEventListener('click', () => { generateRandomTrackWithRetry_Modo(); });
+    }
+
     // Setup event listeners
     elems.trackGridSizeSelect.addEventListener('change', (e) => {
         const size = e.target.value.split('x');
@@ -455,7 +497,6 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
     for (let i = 0; i < maxRetries; i++) {
         const generationResult = generateRandomLoopTrackLogic();
         if (generationResult.success) {
-            console.log(`Pista aleatoria generada con éxito en intento ${i + 1}`);
             resizeTrackEditorCanvas(); // <-- Ajustar canvas tras generar pista
             return;
         }
