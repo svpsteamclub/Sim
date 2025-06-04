@@ -73,24 +73,28 @@ header {
 
 @media (max-width: 768px) {
     .header-flex {
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     .header-title-nav {
-        align-items: center;
-        width: 100%;
+        align-items: center !important;
+        width: 100% !important;
     }
     .header-logo {
-        margin: 0 0 0.5em 0;
-        max-width: 120px;
-        max-height: 80px;
-        display: block;
-        order: -1;
+        margin: 0 0 0.5em 0 !important;
+        max-width: 120px !important;
+        max-height: 80px !important;
+        display: block !important;
+        order: -1 !important;
     }
     header h1 {
-        text-align: center;
-        width: 100%;
+        text-align: center !important;
+        width: 100% !important;
+    }
+    body, html {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
     }
 }
 
@@ -398,6 +402,16 @@ button:disabled {
     
     button {
         width: 100%;
+    }
+}
+
+@media (max-width: 900px) {
+    .simulation-double-column {
+        grid-template-columns: 1fr;
+    }
+    .sim-monitor-column, .simulation-parameters {
+        max-width: 100%;
+        min-width: 0;
     }
 }
 
