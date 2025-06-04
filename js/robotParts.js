@@ -325,7 +325,11 @@ export function initRobotParts() {
         const pos = getTouchPos(e, previewCanvas);
         touchMovePart.x = pos.x - touchMoveOffset.x;
         touchMovePart.y = pos.y - touchMoveOffset.y;
-        drawRobotPreview();
+        // Limpiar el canvas antes de dibujar para evitar trails/glitches en mobile
+        if (previewCtx && previewCanvas) {
+            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        }
+        window.renderRobotPreview();
     }, { passive: false });
 
     previewCanvas.addEventListener('touchend', function(e) {

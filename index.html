@@ -6,6 +6,11 @@
     <title>Arduino Line Follower Advanced Simulator</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.47.0/min/vs/loader.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1976d2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="assets/Logo%20guaroduino.png">
 </head>
 <body>
     <header>
@@ -382,5 +387,17 @@
     </footer>
 
     <script type="module" src="js/main.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('service-worker.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registrado con éxito:', registration.scope);
+            }, function(err) {
+              console.log('Error al registrar el ServiceWorker:', err);
+            });
+        });
+      }
+    </script>
 </body>
 </html>
