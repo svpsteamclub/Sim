@@ -325,11 +325,14 @@ export function initRobotParts() {
         const pos = getTouchPos(e, previewCanvas);
         touchMovePart.x = pos.x - touchMoveOffset.x;
         touchMovePart.y = pos.y - touchMoveOffset.y;
-        // Limpiar el canvas antes de dibujar para evitar trails/glitches en mobile
-        if (previewCtx && previewCanvas) {
+        // Limpiar el canvas y forzar redibujo completo para evitar trails/glitches en mobile
+        if (window.renderRobotPreview) {
+            window.renderRobotPreview();
+        } else if (previewCtx && previewCanvas) {
             previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            // Redibuja manualmente si no existe renderRobotPreview
+            if (typeof drawRobotPreview === 'function') drawRobotPreview();
         }
-        window.renderRobotPreview();
     }, { passive: false });
 
     previewCanvas.addEventListener('touchend', function(e) {
