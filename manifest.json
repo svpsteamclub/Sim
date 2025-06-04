@@ -2,7 +2,7 @@
   "name": "Simulador de Seguidor de Líneas",
   "short_name": "SimLineSim",
   "start_url": ".",
-  "display": "standalone",
+  "display": "fullscren",
   "background_color": "#ffffff",
   "theme_color": "#1976d2",
   "description": "Simulador avanzado de robots seguidores de línea para Arduino.",
