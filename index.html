@@ -226,7 +226,7 @@
                         <h2>Editor de Código (Arduino-like JavaScript)</h2>
                         <h3>¿Cómo usar este editor?</h3>
                         <p>¡Aquí puedes escribir el código que controla tu robot! Cambia el tipo de control arriba, edita el código y mira cómo responde el robot en la simulación. Si te equivocas, no pasa nada, puedes volver a intentarlo.</p>
-                        <h4>Funciones de Control Disponibles</h4>
+                        <h4>Esquemas de Control Disponibles</h4>
                         <ul>
                             <li><strong>On/Off Simple:</strong> Gira completamente a la izquierda o derecha según el sensor activado. Ejemplo:
                                 <pre style="background:#f8f9fa; border-radius:6px; padding:0.5em;">if (digitalRead(LEFT_SENSOR_PIN) == 0) {
@@ -253,6 +253,31 @@ let sL = digitalRead(LEFT_SENSOR_PIN);
 let sR = digitalRead(RIGHT_SENSOR_PIN);
 let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);</pre>
                         <p>Si tienes 2 o 3 sensores, simplemente ignora los que no existen. El simulador asigna los pines automáticamente según la cantidad de sensores seleccionada en el editor de robot.</p>
+</ul>
+                        <h4>Funciones que puedes usar:</h4>
+                        <ul>
+                            <li><strong>setup()</strong>: Se ejecuta una vez al comenzar. Aquí preparas todo.</li>
+                            <li><strong>loop()</strong>: Se repite muchas veces. Aquí va la lógica principal.</li>
+                            <li><strong>digitalRead(pin)</strong>: Lee si un sensor está sobre la línea (0) o fuera (1).</li>
+                            <li><strong>analogWrite(pin, valor)</strong>: Cambia la velocidad de los motores (0 a 255).</li>
+                            <li><strong>(...)</strong> y <strong>Serial.println(...)</strong>: Muestra mensajes en el Monitor Serial.</li>
+                            <li><strong>delay(ms)</strong>: Espera el tiempo que le digas (en milisegundos).</li>
+                        </ul>
+                        <h4>¿Cómo escribir tu lógica de control?</h4>
+                        <p>Puedes usar estructuras de control como <b>if</b>, <b>else</b>, y operadores como <b>===</b> (igualdad estricta), <b>=</b> (asignación), <b>&gt;</b>, <b>&lt;</b>, <b>&amp;&amp;</b> (y lógico), <b>||</b> (o lógico) para tomar decisiones en tu código. Ejemplo básico:</p>
+                        <pre style="background:#f8f9fa; border-radius:6px; padding:0.5em;">if (digitalRead(LEFT_SENSOR_PIN) === 0) {
+    // Gira a la izquierda
+} else if (digitalRead(RIGHT_SENSOR_PIN) === 0) {
+    // Gira a la derecha
+} else {
+    // Avanza recto
+}
+
+let velocidad = 100;
+if (digitalRead(CENTER_SENSOR_PIN) === 0) {
+    velocidad = 150;
+}</pre>
+                        <p>Recuerda: <b>===</b> compara igualdad, <b>=</b> asigna valores, y puedes anidar condiciones para crear comportamientos más complejos.</p>
                         <h4>Funciones que puedes usar:</h4>
                         <ul>
                             <li><strong>setup()</strong>: Se ejecuta una vez al comenzar. Aquí preparas todo.</li>
