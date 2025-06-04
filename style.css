@@ -57,6 +57,43 @@ header {
     justify-content: center;
 }
 
+.header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1400px;
+}
+
+.header-title-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+    .header-flex {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .header-title-nav {
+        align-items: center;
+        width: 100%;
+    }
+    .header-logo {
+        margin: 0 0 0.5em 0;
+        max-width: 120px;
+        max-height: 80px;
+        display: block;
+        order: -1;
+    }
+    header h1 {
+        text-align: center;
+        width: 100%;
+    }
+}
+
 header > div {
     max-width: 1400px;
     width: 100%;
