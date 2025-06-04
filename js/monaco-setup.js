@@ -280,9 +280,22 @@ document.getElementById('uploadCodeInput').addEventListener('change', function(e
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(evt) {
-        if (window.editor && typeof window.editor.setValue === 'function') {
-            window.editor.setValue(evt.target.result);
+        // Cambia el dropdown a 'custom' antes de cargar el código
+        const templateSelect = document.getElementById('codeTemplate');
+        if (templateSelect) templateSelect.value = 'custom';
+        // Si hay un evento de cambio, disparemoslo para que el editor se actualice si es necesario
+        if (templateSelect) {
+            const event = new Event('change', { bubbles: true });
+            templateSelect.dispatchEvent(event);
         }
+        // Espera un pequeño tiempo para asegurar que el editor esté en modo custom
+        setTimeout(function() {
+            if (window.editor && typeof window.editor.setValue === 'function') {
+                window.editor.setValue(evt.target.result);
+            } else if (typeof editor !== 'undefined' && typeof editor.setValue === 'function') {
+                editor.setValue(evt.target.result);
+            }
+        }, 100);
     };
     reader.readAsText(file);
 });
