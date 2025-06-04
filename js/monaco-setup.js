@@ -10,6 +10,12 @@ const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Conectado al sensor más a la derech
 const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
 const MOTOR_RIGHT_PWM = 9;  // analogWrite para velocidad del motor derecho
 
+//////Declara variables aqui ejm: const VELOCIDAD = 100;
+
+
+
+//////////////////Setup y Loop////////////////////
+
 function setup() {
     Serial.begin(9600);
     pinMode(LEFT_SENSOR_PIN, INPUT);
@@ -23,10 +29,29 @@ function setup() {
 }
 
 async function loop() {
-    analogWrite(MOTOR_RIGHT_PWM, 70);
-    analogWrite(MOTOR_LEFT_PWM, 70);
+    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
+    let sC = digitalRead(CENTER_SENSOR_PIN);
+    let sR = digitalRead(RIGHT_SENSOR_PIN);
+    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);
+    let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
+    
+    // Control
+    //Plantea tu lógica de control aquí
+
+    
+    
+    //Ejmplo de aplicacion de velocidad a motores
+        analogWrite(MOTOR_RIGHT_PWM, 70);
+        analogWrite(MOTOR_LEFT_PWM, 70);
+    
+    
     await delay(10);
 }
+
+//////////////////Fin de Setup y Loop////////////////////
+
+
+//////No Borrar esta función, es necesaria para limitar valores//////
 
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -61,6 +86,7 @@ async function loop() {
     let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
     let sC = digitalRead(CENTER_SENSOR_PIN);
     let sR = digitalRead(RIGHT_SENSOR_PIN);
+    
     // Control On/Off simple
     if (sC === 0) {
         analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
@@ -158,161 +184,9 @@ async function loop() {
 function constrain(value, min, max) {
     return Math.min(Math.max(value, min), max);
 }
+
 `,
-    'onoff-5sensors': `// Definición de pines para 5 sensores
-const FAR_LEFT_SENSOR_PIN = 2;   // Sensor Extremo Izquierdo
-const LEFT_SENSOR_PIN = 3;       // Sensor Izquierdo
-const CENTER_SENSOR_PIN = 4;     // Sensor Central
-const RIGHT_SENSOR_PIN = 5;      // Sensor Derecho
-const FAR_RIGHT_SENSOR_PIN = 6;  // Sensor Extremo Derecho
 
-const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
-
-const TURN_SPEED = 140;      // Velocidad de giro
-const FORWARD_SPEED = 70;    // Velocidad hacia adelante
-const HARD_TURN_SPEED = 180; // Giro fuerte para sensores extremos
-
-function setup() {
-    Serial.begin(9600);
-    pinMode(FAR_LEFT_SENSOR_PIN, INPUT);
-    pinMode(LEFT_SENSOR_PIN, INPUT);
-    pinMode(CENTER_SENSOR_PIN, INPUT);
-    pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. On/Off 5 Sensores.");
-}
-
-async function loop() {
-    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);
-    let sL = digitalRead(LEFT_SENSOR_PIN);
-    let sC = digitalRead(CENTER_SENSOR_PIN);
-    let sR = digitalRead(RIGHT_SENSOR_PIN);
-    let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
-    if (sC === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
-    } else if (sL === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-    } else if (sR === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
-    } else if (sFL === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, -HARD_TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, HARD_TURN_SPEED);
-    } else if (sFR === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, HARD_TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, -HARD_TURN_SPEED);
-    } else {
-        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
-    }
-    Serial.print("sFL:" + sFL + " sL:" + sL + " sC:" + sC + " sR:" + sR + " sFR:" + sFR);
-    Serial.println(" | FL:" + (sFL === 0 ? "ON" : "OFF") + " L:" + (sL === 0 ? "ON" : "OFF") + " C:" + (sC === 0 ? "ON" : "OFF") + " R:" + (sR === 0 ? "ON" : "OFF") + " FR:" + (sFR === 0 ? "ON" : "OFF"));
-    await delay(10);
-}
-
-function constrain(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
-`,
-    'onoff-4sensors': `// Definición de pines para 4 sensores
-const FAR_LEFT_SENSOR_PIN = 2;   // Sensor Extremo Izquierdo
-const LEFT_SENSOR_PIN = 3;       // Sensor Izquierdo
-const RIGHT_SENSOR_PIN = 4;      // Sensor Derecho
-const FAR_RIGHT_SENSOR_PIN = 5;  // Sensor Extremo Derecho
-
-const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
-
-const TURN_SPEED = 140;      // Velocidad de giro
-const FORWARD_SPEED = 70;    // Velocidad hacia adelante
-
-function setup() {
-    Serial.begin(9600);
-    pinMode(FAR_LEFT_SENSOR_PIN, INPUT);
-    pinMode(LEFT_SENSOR_PIN, INPUT);
-    pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(FAR_RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. On/Off 4 Sensores.");
-}
-
-async function loop() {
-    let sFL = digitalRead(FAR_LEFT_SENSOR_PIN);
-    let sL = digitalRead(LEFT_SENSOR_PIN);
-    let sR = digitalRead(RIGHT_SENSOR_PIN);
-    let sFR = digitalRead(FAR_RIGHT_SENSOR_PIN);
-    if (sL === 0 && sR === 1 && sFL === 1 && sFR === 1) {
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-    } else if (sR === 0 && sL === 1 && sFL === 1 && sFR === 1) {
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
-    } else if (sFL === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-    } else if (sFR === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
-    } else {
-        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
-    }
-    Serial.print("sFL:" + sFL + " sL:" + sL + " sR:" + sR + " sFR:" + sFR);
-    Serial.println(" | FL:" + (sFL === 0 ? "ON" : "OFF") + " L:" + (sL === 0 ? "ON" : "OFF") + " R:" + (sR === 0 ? "ON" : "OFF") + " FR:" + (sFR === 0 ? "ON" : "OFF"));
-    await delay(10);
-}
-
-function constrain(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
-`,
-    'onoff-2sensors': `// Definición de pines para 2 sensores
-const LEFT_SENSOR_PIN = 2;   // Sensor Izquierdo
-const RIGHT_SENSOR_PIN = 3;  // Sensor Derecho
-
-const MOTOR_LEFT_PWM = 10;    // analogWrite para velocidad del motor izquierdo
-const MOTOR_RIGHT_PWM = 9;    // analogWrite para velocidad del motor derecho
-
-const TURN_SPEED = 140;      // Velocidad de giro
-const FORWARD_SPEED = 70;    // Velocidad hacia adelante
-
-function setup() {
-    Serial.begin(9600);
-    pinMode(LEFT_SENSOR_PIN, INPUT);
-    pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. On/Off 2 Sensores.");
-}
-
-async function loop() {
-    let sL = digitalRead(LEFT_SENSOR_PIN);   // 0 = en línea, 1 = fuera de línea
-    let sR = digitalRead(RIGHT_SENSOR_PIN);
-    if (sL === 0 && sR === 1) {
-        analogWrite(MOTOR_RIGHT_PWM, TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, -TURN_SPEED);
-    } else if (sL === 1 && sR === 0) {
-        analogWrite(MOTOR_RIGHT_PWM, -TURN_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, TURN_SPEED);
-    } else {
-        analogWrite(MOTOR_RIGHT_PWM, FORWARD_SPEED);
-        analogWrite(MOTOR_LEFT_PWM, FORWARD_SPEED);
-    }
-    Serial.print("sL:" + sL + " sR:" + sR);
-    Serial.println(" | L:" + (sL === 0 ? "ON" : "OFF") + " R:" + (sR === 0 ? "ON" : "OFF"));
-    await delay(10);
-}
-
-function constrain(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
-`
 };
 
 // Textos explicativos para cada plantilla
