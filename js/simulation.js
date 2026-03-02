@@ -10,7 +10,7 @@ export class Simulation {
     constructor(robotImages, watermarkImage, initialGeometry = DEFAULT_ROBOT_GEOMETRY) {
         this.robot = new Robot(0, 0, 0, initialGeometry); // Initial position set by loadTrack
         if (robotImages) this.robot.setImages(robotImages.wheel);
-        
+
         // Ensure robot geometry is valid
         if (!this.robot.length_m || isNaN(this.robot.length_m)) {
             this.robot.length_m = 0.15; // Default length in meters
@@ -21,7 +21,7 @@ export class Simulation {
 
         this.track = new Track();
         if (watermarkImage) this.track.setWatermark(watermarkImage);
-        
+
         this.lapTimer = new LapTimer(this.robot.wheelbase_m, this.robot.length_m);
 
         this.params = {
@@ -32,10 +32,32 @@ export class Simulation {
             sensorNoiseProb: 0.0, // Probability (0-1) of a sensor flipping its reading
             movementPerturbFactor: 0.0, // Random perturbation to movement (0-1)
             motorDeadbandPWM: 10, // PWM values below this (absolute) are treated as 0
-            lineThreshold: 100, // For track's isPixelOnLine
+            lineThreshold: 100 // For track's isPixelOnLine
         };
         this.totalSimTime_s = 0;
         this.isOutOfTrack = false;
+
+        // Camera State
+        this.cameraX = 0;
+        this.cameraY = 0;
+        this.cameraZoom = 1;
+        this.cameraFollowRobot = false;
+    }
+
+    centerCameraOnTrack(canvasWidth, canvasHeight) {
+        if (!this.track || !this.track.width_px) return;
+
+        // Calculate the zoom needed to fit the track width or height
+        const scaleX = canvasWidth / this.track.width_px;
+        const scaleY = canvasHeight / this.track.height_px;
+
+        // Use the smaller scale so it fully fits
+        this.cameraZoom = Math.min(scaleX, scaleY) * 0.95; // 95% to leave a tiny margin
+
+        // El centro de la pista en píxeles. 
+        // Ya que la pista va de (0,0) a (track.width_px, track.height_px).
+        this.cameraX = this.track.width_px / 2;
+        this.cameraY = this.track.height_px / 2;
     }
 
     // Generate a start line at a connection between pieces (preferred)
@@ -155,7 +177,7 @@ export class Simulation {
         this.params.movementPerturbFactor = newParams.movementPerturbFactor ?? this.params.movementPerturbFactor;
         this.params.motorDeadbandPWM = newParams.motorDeadbandPWM ?? this.params.motorDeadbandPWM;
         this.params.lineThreshold = newParams.lineThreshold ?? this.params.lineThreshold;
-        
+
         this.track.lineThreshold = this.params.lineThreshold; // Update track's threshold
     }
 
@@ -185,10 +207,10 @@ export class Simulation {
                         console.warn('[RandomStart] No se pudo generar una línea aleatoria, usando valores por defecto.');
                     }
                 }
-                
+
                 // Reset simulation state first
                 this.resetSimulationState(startX_m, startY_m, startAngle_rad);
-                
+
                 // Ensure LapTimer has up-to-date robot dimensions
                 if (!this.robot.length_m || isNaN(this.robot.length_m)) {
                     this.robot.length_m = 0.15;
@@ -198,7 +220,7 @@ export class Simulation {
                 }
                 this.lapTimer.robotWidth_m = this.robot.wheelbase_m;
                 this.lapTimer.robotLength_m = this.robot.length_m;
-                
+
                 // Initialize lap timer with the new start pose
                 this.lapTimer.initialize({ x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad }, this.totalSimTime_s);
 
@@ -207,17 +229,17 @@ export class Simulation {
                     // Calculate robot position at start line
                     const lineCenterX = (this.lapTimer.startLine.x1 + this.lapTimer.startLine.x2) / 2;
                     const lineCenterY = (this.lapTimer.startLine.y1 + this.lapTimer.startLine.y2) / 2;
-                    
+
                     // Position robot slightly behind the start line
                     const backOffset = -this.robot.length_m / 2;
                     const cosA = Math.cos(startAngle_rad);
                     const sinA = Math.sin(startAngle_rad);
-                    
+
                     this.robot.x_m = lineCenterX + backOffset * cosA;
                     this.robot.y_m = lineCenterY + backOffset * sinA;
                     this.robot.angle_rad = startAngle_rad;
                 }
-                
+
                 // Notify track editor if the track was loaded from a source other than the editor
                 if (source instanceof HTMLCanvasElement && !source.dataset.fromEditor) {
                     // Create a copy of the canvas to send to the editor
@@ -227,7 +249,7 @@ export class Simulation {
                     const ctx = trackCanvas.getContext('2d');
                     ctx.drawImage(source, 0, 0);
                     trackCanvas.dataset.fromEditor = 'true';
-                    
+
                     // Notify the track editor through the main app interface
                     if (window.mainAppInterface) {
                         window.mainAppInterface.loadTrackToEditor(trackCanvas);
@@ -237,7 +259,7 @@ export class Simulation {
             if (callback) callback(success, trackWidthPx, trackHeightPx);
         }, source instanceof HTMLCanvasElement);
     }
-    
+
     resetSimulationState(startX_m, startY_m, startAngle_rad, newGeometry = null) {
         if (newGeometry) this.robot.updateGeometry(newGeometry);
         this.robot.resetState(startX_m, startY_m, startAngle_rad);
@@ -245,7 +267,7 @@ export class Simulation {
         this.isOutOfTrack = false;
         this.lapTimer.reset(); // Reset lap data, but don't re-initialize line until new track/start
         if (this.track.imageData) { // Re-initialize if track already loaded
-             this.lapTimer.initialize(
+            this.lapTimer.initialize(
                 { x_m: startX_m, y_m: startY_m, angle_rad: startAngle_rad },
                 this.totalSimTime_s,
                 this.lapTimer.startLine // <-- Mantener la línea de comienzo actual
@@ -271,18 +293,18 @@ export class Simulation {
         let rightPWM = userRightPWM;
 
         // Apply deadband (user code's constrain should handle 0-255, but good to be safe)
-        leftPWM = (Math.abs(leftPWM) < this.params.motorDeadbandPWM && leftPWM !==0) ? 0 : leftPWM;
-        rightPWM = (Math.abs(rightPWM) < this.params.motorDeadbandPWM && rightPWM !==0) ? 0 : rightPWM;
+        leftPWM = (Math.abs(leftPWM) < this.params.motorDeadbandPWM && leftPWM !== 0) ? 0 : leftPWM;
+        rightPWM = (Math.abs(rightPWM) < this.params.motorDeadbandPWM && rightPWM !== 0) ? 0 : rightPWM;
 
         const effectiveMaxSpeed = this.params.maxRobotSpeedMPS * this.params.motorEfficiency;
         let target_vL_mps = (leftPWM / 255.0) * effectiveMaxSpeed;
         let target_vR_mps = (rightPWM / 255.0) * effectiveMaxSpeed;
-        
+
         // 3. Update robot physics (movement)
         this.robot.updateMovement(
-            this.params.timeStep, 
-            target_vL_mps, 
-            target_vR_mps, 
+            this.params.timeStep,
+            target_vL_mps,
+            target_vR_mps,
             this.params.motorResponseFactor,
             effectiveMaxSpeed, // Max physical speed used for clamping inside updateMovement
             this.params.movementPerturbFactor
@@ -296,12 +318,12 @@ export class Simulation {
         // A simple boundary check. More sophisticated would be checking if far from any line.
         const boundaryMargin_m = Math.max(this.robot.length_m, this.robot.wheelbase_m); // Generous margin
         this.isOutOfTrack = (
-             this.robot.x_m < -boundaryMargin_m || 
-             this.robot.x_m * PIXELS_PER_METER > this.track.width_px + boundaryMargin_m * PIXELS_PER_METER ||
-             this.robot.y_m < -boundaryMargin_m ||
-             this.robot.y_m * PIXELS_PER_METER > this.track.height_px + boundaryMargin_m * PIXELS_PER_METER
+            this.robot.x_m < -boundaryMargin_m ||
+            this.robot.x_m * PIXELS_PER_METER > this.track.width_px + boundaryMargin_m * PIXELS_PER_METER ||
+            this.robot.y_m < -boundaryMargin_m ||
+            this.robot.y_m * PIXELS_PER_METER > this.track.height_px + boundaryMargin_m * PIXELS_PER_METER
         );
-        
+
         // 6. Return data for UI update
         return {
             sensorStates: { ...this.robot.sensors }, // Current sensor readings (0=online, 1=offline)
@@ -342,8 +364,21 @@ export class Simulation {
 
     draw(displayCtx, displayCanvasWidth, displayCanvasHeight) {
         if (!displayCtx) return;
+
+        displayCtx.save();
+        displayCtx.clearRect(0, 0, displayCanvasWidth, displayCanvasHeight);
+
+        // Calculate Camera Transform
+        // We want the rendering to be centered on (cameraX, cameraY) with scale cameraZoom
+        const centerX = displayCanvasWidth / 2;
+        const centerY = displayCanvasHeight / 2;
+
+        displayCtx.translate(centerX, centerY);
+        displayCtx.scale(this.cameraZoom, this.cameraZoom);
+        displayCtx.translate(-this.cameraX, -this.cameraY);
+
         if (this.track) {
-            this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight);
+            this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight); // Note: track drawer might ignore width/height if it draws its own bounds
         }
         if (this.robot && this.track && this.track.imageData) {
             // Pass all sensor states for display
@@ -360,7 +395,6 @@ export class Simulation {
             const y1 = this.lapTimer.startLine.y1 * PIXELS_PER_METER;
             const x2 = this.lapTimer.startLine.x2 * PIXELS_PER_METER;
             const y2 = this.lapTimer.startLine.y2 * PIXELS_PER_METER;
-            console.log('Dibujando línea de inicio:', { x1, y1, x2, y2 });
             displayCtx.save();
             displayCtx.setLineDash([]); // solid line
             displayCtx.strokeStyle = "#FF9999"; // light red
@@ -381,6 +415,8 @@ export class Simulation {
 
             displayCtx.restore();
         }
+
+        displayCtx.restore();
     }
 
     // Utility to get current robot geometry

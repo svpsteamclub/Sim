@@ -48,16 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (simulationInstance) {
                 // Marcar el canvas como proveniente del editor para evitar que se limpie el estado
                 trackCanvas.dataset.fromEditor = 'true';
-                simulationInstance.loadTrack(trackCanvas, startX_m, startY_m, startAngle_rad, 
+                simulationInstance.loadTrack(trackCanvas, startX_m, startY_m, startAngle_rad,
                     (success, trackWidth, trackHeight) => {
-                    if (success) {
-                        elems.simulationDisplayCanvas.width = trackWidth;
-                        elems.simulationDisplayCanvas.height = trackHeight;
-                        drawCurrentSimulationState(); // Draw initial state of new track
-                    } else {
-                        alert("Error al cargar la pista del editor en la simulación.");
-                    }
-                });
+                        if (success) {
+                            elems.simulationDisplayCanvas.width = trackWidth;
+                            elems.simulationDisplayCanvas.height = trackHeight;
+                            simulationInstance.centerCameraOnTrack(elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
+                            drawCurrentSimulationState(); // Draw initial state of new track
+                        } else {
+                            alert("Error al cargar la pista del editor en la simulación.");
+                        }
+                    });
             }
         },
         // Called by Simulation when a track is loaded
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 simulationInstance.updateParameters(currentSimParams);
                 // Resetting simulation is often needed if robot size changes drastically
                 if (simulationInstance.track.imageData) {
-                    const currentPose = {x: simulationInstance.robot.x_m, y: simulationInstance.robot.y_m, angle: simulationInstance.robot.angle_rad};
+                    const currentPose = { x: simulationInstance.robot.x_m, y: simulationInstance.robot.y_m, angle: simulationInstance.robot.angle_rad };
                     simulationInstance.resetSimulationState(currentPose.x, currentPose.y, currentPose.angle, newGeometry);
                 }
                 // Update decorative parts AFTER reset
@@ -107,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Esperar a que Monaco esté listo
             await waitForMonaco();
-            
+
             // Load robot assets
             await new Promise(resolve => {
                 mainAppInterface.loadRobotAssets((b, w) => { resolve(); });
@@ -119,12 +120,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     resolve();
                 });
             });
-            
+
             const initialSimParams = getSimulationParamsFromUI();
             initialSimParams.robotGeometry = getCurrentRobotGeometry(); // Get from robot editor
-            
+
             simulationInstance = new Simulation(
-                { wheel: robotWheelImage }, 
+                { wheel: robotWheelImage },
                 watermarkTrackImage,
                 initialSimParams.robotGeometry
             );
@@ -157,6 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Simulation will start with no track until one is exported from editor.
             elems.simulationDisplayCanvas.width = 700; // Default size
             elems.simulationDisplayCanvas.height = 500;
+
+            // Initial Camera Fit
+            simulationInstance.centerCameraOnTrack(elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
+
             drawCurrentSimulationState();
             updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData()); // Initial lap display
 
@@ -180,20 +185,26 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Error en tu función loop(). La simulación se ha detenido. Revisa la consola y el Monitor Serial.");
             return;
         }
-        
+
         // Get PWMs that user code set (via analogWrite which updated robot.motorPWMSpeeds)
         const userPWMs = simulationInstance.robot.motorPWMSpeeds; // {left, right}
-                                                                // Alternative: const userPWMs = getMotorPWMOutputs();
+        // Alternative: const userPWMs = getMotorPWMOutputs();
 
         // Step the simulation physics and logic with these PWMs
         const simData = simulationInstance.simulationStep(userPWMs.left, userPWMs.right);
+
+        // Update Camera
+        if (simulationInstance.cameraFollowRobot) {
+            simulationInstance.cameraX = simulationInstance.robot.x_m * PIXELS_PER_METER;
+            simulationInstance.cameraY = simulationInstance.robot.y_m * PIXELS_PER_METER;
+        }
 
         // Update UI
         drawCurrentSimulationState();
         updateTelemetry({ // Pass relevant data for display
             error: simData.pidTerms?.error, // If PID is internal to sim (not here)
             pidTerms: simData.pidTerms,    // If PID is internal to sim (not here)
-            motorPWMs: {leftPWM: userPWMs.left, rightPWM: userPWMs.right, leftDirForward: true, rightDirForward:true}, // Assuming forward
+            motorPWMs: { leftPWM: userPWMs.left, rightPWM: userPWMs.right, leftDirForward: true, rightDirForward: true }, // Assuming forward
             sensorStates: simData.sensorStates,
             simTime: simData.simTime_s,
             outOfBounds: simData.outOfBounds
@@ -201,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateLapTimerDisplay(simData.lapData);
         elems.serialMonitorOutput.textContent = getSerialOutput(); // Update serial from codeEditor module
         if (elems.serialMonitorOutput.textContent.length > 0) { // Auto-scroll serial
-             elems.serialMonitorOutput.scrollTop = elems.serialMonitorOutput.scrollHeight;
+            elems.serialMonitorOutput.scrollTop = elems.serialMonitorOutput.scrollHeight;
         }
 
 
@@ -209,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stopSimulation();
             // alert("¡El robot se salió de la pista!");
         }
-        
+
         if (simulationRunning) { // Check again, as errors might stop it
             animationFrameId = requestAnimationFrame(simulationLoop);
         }
@@ -225,13 +236,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ensure latest code from editor is loaded
         if (!loadUserCode(window.monacoEditor.getValue())) {
-             alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
-             return;
+            alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
+            return;
         }
         updateCodeTypeDisplay(getCurrentCodeType()); // Update code type display
-        
+
         // Ensure latest simulation parameters are applied
-        applySimulationParameters(); 
+        applySimulationParameters();
 
         try {
             await executeUserSetup(); // Run user's setup() function
@@ -273,22 +284,22 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSimulation(); // Ensure it's stopped
         if (simulationInstance) {
             const currentGeo = simulationInstance.getCurrentRobotGeometry(); // Preserve current geometry
-            
+
             // Get the original start position from the lap timer's start line
             let startX = 0.1, startY = 0.1, startAngle = 0;
             if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
                 // Calculate the center point of the start line
                 startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
                 startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
-                
+
                 // Calculate angle perpendicular to the start line
                 const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
                 const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
-                startAngle = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
+                startAngle = Math.atan2(dy, dx) + Math.PI / 2; // Perpendicular to line
             }
 
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
-            
+
             // Reload user code and re-run setup for a clean state
             if (loadUserCode(window.monacoEditor.getValue())) {
                 executeUserSetup().catch(e => alert("Error en setup() durante el reinicio."));
@@ -309,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             simulationInstance.draw(ctx, elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
         }
     }
-    
+
     function getSimulationParamsFromUI() {
         return {
             timeStep: parseFloat(elems.timeStepInput.value),
@@ -319,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sensorNoiseProb: parseFloat(elems.sensorNoiseInput.value),
             movementPerturbFactor: parseFloat(elems.movementPerturbInput.value),
             motorDeadbandPWM: parseInt(elems.motorDeadbandInput.value),
-            lineThreshold: parseInt(elems.lineThresholdInput.value),
+            lineThreshold: parseInt(elems.lineThresholdInput.value)
             // robotGeometry is handled by robotEditor
         };
     }
@@ -337,6 +348,46 @@ document.addEventListener('DOMContentLoaded', () => {
     elems.resetSimButton.addEventListener('click', resetSimulation);
     elems.applySimParamsButton.addEventListener('click', applySimulationParameters);
 
+    // --- Event Listeners for Camera ---
+    const simZoomInBtn = document.getElementById('simZoomInBtn');
+    const simZoomOutBtn = document.getElementById('simZoomOutBtn');
+    const simFitTrackBtn = document.getElementById('simFitTrackBtn');
+    const simFollowRobotBtn = document.getElementById('simFollowRobotBtn');
+
+    simZoomInBtn.addEventListener('click', () => {
+        if (simulationInstance) {
+            simulationInstance.cameraZoom *= 1.2;
+            drawCurrentSimulationState();
+        }
+    });
+
+    simZoomOutBtn.addEventListener('click', () => {
+        if (simulationInstance) {
+            simulationInstance.cameraZoom /= 1.2;
+            drawCurrentSimulationState();
+        }
+    });
+
+    simFitTrackBtn.addEventListener('click', () => {
+        if (simulationInstance) {
+            simulationInstance.centerCameraOnTrack(elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
+            drawCurrentSimulationState();
+        }
+    });
+
+    simFollowRobotBtn.addEventListener('click', () => {
+        if (simulationInstance) {
+            simulationInstance.cameraFollowRobot = !simulationInstance.cameraFollowRobot;
+            simFollowRobotBtn.classList.toggle('active', simulationInstance.cameraFollowRobot);
+            if (simulationInstance.cameraFollowRobot && !simulationRunning) {
+                // Instantly jump to robot if toggled while paused
+                simulationInstance.cameraX = simulationInstance.robot.x_m * PIXELS_PER_METER;
+                simulationInstance.cameraY = simulationInstance.robot.y_m * PIXELS_PER_METER;
+                drawCurrentSimulationState();
+            }
+        }
+    });
+
     // Botón para ubicar línea de comienzo en simulación
     const placeStartLineSimButton = document.getElementById('placeStartLineSimButton');
     let startLineStartPoint = null;
@@ -345,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isPlacingStartLineSim = !isPlacingStartLineSim;
         placeStartLineSimButton.textContent = isPlacingStartLineSim ? 'Cancelar Ubicación' : 'Ubicar Línea de Comienzo';
         placeStartLineSimButton.style.backgroundColor = isPlacingStartLineSim ? '#d9534f' : '';
-        
+
         if (isPlacingStartLineSim) {
             elems.simulationDisplayCanvas.style.cursor = 'crosshair';
         } else {
@@ -407,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Calculate angle for robot orientation (perpendicular to line)
         const dx = x2_m - x1_m;
         const dy = y2_m - y1_m;
-        const angle_rad = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
+        const angle_rad = Math.atan2(dy, dx) + Math.PI / 2; // Perpendicular to line
 
         // Calculate center point of line for robot position
         const center_x_m = (x1_m + x2_m) / 2;
@@ -415,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset simulation with new start position
         simulationInstance.resetSimulationState(center_x_m, center_y_m, angle_rad);
-        
+
         // Initialize lap timer with new start line
         simulationInstance.lapTimer.initialize(
             { x_m: center_x_m, y_m: center_y_m, angle_rad: angle_rad },
@@ -501,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Calculate angle for robot orientation (perpendicular to line)
         const dx = x2_m - x1_m;
         const dy = y2_m - y1_m;
-        const angle_rad = Math.atan2(dy, dx) + Math.PI/2; // Perpendicular to line
+        const angle_rad = Math.atan2(dy, dx) + Math.PI / 2; // Perpendicular to line
 
         // Calculate center point of line for robot position
         const center_x_m = (x1_m + x2_m) / 2;
@@ -509,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset simulation with new start position
         simulationInstance.resetSimulationState(center_x_m, center_y_m, angle_rad);
-        
+
         // Initialize lap timer with new start line
         simulationInstance.lapTimer.initialize(
             { x_m: center_x_m, y_m: center_y_m, angle_rad: angle_rad },
@@ -528,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         drawCurrentSimulationState();
         event.preventDefault();
     }, { passive: false });
-    
+
     // --- Start Everything ---
     initializeSimulator().then(() => {
     }).catch(err => {

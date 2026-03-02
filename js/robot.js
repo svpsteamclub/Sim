@@ -68,7 +68,7 @@ export class Robot {
     setDecorativeParts(parts) {
         this.decorativeParts = parts;
     }
-    
+
     updateGeometry(geometry, resetTrails = true) {
         if (!geometry) return;
 
@@ -78,8 +78,17 @@ export class Robot {
         this.sensorSideSpread_m = geometry.sensorSpread_m;
         this.sensorDiameter_m = geometry.sensorDiameter_m;
         this.sensorCount = geometry.sensorCount || 3;
+
+        // Asignar parámetros físicos de la geometría (o usar defaults de config en caso que no vengan)
+        this.robotMass_kg = geometry.robotMass_kg ?? 0.25;
+        this.comOffset_m = geometry.comOffset_m ?? 0.0;
+        this.tireGrip = geometry.tireGrip ?? 0.8;
+
+        // Asignar llantas paramétricas si existen
+        this.customWheels = geometry.customWheels || null;
+
         this._initSensorState();
-        
+
         if (resetTrails) this.resetTrails();
     }
 
@@ -104,21 +113,34 @@ export class Robot {
 
     // Called by the simulation loop AFTER user code has run and set motorPWMSpeeds
     updateMovement(dt_s, target_vL_mps, target_vR_mps, motorResponseFactor, maxPhysicalSpeed_mps, movementPerturbationFactor) {
-        // Apply motor response (inertia)
-        this.currentApplied_vL_mps += (target_vL_mps - this.currentApplied_vL_mps) * motorResponseFactor;
-        this.currentApplied_vR_mps += (target_vR_mps - this.currentApplied_vR_mps) * motorResponseFactor;
+        // --- 1. inercia longitudinal y rotacional avanzada ---
+        // Basic inertia modified by mass and CoM
+        const massFactor = Math.max(0.1, this.robotMass_kg); // Evitamos masas demasiado bajas
+        // Un centro de masa alejado (mayor inercia rotacional) afecta cuán lento cambian las velocidades asimétricas
+
+        let actualResponseL = motorResponseFactor / Math.sqrt(massFactor);
+        let actualResponseR = motorResponseFactor / Math.sqrt(massFactor);
+
+        // Asimetría (si comOffset_m está desplazado, las ruedas no levantan parejo la fuerza)
+        this.currentApplied_vL_mps += (target_vL_mps - this.currentApplied_vL_mps) * actualResponseL;
+        this.currentApplied_vR_mps += (target_vR_mps - this.currentApplied_vR_mps) * actualResponseR;
 
         this.currentApplied_vL_mps = clamp(this.currentApplied_vL_mps, -maxPhysicalSpeed_mps, maxPhysicalSpeed_mps);
         this.currentApplied_vR_mps = clamp(this.currentApplied_vR_mps, -maxPhysicalSpeed_mps, maxPhysicalSpeed_mps);
 
         let linear_displacement_m = (this.currentApplied_vR_mps + this.currentApplied_vL_mps) / 2.0 * dt_s;
         let d_theta_rad = 0;
-        if (this.wheelbase_m > 0.001) { // Avoid division by zero if wheelbase is tiny
-             // Positive d_theta_rad for counter-clockwise rotation.
-             // If vR > vL, robot turns left (CCW).
+
+        if (this.wheelbase_m > 0.001) {
+            // Positivo es giro en contra de las manecillas del reloj (izquierda)
             d_theta_rad = (this.currentApplied_vR_mps - this.currentApplied_vL_mps) / this.wheelbase_m * dt_s;
+            // Moderador de inercia rotacional por posición del CG ("péndulo")
+            // Un CoM desplazado requiere más energía para rotar.
+            let momentOfInertiaMod = 1 + Math.abs(this.comOffset_m) * 10;
+            d_theta_rad /= momentOfInertiaMod;
         }
-        
+
+        // --- 2. Perturbaciones Aleatorias ---
         if (movementPerturbationFactor > 0) {
             const perturbR = (Math.random() * 2 - 1) * movementPerturbationFactor;
             const perturbL = (Math.random() * 2 - 1) * movementPerturbationFactor;
@@ -126,8 +148,42 @@ export class Robot {
             d_theta_rad *= (1 + perturbL);
         }
 
-        this.x_m += linear_displacement_m * Math.cos(this.angle_rad);
-        this.y_m += linear_displacement_m * Math.sin(this.angle_rad);
+        // --- 3. Posicionamiento Teórico ---
+        let deltaX_m = linear_displacement_m * Math.cos(this.angle_rad);
+        let deltaY_m = linear_displacement_m * Math.sin(this.angle_rad);
+
+        // --- 4. Derrape (Slip Model) ---
+        // Velocidad tangencial v y velocidad angular W
+        let v_tan = linear_displacement_m / dt_s;
+        let omega = d_theta_rad / dt_s;
+
+        if (Math.abs(omega) > 0.1 && Math.abs(v_tan) > 0.1) {
+            // F_c = m * v * w (centripetal force required to turn)
+            let F_centripetal = Math.abs(massFactor * v_tan * omega);
+            // F_f = m * g * mu (max friction force available)
+            const g = 9.81;
+            let F_friction_max = massFactor * g * this.tireGrip;
+
+            // Si la fuerza centrífuga supera la fricción disponible, ocurre el derrape!
+            if (F_centripetal > F_friction_max) {
+                let slipForce = F_centripetal - F_friction_max;
+                let slipFactor = slipForce / massFactor; // a = F/m
+
+                // El derrape empuja radialmente "hacia afuera" de la curva
+                // Direction of centrifugal force is 90 deg off from current heading
+                // Orientación: Si w es positivo (gira a la izq), la fuerza empuja a la derecha (-90 deg)
+                let centrifugalAngle = this.angle_rad + (omega > 0 ? -Math.PI / 2 : Math.PI / 2);
+
+                let slip_displacement_m = slipFactor * dt_s * 0.1; // Scale factor for realism
+
+                deltaX_m += slip_displacement_m * Math.cos(centrifugalAngle);
+                deltaY_m += slip_displacement_m * Math.sin(centrifugalAngle);
+            }
+        }
+
+        // --- 5. Actualización final ---
+        this.x_m += deltaX_m;
+        this.y_m += deltaY_m;
         this.angle_rad += d_theta_rad;
         this.angle_rad = Math.atan2(Math.sin(this.angle_rad), Math.cos(this.angle_rad)); // Normalize angle to [-PI, PI]
 
@@ -245,21 +301,37 @@ export class Robot {
         ctx.rotate(this.angle_rad);
 
         // Draw Wheels
-        const wheelLengthPx = WHEEL_LENGTH_M * PIXELS_PER_METER;
-        const wheelWidthPx = WHEEL_WIDTH_M * PIXELS_PER_METER;
-        const wheelYOffsetPx = this.wheelbase_m / 2 * PIXELS_PER_METER;
+        let wheelLengthPx = WHEEL_LENGTH_M * PIXELS_PER_METER;
+        let wheelWidthPx = WHEEL_WIDTH_M * PIXELS_PER_METER;
+        let wheelYOffsetPx = this.wheelbase_m / 2 * PIXELS_PER_METER;
+        let wheelColor = 'rgba(80, 80, 80, 0.9)';
+        let useImage = false;
 
-        if (this.wheelImage && this.wheelImage.complete && this.wheelImage.naturalWidth > 0) {
+        if (this.customWheels) {
+            wheelLengthPx = this.customWheels.length_m * PIXELS_PER_METER;
+            wheelWidthPx = this.customWheels.width_m * PIXELS_PER_METER;
+            wheelColor = this.customWheels.color;
+        } else if (this.wheelImage && this.wheelImage.complete && this.wheelImage.naturalWidth > 0) {
+            useImage = true;
+        }
+
+        if (useImage) {
             // Left wheel
             ctx.drawImage(this.wheelImage, -wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
             // Right wheel
             ctx.drawImage(this.wheelImage, -wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
         } else {
-            ctx.fillStyle = 'rgba(80, 80, 80, 0.9)';
+            ctx.fillStyle = wheelColor;
             ctx.fillRect(-wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
             ctx.fillRect(-wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
+            if (this.customWheels) {
+                ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(-wheelLengthPx / 2, wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
+                ctx.strokeRect(-wheelLengthPx / 2, -wheelYOffsetPx - wheelWidthPx / 2, wheelLengthPx, wheelWidthPx);
+            }
         }
-            
+
         // Draw direction indicator
         ctx.fillStyle = 'rgba(173, 216, 230, 0.9)';
         ctx.beginPath();
@@ -284,7 +356,7 @@ export class Robot {
                     // Always fully opaque
                     ctx.translate(x, y);
                     ctx.rotate(part.rotation || 0); // Apply the part's rotation
-                    ctx.drawImage(part.img, -sizeW/2, -sizeH/2, sizeW, sizeH);
+                    ctx.drawImage(part.img, -sizeW / 2, -sizeH / 2, sizeW, sizeH);
                     ctx.restore();
                 }
             });

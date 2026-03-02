@@ -5,7 +5,7 @@ import { loadAndScaleImage } from './utils.js'; // utils.js for image loading
 
 let editorCanvas, ctx;
 let grid = []; // Stores { partInfo, rotation_deg, image }
-let currentGridSize = { rows: 4, cols: 4 }; 
+let currentGridSize = { rows: 4, cols: 4 };
 let trackPartsImages = {}; // Cache for loaded track part images { 'fileName.png': ImageElement }
 let selectedTrackPart = null; // { ...partInfo, image: ImageElement }
 let savedState = null;
@@ -28,11 +28,15 @@ function resizeTrackEditorCanvas() {
     const container = editorCanvas.parentElement;
     if (!container) return;
     const containerRect = container.getBoundingClientRect();
-    const size = Math.max(containerRect.width, 320); // Mínimo para mobile
+    // Use the *minimum* of width and height so the square fits entirely in the container
+    const size = Math.max(Math.min(containerRect.width, containerRect.height), 320);
+
     editorCanvas.width = size;
     editorCanvas.height = size;
-    editorCanvas.style.width = size + 'px';
-    editorCanvas.style.height = size + 'px';
+    // Eliminamos la asignación de px rígida al style para que object-fit y flexbox hagan su trabajo
+    editorCanvas.style.width = '100%';
+    editorCanvas.style.height = '100%';
+
     const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
     renderEditor(cellSize);
 }
@@ -108,7 +112,7 @@ export function initTrackEditor(appInterface) {
     loadTrackPartAssets(() => {
         console.log("[TrackEditor] Track part assets loaded, populating palette...");
         populateTrackPartsPalette(elems.trackPartsPalette);
-        
+
         // Ensure the container is ready and visible
         const container = editorCanvas.parentElement;
         if (!container) {
@@ -177,13 +181,13 @@ export function initTrackEditor(appInterface) {
         setupGrid();
     });
 
-    elems.generateRandomTrackButton.addEventListener('click', () => { 
-        generateRandomTrackWithRetry(); 
+    elems.generateRandomTrackButton.addEventListener('click', () => {
+        generateRandomTrackWithRetry();
     });
 
     elems.exportTrackToSimulatorButton.addEventListener('click', () => {
         const trackValidation = validateTrack();
-        if (!trackValidation.isValid) { 
+        if (!trackValidation.isValid) {
             let errorMsg = "La pista puede tener problemas:\n";
             if (trackValidation.connectionMismatches > 0) errorMsg += `- ${trackValidation.connectionMismatches / 2} conexiones incompatibles.\n`;
             if (trackValidation.danglingConnections > 0) errorMsg += `- ${trackValidation.danglingConnections} conexiones abiertas.\n`;
@@ -230,11 +234,11 @@ export function initTrackEditor(appInterface) {
         if (!container) return;
         const containerRect = container.getBoundingClientRect();
         // Use the smallest dimension for square aspect ratio
-        const size = Math.max(containerRect.width, 320); // Minimum for mobile
+        const size = Math.max(Math.min(containerRect.width, containerRect.height), 320); // Minimum for mobile
         editorCanvas.width = size;
         editorCanvas.height = size;
-        editorCanvas.style.width = size + 'px';
-        editorCanvas.style.height = size + 'px';
+        editorCanvas.style.width = '100%';
+        editorCanvas.style.height = '100%';
         // Calculate dynamic cell size and re-render
         const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
         renderEditor(cellSize);
@@ -246,7 +250,7 @@ function loadTrackPartAssets(callback) {
     const totalParts = AVAILABLE_TRACK_PARTS.length;
     console.log("[TrackEditor] Starting track part assets loading. Total parts:", totalParts);
     console.log("[TrackEditor] Available track parts:", AVAILABLE_TRACK_PARTS);
-    
+
     if (totalParts === 0) {
         console.warn("[TrackEditor] No track parts defined in config.js (AVAILABLE_TRACK_PARTS).");
         if (typeof callback === 'function') callback();
@@ -281,7 +285,7 @@ function populateTrackPartsPalette(paletteElement) {
     AVAILABLE_TRACK_PARTS.forEach(partInfo => {
         const imgContainer = document.createElement('div');
         const imgElement = trackPartsImages[partInfo.file]?.cloneNode() || new Image(70, 70); // Use cached image
-        
+
         if (!trackPartsImages[partInfo.file]) {
             imgElement.alt = `${partInfo.name} (imagen no cargada)`;
             imgElement.style.border = "1px dashed red";
@@ -295,7 +299,7 @@ function populateTrackPartsPalette(paletteElement) {
             const elems = getDOMElements();
             document.querySelectorAll('#trackPartsPalette img').forEach(p => p.classList.remove('selected'));
             imgElement.classList.add('selected');
-            
+
             if (trackPartsImages[partInfo.file]) {
                 selectedTrackPart = { ...partInfo, image: trackPartsImages[partInfo.file] };
             } else {
@@ -324,15 +328,16 @@ function setupGrid() {
             height: containerRect.height
         });
 
-        // Force a minimum size of 1200px for better visibility
-        const size = Math.max(containerRect.width || 1200, 1200);
+        // Force a size to keep simulation resolution crisp, 
+        // HTML CSS object-fit will compress it visually if needed
+        const size = Math.max(Math.min(containerRect.width, containerRect.height) || 1200, 1200);
         console.log("[DEBUG] Setting canvas size to:", size);
 
         editorCanvas.width = size;
         editorCanvas.height = size;
-        editorCanvas.style.width = `${size}px`;
-        editorCanvas.style.height = `${size}px`;
-        
+        editorCanvas.style.width = '100%';
+        editorCanvas.style.height = '100%';
+
         // Calculate dynamic cell size and render immediately
         const cellSize = size / Math.max(currentGridSize.rows, currentGridSize.cols);
         console.log("[DEBUG] Cell size calculated:", cellSize);
@@ -359,23 +364,23 @@ function renderEditor(cellSize) {
     // Clear the canvas with white background
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
-    
+
     // Draw grid and track parts
     for (let r = 0; r < currentGridSize.rows; r++) {
         for (let c = 0; c < currentGridSize.cols; c++) {
             const x_topLeft = c * cellSize;
             const y_topLeft = r * cellSize;
-            
+
             // Draw subtle grid lines
             ctx.strokeStyle = '#f0f0f0';
             ctx.lineWidth = 0.5;
             ctx.strokeRect(x_topLeft, y_topLeft, cellSize, cellSize);
-            
+
             const currentGridPart = grid[r][c];
             if (currentGridPart && currentGridPart.image) {
                 const x_center = x_topLeft + cellSize / 2;
                 const y_center = y_topLeft + cellSize / 2;
-                
+
                 ctx.save();
                 ctx.translate(x_center, y_center);
                 ctx.rotate(currentGridPart.rotation_deg * Math.PI / 180);
@@ -384,7 +389,7 @@ function renderEditor(cellSize) {
             }
         }
     }
-    
+
     if (AVAILABLE_TRACK_PARTS.length === 0 && editorCanvas.width > 0) {
         ctx.fillStyle = "rgba(0,0,0,0.7)";
         ctx.font = `bold ${Math.min(20, editorCanvas.width * 0.05)}px Arial`;
@@ -402,7 +407,7 @@ function onGridSingleClick(event) {
 
     // Calculate cell size dynamically
     const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
-    
+
     const c = Math.floor(x_canvas / cellSize);
     const r = Math.floor(y_canvas / cellSize);
 
@@ -432,7 +437,7 @@ function onGridDoubleClick(event) {
 
     // Calculate cell size dynamically
     const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
-    
+
     const c = Math.floor(x_canvas / cellSize);
     const r = Math.floor(y_canvas / cellSize);
 
@@ -440,7 +445,7 @@ function onGridDoubleClick(event) {
         // Simply add 90 degrees to current rotation
         const currentRotation = grid[r][c].rotation_deg || 0;
         const nextRotation = (currentRotation + 90) % 360;
-        
+
         grid[r][c].rotation_deg = nextRotation;
         console.log(`Rotating piece at [${r},${c}] from ${currentRotation}° to ${nextRotation}°`);
         renderEditor();
@@ -450,13 +455,13 @@ function onGridDoubleClick(event) {
 
 function getRotatedConnections(part, rotation_deg) {
     if (!part || !part.connections) return { N: false, S: false, E: false, W: false };
-    
+
     // Normalize rotation to 0, 90, 180, or 270
     rotation_deg = ((rotation_deg % 360) + 360) % 360;
-    
+
     const original = { ...part.connections };
     const rotated = { N: false, S: false, E: false, W: false };
-    
+
     switch (rotation_deg) {
         case 0: // No rotation
             return { ...original };
@@ -479,7 +484,7 @@ function getRotatedConnections(part, rotation_deg) {
             rotated.W = original.N;
             break;
     }
-    
+
     return rotated;
 }
 
@@ -504,89 +509,89 @@ function generateRandomTrackWithRetry(maxRetries = (currentGridSize.rows * curre
 }
 
 function generateCellPathAndConnections() {
-    let path = []; 
-    let visitedOnPath = new Set(); 
+    let path = [];
+    let visitedOnPath = new Set();
     // Ajustar la longitud mínima y máxima del camino según el tamaño del grid
     const minPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 4 : Math.max(3, Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.30));
-    const maxPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 8 : Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.80); 
-    
+    const maxPathLength = (currentGridSize.rows * currentGridSize.cols <= 9) ? 8 : Math.floor((currentGridSize.rows * currentGridSize.cols) * 0.80);
+
     let startR = Math.floor(Math.random() * currentGridSize.rows);
     let startC = Math.floor(Math.random() * currentGridSize.cols);
     let currentR = startR; let currentC = startC;
-    
-    path.push({ r: currentR, c: currentC }); 
+
+    path.push({ r: currentR, c: currentC });
     visitedOnPath.add(`${currentR},${currentC}`);
-    
-    let stuckCounter = 0; 
+
+    let stuckCounter = 0;
     const maxStuck = 8;
 
     for (let k = 0; k < maxPathLength * 2 && path.length < maxPathLength; k++) {
         const shuffledDirections = [...DIRECTIONS].sort(() => 0.5 - Math.random());
         let moved = false;
         for (const dir of shuffledDirections) {
-            const nextR = currentR + dir.dr; 
+            const nextR = currentR + dir.dr;
             const nextC = currentC + dir.dc;
-            if (nextR >= 0 && nextR < currentGridSize.rows && 
-                nextC >= 0 && nextC < currentGridSize.cols && 
+            if (nextR >= 0 && nextR < currentGridSize.rows &&
+                nextC >= 0 && nextC < currentGridSize.cols &&
                 !visitedOnPath.has(`${nextR},${nextC}`)) {
-                
+
                 currentR = nextR; currentC = nextC;
-                path.push({ r: currentR, c: currentC }); 
+                path.push({ r: currentR, c: currentC });
                 visitedOnPath.add(`${currentR},${currentC}`);
-                moved = true; stuckCounter = 0; 
+                moved = true; stuckCounter = 0;
                 break;
             }
         }
         if (!moved) {
             stuckCounter++;
-            if (stuckCounter > maxStuck && path.length >= minPathLength) break; 
+            if (stuckCounter > maxStuck && path.length >= minPathLength) break;
             if (stuckCounter > maxStuck * 2) break; // Hard break if too stuck
-            
+
             if (path.length > 1) { // Backtrack
-                visitedOnPath.delete(`${currentR},${currentC}`); 
+                visitedOnPath.delete(`${currentR},${currentC}`);
                 path.pop();
-                currentR = path[path.length - 1].r; 
+                currentR = path[path.length - 1].r;
                 currentC = path[path.length - 1].c;
             } else { break; } // Cannot backtrack from a single cell
         }
-         if (path.length >= maxPathLength) break;
+        if (path.length >= maxPathLength) break;
     }
-    
+
     let loopClosed = false;
-    if (path.length >= minPathLength -1 ) { 
+    if (path.length >= minPathLength - 1) {
         for (const dir of DIRECTIONS) {
             if (currentR + dir.dr === startR && currentC + dir.dc === startC) {
                 path.push({ r: startR, c: startC }); // Close the loop by adding start cell again
-                loopClosed = true; 
+                loopClosed = true;
                 break;
             }
         }
     }
 
     if (!loopClosed || path.length < minPathLength) {
-        return null; 
+        return null;
     }
-    
+
     const pathWithConnections = [];
     for (let i = 0; i < path.length - 1; i++) { // Iterate up to the second to last cell (connection to the last that is start)
         const cell = path[i];
         // For cell path[i], previous is path[i-1] (or path[path.length-2] if i=0 for loop)
         // and next is path[i+1]
-        const prevCellInLogic = (i === 0) ? path[path.length - 2] : path[i - 1]; 
+        const prevCellInLogic = (i === 0) ? path[path.length - 2] : path[i - 1];
         const nextCellInLogic = path[i + 1];
-        
+
         const dirFromPrevToCell = getDirectionFromTo(prevCellInLogic.r, prevCellInLogic.c, cell.r, cell.c);
         const dirFromCellToNext = getDirectionFromTo(cell.r, cell.c, nextCellInLogic.r, nextCellInLogic.c);
 
         if (!dirFromPrevToCell || !dirFromCellToNext) {
             console.error("Error determining directions for path connections during generation.");
-            return null; 
+            return null;
         }
         pathWithConnections.push({
             r: cell.r, c: cell.c,
-            connections: { 
-                [OPPOSITE_DIRECTIONS[dirFromPrevToCell]]: true, 
-                [dirFromCellToNext]: true 
+            connections: {
+                [OPPOSITE_DIRECTIONS[dirFromPrevToCell]]: true,
+                [dirFromCellToNext]: true
             }
         });
     }
@@ -595,7 +600,7 @@ function generateCellPathAndConnections() {
 
 function generateRandomLoopTrackLogic(limitedParts = AVAILABLE_TRACK_PARTS) {
     setupGrid(); // Clear existing grid content but keep canvas size
-    
+
     // Usar la lista limitada de piezas
     const loopParts = limitedParts.filter(p => {
         if (!p.connections) return false;
@@ -612,7 +617,7 @@ function generateRandomLoopTrackLogic(limitedParts = AVAILABLE_TRACK_PARTS) {
     if (!cellPathWithConnections || cellPathWithConnections.length === 0) {
         return { success: false };
     }
-    
+
     let allPartsPlaced = true;
     let placedCount = 0;
 
@@ -650,7 +655,7 @@ function generateRandomLoopTrackLogic(limitedParts = AVAILABLE_TRACK_PARTS) {
             break;
         }
     }
-    
+
     if (!allPartsPlaced || placedCount !== cellPathWithConnections.length) {
         return { success: false };
     }
@@ -659,29 +664,29 @@ function generateRandomLoopTrackLogic(limitedParts = AVAILABLE_TRACK_PARTS) {
 }
 
 function validateTrack() {
-    let partCount = 0; 
-    let danglingConnections = 0; 
+    let partCount = 0;
+    let danglingConnections = 0;
     let connectionMismatches = 0;
 
-    for (let r = 0; r < currentGridSize.rows; r++) { 
-        for (let c = 0; c < currentGridSize.cols; c++) { 
+    for (let r = 0; r < currentGridSize.rows; r++) {
+        for (let c = 0; c < currentGridSize.cols; c++) {
             const currentPart = grid[r][c];
             if (currentPart) {
                 partCount++;
                 const currentConnections = getRotatedConnections(currentPart, currentPart.rotation_deg);
-                
+
                 for (const dir of DIRECTIONS) { // N, E, S, W
                     if (currentConnections[dir.name]) { // If current part has an opening in this direction
-                        const nextR = r + dir.dr; 
+                        const nextR = r + dir.dr;
                         const nextC = c + dir.dc;
-                        
+
                         if (nextR < 0 || nextR >= currentGridSize.rows || nextC < 0 || nextC >= currentGridSize.cols) {
                             // Connection leads off the grid
-                            danglingConnections++; 
+                            danglingConnections++;
                         } else {
                             const neighborPart = grid[nextR][nextC];
                             if (!neighborPart) { // Neighbor cell is empty
-                                danglingConnections++; 
+                                danglingConnections++;
                             } else {
                                 const neighborConnections = getRotatedConnections(neighborPart, neighborPart.rotation_deg);
                                 const requiredFromNeighbor = OPPOSITE_DIRECTIONS[dir.name];
@@ -696,10 +701,10 @@ function validateTrack() {
             }
         }
     }
-    
+
     const isValid = partCount > 0 && connectionMismatches === 0 && (danglingConnections === 0 || partCount === 1); // Allow dangling for single piece track
     if (partCount === 0) alert("Validación: La pista está vacía.");
-    
+
     return {
         isValid: isValid,
         partCount: partCount,
@@ -763,15 +768,15 @@ function loadTrackDesign(event, gridSizeSelect, trackNameInput) {
 
             currentGridSize.rows = designData.gridSize.rows || 4;
             currentGridSize.cols = designData.gridSize.cols || 4;
-            
+
             if (gridSizeSelect) { // Update UI if element provided
-                 gridSizeSelect.value = `${currentGridSize.rows}x${currentGridSize.cols}`;
+                gridSizeSelect.value = `${currentGridSize.rows}x${currentGridSize.cols}`;
             }
             if (trackNameInput && designData.trackName) {
                 trackNameInput.value = designData.trackName;
             } else if (trackNameInput) {
-                 let fName = file.name.replace(/\.trackdesign\.json$|\.json$/i, '');
-                 trackNameInput.value = fName || "PistaCargada";
+                let fName = file.name.replace(/\.trackdesign\.json$|\.json$/i, '');
+                trackNameInput.value = fName || "PistaCargada";
             }
 
 
@@ -833,7 +838,7 @@ function exportTrackAsCanvas() {
                 hasContent = true;
                 const x_center = c * TRACK_PART_SIZE_PX + TRACK_PART_SIZE_PX / 2;
                 const y_center = r * TRACK_PART_SIZE_PX + TRACK_PART_SIZE_PX / 2;
-                
+
                 exportCtx.save();
                 exportCtx.translate(x_center, y_center);
                 exportCtx.rotate(part.rotation_deg * Math.PI / 180);
@@ -876,9 +881,9 @@ function saveEditorState() {
 function restoreEditorState() {
     if (savedState) {
         currentGridSize = { ...savedState.currentGridSize };
-        
+
         // Restore grid with proper image references
-        grid = savedState.grid.map(row => 
+        grid = savedState.grid.map(row =>
             row.map(cell => {
                 if (cell && cell.file) {
                     return {
@@ -889,7 +894,7 @@ function restoreEditorState() {
                 return null;
             })
         );
-        
+
         // Only render if we have a canvas context
         if (ctx && editorCanvas) {
             renderEditor();

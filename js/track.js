@@ -30,7 +30,7 @@ export class Track {
 
         const img = new Image();
         img.crossOrigin = "Anonymous"; // Important for getImageData if source is URL
-        
+
         img.onload = () => {
             this.width_px = img.width;
             this.height_px = img.height;
@@ -39,7 +39,7 @@ export class Track {
             this.offscreenCanvas.width = this.width_px;
             this.offscreenCanvas.height = this.height_px;
             this.offscreenCtx.drawImage(img, 0, 0, this.width_px, this.height_px);
-            
+
             try {
                 this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
                 if (callback) callback(true, this.width_px, this.height_px);
@@ -48,7 +48,7 @@ export class Track {
                 if (callback) callback(false, 0, 0);
             }
         };
-        
+
         img.onerror = (error) => {
             this.imageData = null;
             if (callback) callback(false, 0, 0);
@@ -72,7 +72,7 @@ export class Track {
             if (callback) callback(false, 0, 0);
         }
     }
-    
+
     // Used by track editor to set the track from a generated canvas
     setFromCanvas(sourceCanvas, lineThreshold) {
         return new Promise((resolve, reject) => {
@@ -86,7 +86,7 @@ export class Track {
             this.offscreenCanvas.width = this.width_px;
             this.offscreenCanvas.height = this.height_px;
             this.offscreenCtx.drawImage(sourceCanvas, 0, 0, this.width_px, this.height_px);
-            
+
             try {
                 this.imageData = this.offscreenCtx.getImageData(0, 0, this.width_px, this.height_px);
                 this.image.src = sourceCanvas.toDataURL(); // Keep an Image object too for consistency
@@ -132,22 +132,22 @@ export class Track {
             displayCtx.fillText("No hay pista cargada", displayCanvasWidth / 2, displayCanvasHeight / 2);
             return;
         }
-        
+
         // Clear the display canvas
-        displayCtx.fillStyle = 'white'; // Default background for areas outside the track image
-        displayCtx.fillRect(0, 0, displayCanvasWidth, displayCanvasHeight);
-        
-        // Draw the track from the offscreen canvas (which holds the original track image)
-        // This will scale the track image to fit the display canvas if they are different sizes.
-        // For 1px=1mm, displayCanvasWidth/Height should match track.width_px/height_px.
-        displayCtx.drawImage(this.offscreenCanvas, 0, 0, displayCanvasWidth, displayCanvasHeight);
+        displayCtx.fillStyle = '#ebf2fb'; // un fondo sutil para cuando alejas el zoom
+        displayCtx.fillRect(-displayCanvasWidth * 10, -displayCanvasHeight * 10, displayCanvasWidth * 20, displayCanvasHeight * 20);
+
+        // Draw the track from the offscreen canvas
+        // Se debe dibujar usando el ancho de la PISTA, no de la pantalla, porque la simulación 
+        // ya se encarga de aplicar los factores de `cameraZoom` al entorno entero
+        displayCtx.drawImage(this.offscreenCanvas, 0, 0, this.width_px, this.height_px);
 
         // Draw watermark if available
         if (this.watermarkImage && this.watermarkImage.complete && this.watermarkImage.naturalWidth > 0) {
             const maxSize = Math.min(displayCanvasWidth, displayCanvasHeight) * 0.3; // Watermark size relative to canvas
             const aspectRatio = this.watermarkImage.naturalWidth / this.watermarkImage.naturalHeight;
             let watermarkWidth, watermarkHeight;
-            
+
             if (aspectRatio > 1) { // Wider than tall
                 watermarkWidth = maxSize;
                 watermarkHeight = maxSize / aspectRatio;
@@ -155,10 +155,10 @@ export class Track {
                 watermarkHeight = maxSize;
                 watermarkWidth = maxSize * aspectRatio;
             }
-            
+
             const x = (displayCanvasWidth - watermarkWidth) / 2;
             const y = (displayCanvasHeight - watermarkHeight) / 2;
-            
+
             displayCtx.save();
             displayCtx.globalAlpha = 0.10; // Watermark opacity
             displayCtx.drawImage(this.watermarkImage, x, y, watermarkWidth, watermarkHeight);

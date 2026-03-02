@@ -1,8 +1,8 @@
 // js/codeEditor.js
 import { getDOMElements } from './ui.js';
 
-let userSetupFunction = () => {};
-let userLoopFunction = async () => {};
+let userSetupFunction = () => { };
+let userLoopFunction = async () => { };
 let currentCodeType = 'onoff'; // Track the current code type
 
 let sharedSimulationState = null; // To access robot sensors and track
@@ -31,10 +31,10 @@ const ArduinoSerial = {
     _outputElement: null, // Will be set to the serialMonitorOutput pre element
     _maxLines: 10, // Maximum number of lines to keep
 
-    begin: function(baudRate) {
+    begin: function (baudRate) {
         this.println(`Serial communication started at ${baudRate} baud (simulated).`);
     },
-    print: function(msg) {
+    print: function (msg) {
         this._buffer += String(msg);
         this._trimBuffer();
         if (this._outputElement) {
@@ -42,19 +42,19 @@ const ArduinoSerial = {
             this._outputElement.scrollTop = this._outputElement.scrollHeight; // Auto-scroll
         }
     },
-    println: function(msg = "") {
+    println: function (msg = "") {
         this.print(String(msg) + '\n');
     },
-    clear: function() {
+    clear: function () {
         this._buffer = "";
         if (this._outputElement) {
             this._outputElement.textContent = "";
         }
     },
-    getOutput: function() { // For external UI update if needed
+    getOutput: function () { // For external UI update if needed
         return this._buffer;
     },
-    _trimBuffer: function() {
+    _trimBuffer: function () {
         // Split into lines and keep only the last _maxLines
         const lines = this._buffer.split('\n');
         if (lines.length > this._maxLines) {
@@ -78,7 +78,7 @@ const arduinoAPI = {
         if (pin === SIM_RIGHT_SENSOR_PIN) return sharedSimulationState.robot.sensors.right;
         if (pin === SIM_FAR_LEFT_SENSOR_PIN) return sharedSimulationState.robot.sensors.farLeft;
         if (pin === SIM_FAR_RIGHT_SENSOR_PIN) return sharedSimulationState.robot.sensors.farRight;
-        
+
         // ArduinoSerial.println(`Warning: digitalRead from unmapped pin ${pin}. Returning HIGH.`);
         return 1; // Default to HIGH (off line) for unmapped pins
     },
@@ -156,42 +156,41 @@ export function initCodeEditor(simulationState) {
     elems.clearSerialButton.addEventListener('click', () => {
         ArduinoSerial.clear();
     });
-    
+
     // Load initial code
     if (!window.monacoEditor) {
         console.error("Monaco Editor no está disponible");
         return false;
     }
-    
+
     return loadUserCode(window.monacoEditor.getValue());
 }
 
 export function loadUserCode(code) {
     ArduinoSerial.clear(); // Clear serial on new code load
     _pinModes = {};
-    _motorPWMValues = {[SIM_MOTOR_LEFT_PWM_PIN]: 0, [SIM_MOTOR_RIGHT_PWM_PIN]: 0};
+    _motorPWMValues = { [SIM_MOTOR_LEFT_PWM_PIN]: 0, [SIM_MOTOR_RIGHT_PWM_PIN]: 0 };
 
-    // Check if the code matches any of the templates
-    if (code.includes('Robot Setup Complete. On/Off Control.')) {
-        currentCodeType = 'onoff';
-    } else if (code.includes('Robot Setup Complete. Continuous Turn Control.')) {
-        currentCodeType = 'continuous-turn';
-    } else if (code.includes('Robot Setup Complete. Proportional Control.')) {
-        currentCodeType = 'proportional';
-    } else if (code.includes('Robot Setup Complete. PID Line Follower.')) {
-        currentCodeType = 'pid';
-    } else {
-        currentCodeType = 'custom';
-    }
+    // Detectar el tipo de código (opcional, solo mantendremos 'onoff')
+    currentCodeType = 'onoff';
 
     try {
+        // C++ to JS Parser overrides:
+        let jsCode = code
+            // Replace C++ variable types with "let"
+            .replace(/\b(int|float|double|bool|String|long)\s+/g, 'let ')
+            // Replace "void setup()" with "function setup()" 
+            .replace(/void\s+setup\s*\(\s*\)/g, 'function setup()')
+            // Replace "void loop()" with "async function loop()" to allow delays
+            .replace(/void\s+loop\s*\(\s*\)/g, 'async function loop()');
+
         // Create a function scope for the user's code, injecting the Arduino API
         // The user code should define setup() and loop()
         const userScript = new Function(
             ...Object.keys(arduinoAPI), // Argument names for the API objects/functions
-            code + '; return { setup, loop, constrain };' // User code + return the functions
+            jsCode + `\nreturn { setup: typeof setup !== 'undefined' ? setup : undefined, loop: typeof loop !== 'undefined' ? loop : undefined, constrain: typeof constrain !== 'undefined' ? constrain : undefined };`
         );
-        
+
         // Call the created function, passing the actual API implementations
         const scriptExports = userScript(...Object.values(arduinoAPI));
 
@@ -268,19 +267,7 @@ export function getCurrentCodeType() {
     return currentCodeType;
 }
 
-// Add event listener for code template changes
+// Cleanup unused event listener related to code template dropdown
 document.addEventListener('DOMContentLoaded', () => {
-    const codeTemplate = document.getElementById('codeTemplate');
-    
-    // Add event listener for code template changes
-    if (codeTemplate) {
-        codeTemplate.addEventListener('change', (e) => {
-            const selectedType = e.target.value;
-            if (selectedType === 'custom' && window.monacoEditor) {
-                window.monacoEditor.setValue(customCodeTemplate);
-            }
-            // Update the current code type display
-            updateCodeTypeDisplay(selectedType);
-        });
-    }
+    // Dropdown codeTemplate has been removed from index.html
 });

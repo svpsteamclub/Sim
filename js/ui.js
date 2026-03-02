@@ -19,6 +19,9 @@ export function getDOMElements() {
         movementPerturbInput: document.getElementById('movementPerturb'),
         motorDeadbandInput: document.getElementById('motorDeadband'),
         lineThresholdInput: document.getElementById('lineThreshold'),
+        robotMassInput: document.getElementById('robotMass'),
+        comOffsetInput: document.getElementById('comOffset'),
+        tireGripInput: document.getElementById('tireGrip'),
         applySimParamsButton: document.getElementById('applySimParamsButton'),
         telemetryOutput: document.getElementById('telemetryOutput'),
         lapTimerOutput: document.getElementById('lapTimerOutput'),
@@ -41,6 +44,22 @@ export function getDOMElements() {
         saveRobotButton: document.getElementById('saveRobotButton'),
         loadRobotInput: document.getElementById('loadRobotInput'),
         robotSelectionDropdown: document.getElementById('robotSelectionDropdown'),
+
+        // Custom Parts UI
+        addCustomWheelsBtn: document.getElementById('addCustomWheelsBtn'),
+        addCustomBodyBtn: document.getElementById('addCustomBodyBtn'),
+        customPartDialog: document.getElementById('customPartDialog'),
+        customPartForm: document.getElementById('customPartForm'),
+        customPartTitle: document.getElementById('customPartTitle'),
+        customPartType: document.getElementById('customPartType'),
+        customPartLengthInput: document.getElementById('customPartLength'),
+        customPartWidthInput: document.getElementById('customPartWidth'),
+        customPartOffsetInput: document.getElementById('customPartOffset'),
+        customPartColorInput: document.getElementById('customPartColor'),
+        cancelCustomPartBtn: document.getElementById('cancelCustomPart'),
+        confirmCustomPartBtn: document.getElementById('confirmCustomPart'),
+        customPartWidthContainer: document.getElementById('customPartWidthContainer'),
+        customPartOffsetContainer: document.getElementById('customPartOffsetContainer'),
 
         // Track Editor Tab
         trackEditorCanvas: document.getElementById('trackEditorCanvas'),
@@ -88,8 +107,8 @@ export function updateTelemetry(data) {
         output += `  D: ${data.pidTerms.D?.toFixed(2) ?? 'N/A'}\n`;
     }
     if (data.motorPWMs) {
-        output += `PWM Izquierdo: ${data.motorPWMs.leftPWM} (${data.motorPWMs.leftDirForward ? 'Fwd':'Rev'})\n`;
-        output += `PWM Derecho: ${data.motorPWMs.rightPWM} (${data.motorPWMs.rightDirForward ? 'Fwd':'Rev'})\n`;
+        output += `PWM Izquierdo: ${data.motorPWMs.leftPWM} (${data.motorPWMs.leftDirForward ? 'Fwd' : 'Rev'})\n`;
+        output += `PWM Derecho: ${data.motorPWMs.rightPWM} (${data.motorPWMs.rightDirForward ? 'Fwd' : 'Rev'})\n`;
     }
     if (data.sensorStates) {
         output += `Sensor Izquierdo: ${data.sensorStates.left ? 'OFF' : 'ON'} Linea\n`;
@@ -113,12 +132,12 @@ export function updateLapTimerDisplay(lapData) {
         let mins = Math.floor(time_ms / (1000 * 60));
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:${String(ms).padStart(3, '0')}`;
     };
-    
+
     let output = `Vueltas: ${lapData.lapCount}\n`;
     output += `Mejor: ${formatTime(lapData.bestLapTime_ms)}\n`;
     output += `Última: ${formatTime(lapData.lastLapTime_ms)}\n`;
     output += `Actual: ${formatTime(lapData.currentLapTime_ms)}\n\n`;
-    
+
     // Add lap history
     if (lapData.lapHistory && lapData.lapHistory.length > 0) {
         output += "Últimas 10 vueltas:\n";
@@ -126,7 +145,7 @@ export function updateLapTimerDisplay(lapData) {
             output += `${index + 1}. ${formatTime(lapTime)}\n`;
         });
     }
-    
+
     elems.lapTimerOutput.textContent = output;
 }
 

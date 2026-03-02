@@ -23,7 +23,7 @@ export function initRobotEditor(appInterface) {
     // Set fixed canvas size to 350x350 pixels (35cm x 35cm)
     previewCanvas.width = 350;
     previewCanvas.height = 350;
-    
+
     // Set display size to match canvas size exactly (1:1 pixel mapping)
     previewCanvas.style.width = '350px';
     previewCanvas.style.height = '350px';
@@ -48,16 +48,20 @@ export function initRobotEditor(appInterface) {
     // Event listeners
     elems.applyRobotGeometryButton.addEventListener('click', () => {
         console.log("Applying robot geometry...");
-        currentGeometry = getFormValues();
-        previewRobot.updateGeometry(currentGeometry);
-        syncDecorativeSensorsWithGeometry();
-        renderRobotPreview();
+        window.forceGeometrySync();
         // Get decorative parts and pass them to the simulation
         const decorativeParts = getPlacedParts();
         console.log("Decorative parts:", decorativeParts);
         mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
         alert("Geometría del robot actualizada y aplicada a la simulación (requiere reinicio de sim).");
     });
+
+    window.forceGeometrySync = () => {
+        currentGeometry = getFormValues();
+        previewRobot.updateGeometry(currentGeometry);
+        syncDecorativeSensorsWithGeometry();
+        renderRobotPreview();
+    };
 
     // --- Sensor count dropdown logic ---
     if (elems.sensorCountSelect) {
@@ -70,16 +74,18 @@ export function initRobotEditor(appInterface) {
     }
 
     // Update preview dynamically as user types
-    const inputs = [elems.robotWidthInput, elems.sensorOffsetInput, elems.sensorSpreadInput, elems.sensorDiameterInput];
+    const inputs = [elems.robotWidthInput, elems.sensorOffsetInput, elems.sensorSpreadInput, elems.sensorDiameterInput, elems.robotMassInput, elems.comOffsetInput, elems.tireGripInput];
     inputs.forEach(input => {
-        input.addEventListener('input', () => {
-            currentGeometry = getFormValues();
-            previewRobot.updateGeometry(currentGeometry);
-            syncDecorativeSensorsWithGeometry();
-            renderRobotPreview();
-        });
+        if (input) {
+            input.addEventListener('input', () => {
+                currentGeometry = getFormValues();
+                previewRobot.updateGeometry(currentGeometry);
+                syncDecorativeSensorsWithGeometry();
+                renderRobotPreview();
+            });
+        }
     });
-    
+
     // Initial render
     console.log("Loading robot assets...");
     mainAppInterface.loadRobotAssets((wheelImg) => {
@@ -106,6 +112,52 @@ export function initRobotEditor(appInterface) {
         });
     });
     observer.observe(robotEditorTab, { attributes: true });
+
+    // Custom Parts Dialog Logic
+    if (elems.addCustomWheelsBtn) {
+        elems.addCustomWheelsBtn.addEventListener('click', () => {
+            elems.customPartTitle.textContent = 'Añadir Ruedas Custom';
+            elems.customPartType.value = 'wheels';
+            elems.customPartOffsetContainer.style.display = 'none'; // Solo X y Largo
+            elems.customPartLengthInput.value = 65;
+            elems.customPartWidthInput.value = 25;
+            elems.customPartColorInput.value = '#000000';
+            elems.customPartDialog.showModal();
+        });
+
+        elems.addCustomBodyBtn.addEventListener('click', () => {
+            elems.customPartTitle.textContent = 'Añadir Cuerpo Custom';
+            elems.customPartType.value = 'body';
+            elems.customPartOffsetContainer.style.display = 'block';
+            elems.customPartLengthInput.value = 120;
+            elems.customPartWidthInput.value = 80;
+            elems.customPartOffsetInput.value = 0;
+            elems.customPartColorInput.value = '#3366cc';
+            elems.customPartDialog.showModal();
+        });
+
+        elems.cancelCustomPartBtn.addEventListener('click', () => {
+            elems.customPartDialog.close();
+        });
+
+        elems.customPartForm.addEventListener('submit', () => {
+            const type = elems.customPartType.value;
+            const length_mm = parseFloat(elems.customPartLengthInput.value);
+            const width_mm = parseFloat(elems.customPartWidthInput.value);
+            const offset_mm = parseFloat(elems.customPartOffsetInput.value) || 0;
+            const color = elems.customPartColorInput.value;
+
+            if (type === 'wheels') {
+                currentGeometry.customWheels = { length_m: length_mm / 1000, width_m: width_mm / 1000, color };
+                previewRobot.updateGeometry(currentGeometry);
+                renderRobotPreview();
+            } else if (type === 'body') {
+                if (window.addParametricBodyPart) {
+                    window.addParametricBodyPart(width_mm, length_mm, offset_mm, color);
+                }
+            }
+        });
+    }
 
     // Guardar y cargar robot
     elems.saveRobotButton.addEventListener('click', () => {
@@ -143,7 +195,7 @@ export function initRobotEditor(appInterface) {
                     window.restorePlacedPartsRaw(robotData.parts);
                 }
                 renderRobotPreview();
-            } catch (err) {}
+            } catch (err) { }
         };
         reader.readAsText(file);
         event.target.value = null;
@@ -188,13 +240,17 @@ function syncDecorativeSensorsWithGeometry() {
 
 function getFormValues() {
     const elems = getDOMElements();
-    // Leer valores en milímetros y convertir a metros
+    // Leer valores en milímetros y convertir a metros (o valores por default)
     return {
         width_m: parseFloat(elems.robotWidthInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.width_m,
         sensorOffset_m: parseFloat(elems.sensorOffsetInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.sensorOffset_m,
         sensorSpread_m: parseFloat(elems.sensorSpreadInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.sensorSpread_m,
         sensorDiameter_m: parseFloat(elems.sensorDiameterInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.sensorDiameter_m,
-        sensorCount: parseInt(elems.sensorCountSelect?.value) || 3
+        sensorCount: parseInt(elems.sensorCountSelect?.value) || 3,
+        robotMass_kg: elems.robotMassInput ? parseFloat(elems.robotMassInput.value) : DEFAULT_ROBOT_GEOMETRY.robotMass_kg,
+        comOffset_m: elems.comOffsetInput ? (parseFloat(elems.comOffsetInput.value) / 1000) : DEFAULT_ROBOT_GEOMETRY.comOffset_m,
+        tireGrip: elems.tireGripInput ? parseFloat(elems.tireGripInput.value) : DEFAULT_ROBOT_GEOMETRY.tireGrip,
+        customWheels: currentGeometry ? currentGeometry.customWheels : null
     };
 }
 
@@ -212,42 +268,54 @@ function setFormValues(geometry) {
     if (elems.sensorCountSelect && geometry.sensorCount) {
         elems.sensorCountSelect.value = geometry.sensorCount;
     }
+
+    // Configurar campos físicos que quizás falten en robots JSON antiguos
+    if (elems.robotMassInput) elems.robotMassInput.value = geometry.robotMass_kg ?? DEFAULT_ROBOT_GEOMETRY.robotMass_kg;
+    if (elems.comOffsetInput) elems.comOffsetInput.value = ((geometry.comOffset_m ?? DEFAULT_ROBOT_GEOMETRY.comOffset_m) * 1000).toFixed(1);
+    if (elems.tireGripInput) elems.tireGripInput.value = geometry.tireGrip ?? DEFAULT_ROBOT_GEOMETRY.tireGrip;
+
+    if (geometry.customWheels !== undefined) {
+        currentGeometry.customWheels = geometry.customWheels;
+    } else {
+        currentGeometry.customWheels = null;
+    }
+
     syncDecorativeSensorsWithGeometry();
 }
 
 function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
     const arrowSize = 5 / ctx.getTransform().a; // Ajustar tamaño de flecha para la escala
     const textOffset = 10 / ctx.getTransform().a; // Ajustar offset de texto para la escala
-    
+
     // Dibujar línea principal
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
     ctx.stroke();
-    
+
     // Dibujar flechas
     const angle = Math.atan2(endY - startY, endX - startX);
-    
+
     // Flecha 1
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    ctx.lineTo(startX + Math.cos(angle + Math.PI - Math.PI/6) * arrowSize, 
-               startY + Math.sin(angle + Math.PI - Math.PI/6) * arrowSize);
-    ctx.lineTo(startX + Math.cos(angle + Math.PI + Math.PI/6) * arrowSize,
-               startY + Math.sin(angle + Math.PI + Math.PI/6) * arrowSize);
+    ctx.lineTo(startX + Math.cos(angle + Math.PI - Math.PI / 6) * arrowSize,
+        startY + Math.sin(angle + Math.PI - Math.PI / 6) * arrowSize);
+    ctx.lineTo(startX + Math.cos(angle + Math.PI + Math.PI / 6) * arrowSize,
+        startY + Math.sin(angle + Math.PI + Math.PI / 6) * arrowSize);
     ctx.closePath();
     ctx.fill();
-    
+
     // Flecha 2
     ctx.beginPath();
     ctx.moveTo(endX, endY);
-    ctx.lineTo(endX + Math.cos(angle - Math.PI/6) * arrowSize,
-               endY + Math.sin(angle - Math.PI/6) * arrowSize);
-    ctx.lineTo(endX + Math.cos(angle + Math.PI/6) * arrowSize,
-               endY + Math.sin(angle + Math.PI/6) * arrowSize);
+    ctx.lineTo(endX + Math.cos(angle - Math.PI / 6) * arrowSize,
+        endY + Math.sin(angle - Math.PI / 6) * arrowSize);
+    ctx.lineTo(endX + Math.cos(angle + Math.PI / 6) * arrowSize,
+        endY + Math.sin(angle + Math.PI / 6) * arrowSize);
     ctx.closePath();
     ctx.fill();
-    
+
     // Dibujar texto
     const midX = (startX + endX) / 2;
     const midY = (startY + endY) / 2;
@@ -326,9 +394,9 @@ export function renderRobotPreview() {
 
     console.log("Drawing dimension lines...");
     // Robot width (wheelbase)
-    const wheelbaseStartX = -previewRobot.wheelbase_m/2 * PIXELS_PER_METER;
-    const wheelbaseEndX = previewRobot.wheelbase_m/2 * PIXELS_PER_METER;
-    drawDimensionLine(previewCtx, 
+    const wheelbaseStartX = -previewRobot.wheelbase_m / 2 * PIXELS_PER_METER;
+    const wheelbaseEndX = previewRobot.wheelbase_m / 2 * PIXELS_PER_METER;
+    drawDimensionLine(previewCtx,
         wheelbaseStartX, 20, // Horizontal line above
         wheelbaseEndX, 20,
         20, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
@@ -364,6 +432,48 @@ export function renderRobotPreview() {
     // Draw sensors on top
     previewCtx.save();
     previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
+
+    // Draw Center of Mass Symbol
+    const comY_px = -previewRobot.comOffset_m * PIXELS_PER_METER;
+    previewCtx.save();
+    previewCtx.translate(0, comY_px);
+
+    // CG circle with alternating quadrants
+    const cgRadius = 6;
+    previewCtx.beginPath();
+    previewCtx.arc(0, 0, cgRadius, 0, Math.PI * 2);
+    previewCtx.fillStyle = 'white';
+    previewCtx.fill();
+    previewCtx.lineWidth = 1;
+    previewCtx.strokeStyle = 'black';
+    previewCtx.stroke();
+
+    // Q1 (Black)
+    previewCtx.beginPath();
+    previewCtx.moveTo(0, 0);
+    previewCtx.arc(0, 0, cgRadius, 0, Math.PI / 2);
+    previewCtx.lineTo(0, 0);
+    previewCtx.fillStyle = 'black';
+    previewCtx.fill();
+
+    // Q3 (Black)
+    previewCtx.beginPath();
+    previewCtx.moveTo(0, 0);
+    previewCtx.arc(0, 0, cgRadius, Math.PI, Math.PI * 1.5);
+    previewCtx.lineTo(0, 0);
+    previewCtx.fill();
+
+    // Cross lines extending slightly outward
+    previewCtx.beginPath();
+    previewCtx.moveTo(-cgRadius - 3, 0);
+    previewCtx.lineTo(cgRadius + 3, 0);
+    previewCtx.moveTo(0, -cgRadius - 3);
+    previewCtx.lineTo(0, cgRadius + 3);
+    previewCtx.lineWidth = 1.5;
+    previewCtx.stroke();
+
+    previewCtx.restore();
+
     previewRobot.x_m = 0;
     previewRobot.y_m = 0;
     previewRobot.angle_rad = -Math.PI / 2;
@@ -417,7 +527,7 @@ export async function loadDefaultRobotJSON() {
 async function initRobotSelectionDropdown() {
     const elems = getDOMElements();
     const dropdown = elems.robotSelectionDropdown;
-    
+
     // Add default option
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
@@ -448,19 +558,19 @@ async function initRobotSelectionDropdown() {
             const response = await fetch(`assets/robots/${selectedFile}`);
             if (!response.ok) throw new Error(`No se pudo cargar ${selectedFile}`);
             const robotData = await response.json();
-            
+
             if (robotData.geometry) {
                 setFormValues(robotData.geometry);
                 currentGeometry = getFormValues();
                 previewRobot.updateGeometry(currentGeometry);
             }
-            
+
             if (robotData.parts && window.restorePlacedPartsRaw) {
                 window.restorePlacedPartsRaw(robotData.parts);
                 // Asegurarse de que las partes decorativas se dibujen
                 renderRobotPreview();
             }
-            
+
             // Notificar a la simulación
             if (mainAppInterface && typeof mainAppInterface.updateRobotGeometry === 'function') {
                 const decorativeParts = window.getPlacedParts ? window.getPlacedParts() : [];
