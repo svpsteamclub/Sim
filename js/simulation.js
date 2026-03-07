@@ -366,8 +366,8 @@ export class Simulation {
             if (this.params.sensorNoiseProb > 0 && Math.random() < this.params.sensorNoiseProb) {
                 onLine = !onLine;
             }
-            // 0 = on line, 1 = off line
-            this.robot.sensors[key] = onLine ? 0 : 1;
+            // 1 = on line (HIGH), 0 = off line (LOW)
+            this.robot.sensors[key] = onLine ? 1 : 0;
         }
     }
 
@@ -393,6 +393,7 @@ export class Simulation {
             // Pass all sensor states for display
             const displaySensorStates = {};
             for (const key in this.robot.sensors) {
+                // Pass true if on line (1), false if off line (0)
                 displaySensorStates[key] = this.robot.sensors[key] === 1;
             }
             this.robot.draw(displayCtx, displaySensorStates);

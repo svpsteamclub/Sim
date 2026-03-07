@@ -79,12 +79,7 @@ require(['vs/editor/editor.main'], function () {
     // Make the editor instance available globally
     window.monacoEditor = editor;
 
-    // Remove template selector logic as there is only one default template now
-    // Inicializar explicación al cargar
-    const codeExplanationElem = document.querySelector('.code-explanation');
-    if (codeExplanationElem && codeExplanations.simpleOnOff) {
-        codeExplanationElem.innerHTML = `<h3>Guía del Código</h3><pre style='font-family:inherit;background:none;border:none;padding:0;margin:0;white-space:pre-wrap;'>${codeExplanations.simpleOnOff}</pre>`;
-    }
+    window.monacoEditor = editor;
 });
 
 // --- Descargar y cargar código desde archivo ---

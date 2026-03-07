@@ -44,6 +44,26 @@ function getTouchPos(e, el) {
     };
 }
 
+// Helper: convert screen-space pixels (relative to canvas top-left) 
+// to unscaled "world" pixels relative to canvas top-left.
+// (Inverse of the translation and scale applied in render)
+function screenToWorld(x, y) {
+    const zoom = window.getPreviewZoom ? window.getPreviewZoom() : 1.0;
+    const centerX = previewCanvas.width / 2;
+    const centerY = previewCanvas.height / 2;
+
+    // 1. Center the coordinate (rel to canvas center)
+    // 2. Un-scale
+    // 3. Un-center
+    const relX = (x - centerX) / zoom;
+    const relY = (y - centerY) / zoom;
+
+    return {
+        x: centerX + relX,
+        y: centerY + relY
+    };
+}
+
 export function initRobotParts() {
     console.log("Initializing robot parts...");
     const elems = getDOMElements();
@@ -126,29 +146,34 @@ export function initRobotParts() {
             console.log(`Dropping part: ${draggedPart.name}`);
             const rect = previewCanvas.getBoundingClientRect();
             // Get exact pixel coordinates (1:1 mapping)
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
 
-            console.log(`Part dropped at coordinates:`, { x, y });
+            const world = screenToWorld(screenX, screenY);
 
             placedParts.push({
                 id: draggedPart.id,
                 name: draggedPart.name,
                 img: draggedPart.img,
-                x: x,
-                y: y
+                x: world.x,
+                y: world.y
             });
 
             draggedPart = null;
-            drawRobotPreview();
+            if (window.renderRobotPreview) window.renderRobotPreview();
+            else drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
         }
     });
 
     // Mouse interaction for moving parts
     previewCanvas.addEventListener('mousedown', (e) => {
         const rect = previewCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+
+        const world = screenToWorld(screenX, screenY);
+        const x = world.x;
+        const y = world.y;
 
         // Check if clicked on a part
         for (let i = placedParts.length - 1; i >= 0; i--) {
@@ -172,8 +197,13 @@ export function initRobotParts() {
         if (isDragging && selectedPart) {
             wasDragging = true;
             const rect = previewCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const screenX = e.clientX - rect.left;
+            const screenY = e.clientY - rect.top;
+
+            const world = screenToWorld(screenX, screenY);
+            const x = world.x;
+            const y = world.y;
+
             selectedPart.x = x - dragOffset.x;
             selectedPart.y = y - dragOffset.y;
             renderRobotPreview();
@@ -201,8 +231,12 @@ export function initRobotParts() {
     // Double-click to rotate or erase parts
     previewCanvas.addEventListener('dblclick', (e) => {
         const rect = previewCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+
+        const world = screenToWorld(screenX, screenY);
+        const x = world.x;
+        const y = world.y;
 
         let partHit = false;
 
@@ -295,7 +329,11 @@ export function initRobotParts() {
 
     partsPalette.addEventListener('touchend', function (e) {
         if (!touchDragPart || !touchDragImg) return;
-        const pos = getTouchPos(e, previewCanvas);
+        const touchPos = getTouchPos(e, previewCanvas);
+
+        // Translate touch focus to unscaled world coordinates
+        const world = screenToWorld(touchPos.x, touchPos.y);
+
         // Check if touch ended over the canvas
         const rect = previewCanvas.getBoundingClientRect();
         const t = e.changedTouches[0];
@@ -305,11 +343,11 @@ export function initRobotParts() {
                 id: touchDragPart.id,
                 name: touchDragPart.name,
                 img: new window.Image(),
-                x: pos.x,
-                y: pos.y
+                x: world.x,
+                y: world.y
             });
             placedParts[placedParts.length - 1].img.src = getAssetPath(touchDragPart.src);
-            drawRobotPreview();
+            drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
         }
         document.body.removeChild(touchDragImg);
         touchDragImg = null;
@@ -327,14 +365,18 @@ export function initRobotParts() {
     let touchMoveOffset = { x: 0, y: 0 };
     previewCanvas.addEventListener('touchstart', function (e) {
         if (e.touches.length > 1) return; // Ignore multi-touch
-        const pos = getTouchPos(e, previewCanvas);
+        const touchPos = getTouchPos(e, previewCanvas);
+        const world = screenToWorld(touchPos.x, touchPos.y);
+        const x = world.x;
+        const y = world.y;
+
         // Check if touching a part
         for (let i = placedParts.length - 1; i >= 0; i--) {
             const part = placedParts[i];
             const partSize = 40;
-            if (Math.abs(pos.x - part.x) < partSize / 2 && Math.abs(pos.y - part.y) < partSize / 2) {
+            if (Math.abs(x - part.x) < partSize / 2 && Math.abs(y - part.y) < partSize / 2) {
                 touchMovePart = part;
-                touchMoveOffset = { x: pos.x - part.x, y: pos.y - part.y };
+                touchMoveOffset = { x: x - part.x, y: y - part.y };
                 // Double tap detection for rotate/erase
                 const now = Date.now();
                 if (now - lastTapTime < 350) {
@@ -345,7 +387,8 @@ export function initRobotParts() {
                     } else {
                         part.rotation = ((part.rotation || 0) + Math.PI / 2) % (2 * Math.PI);
                     }
-                    drawRobotPreview();
+                    if (window.renderRobotPreview) window.renderRobotPreview();
+                    else drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
                     e.preventDefault();
                     return;
                 } else {
@@ -361,16 +404,19 @@ export function initRobotParts() {
     previewCanvas.addEventListener('touchmove', function (e) {
         if (!touchMovePart) return;
         e.preventDefault();
-        const pos = getTouchPos(e, previewCanvas);
-        touchMovePart.x = pos.x - touchMoveOffset.x;
-        touchMovePart.y = pos.y - touchMoveOffset.y;
+        const touchPos = getTouchPos(e, previewCanvas);
+        const world = screenToWorld(touchPos.x, touchPos.y);
+
+        touchMovePart.x = world.x - touchMoveOffset.x;
+        touchMovePart.y = world.y - touchMoveOffset.y;
+
         // Limpiar el canvas y forzar redibujo completo para evitar trails/glitches en mobile
         if (window.renderRobotPreview) {
             window.renderRobotPreview();
         } else if (previewCtx && previewCanvas) {
             previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
             // Redibuja manualmente si no existe renderRobotPreview
-            if (typeof drawRobotPreview === 'function') drawRobotPreview();
+            if (typeof drawRobotPreview === 'function') drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
         }
     }, { passive: false });
 
@@ -384,7 +430,7 @@ export function initRobotParts() {
     });
 }
 
-export function drawRobotPreview() {
+export function drawRobotPreview(zoom = 1.0) {
     if (!previewCtx || !previewCanvas) {
         console.error("Missing previewCtx or previewCanvas in drawRobotPreview");
         return;
@@ -396,11 +442,17 @@ export function drawRobotPreview() {
         const sizeW = part.img.width;
         const sizeH = part.img.height;
         const rotation = part.rotation || 0;
-        console.log(`Drawing part ${part.name} at:`, { x: part.x, y: part.y, rotation });
+
+        // Calculate position relative to center, scaled by zoom
+        const centerX = previewCanvas.width / 2;
+        const centerY = previewCanvas.height / 2;
+        const relX = (part.x - centerX) * zoom;
+        const relY = (part.y - centerY) * zoom;
+
         previewCtx.save();
-        previewCtx.translate(part.x, part.y);
+        previewCtx.translate(centerX + relX, centerY + relY);
+        previewCtx.scale(zoom, zoom);
         previewCtx.rotate(rotation);
-        // Always fully opaque
         previewCtx.drawImage(part.img, -sizeW / 2, -sizeH / 2, sizeW, sizeH);
         previewCtx.restore();
     });
@@ -538,7 +590,7 @@ export function addParametricBodyPart(width_mm, length_mm, offset_mm, color) {
         if (window.renderRobotPreview) {
             window.renderRobotPreview();
         } else {
-            drawRobotPreview();
+            drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
         }
     };
 }

@@ -654,6 +654,79 @@ hr {
     grid-template-columns: 1fr 1fr;
 }
 
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.preview-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.preview-canvas-container {
+    position: relative;
+    width: 500px;
+    height: 300px;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: var(--shadow-sm);
+}
+
+#robotPreviewCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.preview-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    z-index: 20;
+}
+
+.preview-controls button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.preview-controls button:hover {
+    background: #fff;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.preview-controls button:active {
+    transform: translateY(0);
+}
+
+#zoomResetBtn {
+    font-size: 0.75rem;
+}
+
 .robot-preview {
     background-color: var(--surface-color);
     padding: var(--spacing-md);
@@ -682,6 +755,33 @@ hr {
     color: var(--text-secondary);
 }
 
+/* Pin rows: label + select/input aligned */
+.pin-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5em;
+    margin-bottom: 0.4em;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.pin-row span {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.pin-row select {
+    flex: 0 0 auto;
+    width: 180px;
+    padding: 3px 6px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    background-color: #fff;
+    cursor: pointer;
+}
+
 .robot-parameters label.sensor-pin-config {
     flex-direction: row;
     align-items: center;
@@ -690,8 +790,8 @@ hr {
     gap: 0.5em;
 }
 
-.robot-parameters label.sensor-pin-config input[type="text"] {
-    width: 60px;
+.robot-parameters label.sensor-pin-config select {
+    width: 180px;
     margin-top: 0;
 }
 

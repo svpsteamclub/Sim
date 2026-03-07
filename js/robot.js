@@ -40,24 +40,26 @@ export class Robot {
         // For 4 sensors: farLeft, left, right, farRight
         // For 5 sensors: farLeft, left, center, right, farRight
         this.sensors = {};
-        if (this.sensorCount === 2) {
-            this.sensors.left = 1;
-            this.sensors.right = 1;
+        if (this.sensorCount === 1) {
+            this.sensors.center = 0;
+        } else if (this.sensorCount === 2) {
+            this.sensors.left = 0;
+            this.sensors.right = 0;
         } else if (this.sensorCount === 3) {
-            this.sensors.left = 1;
-            this.sensors.center = 1;
-            this.sensors.right = 1;
+            this.sensors.left = 0;
+            this.sensors.center = 0;
+            this.sensors.right = 0;
         } else if (this.sensorCount === 4) {
-            this.sensors.farLeft = 1;
-            this.sensors.left = 1;
-            this.sensors.right = 1;
-            this.sensors.farRight = 1;
+            this.sensors.farLeft = 0;
+            this.sensors.left = 0;
+            this.sensors.right = 0;
+            this.sensors.farRight = 0;
         } else if (this.sensorCount === 5) {
-            this.sensors.farLeft = 1;
-            this.sensors.left = 1;
-            this.sensors.center = 1;
-            this.sensors.right = 1;
-            this.sensors.farRight = 1;
+            this.sensors.farLeft = 0;
+            this.sensors.left = 0;
+            this.sensors.center = 0;
+            this.sensors.right = 0;
+            this.sensors.farRight = 0;
         }
     }
 
@@ -135,8 +137,8 @@ export class Robot {
         let d_theta_rad = 0;
 
         if (this.wheelbase_m > 0.001) {
-            // Positivo es giro en contra de las manecillas del reloj (izquierda)
-            d_theta_rad = (this.currentApplied_vR_mps - this.currentApplied_vL_mps) / this.wheelbase_m * dt_s;
+            // For Y-down screen coordinates, positive (vL - vR) means turning RIGHT (clockwise)
+            d_theta_rad = (this.currentApplied_vL_mps - this.currentApplied_vR_mps) / this.wheelbase_m * dt_s;
             // Moderador de inercia rotacional por posición del CG ("péndulo")
             // Un CoM desplazado requiere más energía para rotar.
             let momentOfInertiaMod = 1 + Math.abs(this.comOffset_m) * 10;
@@ -230,12 +232,12 @@ export class Robot {
             const x = this.x_m + offset * cosA;
             const y = this.y_m + offset * sinA;
             positions.left = {
-                x_m: x - ySpread * sinA,
-                y_m: y + ySpread * cosA
-            };
-            positions.right = {
                 x_m: x + ySpread * sinA,
                 y_m: y - ySpread * cosA
+            };
+            positions.right = {
+                x_m: x - ySpread * sinA,
+                y_m: y + ySpread * cosA
             };
         } else if (count === 3) {
             // left, center, right
@@ -243,13 +245,13 @@ export class Robot {
             const x = this.x_m + offset * cosA;
             const y = this.y_m + offset * sinA;
             positions.left = {
-                x_m: x - ySpread * sinA,
-                y_m: y + ySpread * cosA
+                x_m: x + ySpread * sinA,
+                y_m: y - ySpread * cosA
             };
             positions.center = { x_m: x, y_m: y };
             positions.right = {
-                x_m: x + ySpread * sinA,
-                y_m: y - ySpread * cosA
+                x_m: x - ySpread * sinA,
+                y_m: y + ySpread * cosA
             };
         } else if (count === 4) {
             // farLeft, left, right, farRight
@@ -257,20 +259,20 @@ export class Robot {
             const x = this.x_m + offset * cosA;
             const y = this.y_m + offset * sinA;
             positions.farLeft = {
-                x_m: x - 1.5 * ySpread * sinA,
-                y_m: y + 1.5 * ySpread * cosA
+                x_m: x + 1.5 * ySpread * sinA,
+                y_m: y - 1.5 * ySpread * cosA
             };
             positions.left = {
-                x_m: x - 0.5 * ySpread * sinA,
-                y_m: y + 0.5 * ySpread * cosA
-            };
-            positions.right = {
                 x_m: x + 0.5 * ySpread * sinA,
                 y_m: y - 0.5 * ySpread * cosA
             };
+            positions.right = {
+                x_m: x - 0.5 * ySpread * sinA,
+                y_m: y + 0.5 * ySpread * cosA
+            };
             positions.farRight = {
-                x_m: x + 1.5 * ySpread * sinA,
-                y_m: y - 1.5 * ySpread * cosA
+                x_m: x - 1.5 * ySpread * sinA,
+                y_m: y + 1.5 * ySpread * cosA
             };
         } else if (count === 5) {
             // farLeft, left, center, right, farRight
@@ -278,21 +280,21 @@ export class Robot {
             const x = this.x_m + offset * cosA;
             const y = this.y_m + offset * sinA;
             positions.farLeft = {
-                x_m: x - 2 * ySpread * sinA,
-                y_m: y + 2 * ySpread * cosA
+                x_m: x + 2 * ySpread * sinA,
+                y_m: y - 2 * ySpread * cosA
             };
             positions.left = {
-                x_m: x - ySpread * sinA,
-                y_m: y + ySpread * cosA
-            };
-            positions.center = { x_m: x, y_m: y };
-            positions.right = {
                 x_m: x + ySpread * sinA,
                 y_m: y - ySpread * cosA
             };
+            positions.center = { x_m: x, y_m: y };
+            positions.right = {
+                x_m: x - ySpread * sinA,
+                y_m: y + ySpread * cosA
+            };
             positions.farRight = {
-                x_m: x + 2 * ySpread * sinA,
-                y_m: y - 2 * ySpread * cosA
+                x_m: x - 2 * ySpread * sinA,
+                y_m: y + 2 * ySpread * cosA
             };
         }
         return positions;
@@ -395,10 +397,10 @@ export class Robot {
         const sensorRadiusPx = Math.max(2, (this.sensorDiameter_m / 2) * PIXELS_PER_METER);
         for (const key in sensorPositions_m) {
             const pos_m = sensorPositions_m[key];
-            const isOffLine = sensorReadings[key];
+            const isOnLine = sensorReadings[key];
             ctx.beginPath();
             ctx.arc(pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER, sensorRadiusPx, 0, 2 * Math.PI);
-            ctx.fillStyle = isOffLine ? 'gray' : 'lime';
+            ctx.fillStyle = isOnLine ? 'lime' : 'gray';
             ctx.fill();
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
@@ -456,15 +458,19 @@ export class Robot {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        let leftMotorText = '9';
-        let rightMotorText = '10';
+        let leftMotorText = '(9)';
+        let rightMotorText = '(10)';
         if (this.connections && this.connections.motorPins) {
+            const m = this.connections.motorPins;
             if (this.connections.driverType === 'l298n') {
-                leftMotorText = `${this.connections.motorPins.leftFwd}/${this.connections.motorPins.leftRev}`;
-                rightMotorText = `${this.connections.motorPins.rightFwd}/${this.connections.motorPins.rightRev}`;
+                leftMotorText = `(${m.leftEn}, ${m.leftIn1}, ${m.leftIn2})`;
+                rightMotorText = `(${m.rightEn}, ${m.rightIn3}, ${m.rightIn4})`;
+            } else if (this.connections.driverType === 'mx1616') {
+                leftMotorText = `(${m.leftIn1}, ${m.leftIn2})`;
+                rightMotorText = `(${m.rightIn3}, ${m.rightIn4})`;
             } else {
-                leftMotorText = this.connections.motorPins.leftPWM;
-                rightMotorText = this.connections.motorPins.rightPWM;
+                leftMotorText = `(${m.leftPWM})`;
+                rightMotorText = `(${m.rightPWM})`;
             }
         }
 

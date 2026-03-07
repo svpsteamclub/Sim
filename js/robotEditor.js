@@ -1,5 +1,6 @@
 // js/robotEditor.js
-import { getDOMElements } from './ui.js';
+console.log("Robot Editor Version: 1.1 - Zoom Fix Loading...");
+import { getDOMElements, updateDynamicCodeHelp } from './ui.js';
 import { DEFAULT_ROBOT_GEOMETRY, PIXELS_PER_METER } from './config.js';
 import { Robot } from './robot.js';
 import { initRobotParts, drawRobotPreview, getPlacedParts } from './robotParts.js';
@@ -8,6 +9,10 @@ let previewCanvas, previewCtx;
 let previewRobot;
 let currentGeometry = { ...DEFAULT_ROBOT_GEOMETRY };
 let mainAppInterface;
+let previewZoom = 1.0;
+const ZOOM_STEP = 0.2;
+const MIN_ZOOM = 0.4;
+const MAX_ZOOM = 4.0;
 
 export function initRobotEditor(appInterface) {
     console.log("Initializing robot editor...");
@@ -19,20 +24,23 @@ export function initRobotEditor(appInterface) {
         return;
     }
     previewCtx = previewCanvas.getContext('2d');
+    console.log("Zoom buttons found:", { in: !!elems.zoomInBtn, out: !!elems.zoomOutBtn, reset: !!elems.zoomResetBtn });
+    window.renderRobotPreview = renderRobotPreview;
 
-    // Set fixed canvas size to 350x350 pixels (35cm x 35cm)
-    previewCanvas.width = 350;
-    previewCanvas.height = 350;
+    // Set fixed canvas size to 500x300 pixels (50cm x 30cm)
+    previewCanvas.width = 500;
+    previewCanvas.height = 300;
 
     // Set display size to match canvas size exactly (1:1 pixel mapping)
-    previewCanvas.style.width = '350px';
-    previewCanvas.style.height = '350px';
+    previewCanvas.style.width = '500px';
+    previewCanvas.style.height = '300px';
 
     console.log("Canvas size set to:", { width: previewCanvas.width, height: previewCanvas.height });
 
     // Initialize preview robot with default geometry
     previewRobot = new Robot(previewCanvas.width / 2 / PIXELS_PER_METER, previewCanvas.height / 2 / PIXELS_PER_METER, -Math.PI / 2);
     previewRobot.updateGeometry(DEFAULT_ROBOT_GEOMETRY);
+    updateDynamicCodeHelp(DEFAULT_ROBOT_GEOMETRY);
 
     console.log("Preview robot initialized with geometry:", DEFAULT_ROBOT_GEOMETRY);
 
@@ -56,40 +64,112 @@ export function initRobotEditor(appInterface) {
         alert("Geometría del robot actualizada y aplicada a la simulación (requiere reinicio de sim).");
     });
 
+    // Zoom Controls
+    const setZoom = (newZoom) => {
+        previewZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+        console.log("Preview zoom set to:", previewZoom);
+        renderRobotPreview();
+    };
+
+    if (elems.zoomInBtn) {
+        elems.zoomInBtn.addEventListener('click', () => setZoom(previewZoom + ZOOM_STEP));
+    }
+    if (elems.zoomOutBtn) {
+        elems.zoomOutBtn.addEventListener('click', () => setZoom(previewZoom - ZOOM_STEP));
+    }
+    if (elems.zoomResetBtn) {
+        elems.zoomResetBtn.addEventListener('click', () => setZoom(1.0));
+    }
+
+    window.getPreviewZoom = () => previewZoom;
+
     window.forceGeometrySync = () => {
         currentGeometry = getFormValues();
         previewRobot.updateGeometry(currentGeometry);
         syncDecorativeSensorsWithGeometry();
         renderRobotPreview();
+        updateDynamicCodeHelp(currentGeometry);
     };
 
     // --- Dynamic UI for Connections ---
+    // Genera un <select> de pines Arduino UNO con optgroups
+    function pinSelect(id, defaultVal, pwmOnly = false) {
+        const pwmPins = [3, 5, 6, 9, 10, 11];
+        const allPins = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        const pins = pwmOnly ? pwmPins : allPins;
+        const pwmSet = new Set(pwmPins);
+        const opts = pins.map(p => {
+            const label = pwmSet.has(p) ? `${p} — PWM~ / Digital` : `${p} — Digital`;
+            return `<option value="${p}"${p == defaultVal ? ' selected' : ''}>${label}</option>`;
+        }).join('');
+        return `<select id="${id}">${opts}</select>`;
+    }
+
     function updateMotorConnectionsUI() {
         if (!elems.motorDriverTypeSelect || !elems.motorConnectionsContainer) return;
         const type = elems.motorDriverTypeSelect.value;
         let html = '';
         if (type === 'l298n') {
             html = `
-                <div style="margin-bottom:0.5em;"><strong>Motor Izquierdo:</strong> ENA: <input type="text" id="pinMotorLeftEn" value="3" style="width:30px;"> IN1: <input type="text" id="pinMotorLeftIn1" value="11" style="width:30px;"> IN2: <input type="text" id="pinMotorLeftIn2" value="9" style="width:30px;"></div>
-                <div><strong>Motor Derecho:</strong> IN3: <input type="text" id="pinMotorRightIn3" value="10" style="width:30px;"> IN4: <input type="text" id="pinMotorRightIn4" value="6" style="width:30px;"> ENB: <input type="text" id="pinMotorRightEn" value="5" style="width:30px;"></div>
-             `;
+                <div class="pin-row">
+                    <span><strong>Motor Izq.</strong> — ENA (PWM~):</span>
+                    ${pinSelect('pinMotorLeftEn', 3, true)}
+                </div>
+                <div class="pin-row">
+                    <span>IN1 (dirección):</span>
+                    ${pinSelect('pinMotorLeftIn1', 11)}
+                </div>
+                <div class="pin-row">
+                    <span>IN2 (dirección):</span>
+                    ${pinSelect('pinMotorLeftIn2', 9)}
+                </div>
+                <div class="pin-row" style="margin-top:0.5em;">
+                    <span><strong>Motor Der.</strong> — ENB (PWM~):</span>
+                    ${pinSelect('pinMotorRightEn', 5, true)}
+                </div>
+                <div class="pin-row">
+                    <span>IN3 (dirección):</span>
+                    ${pinSelect('pinMotorRightIn3', 10)}
+                </div>
+                <div class="pin-row">
+                    <span>IN4 (dirección):</span>
+                    ${pinSelect('pinMotorRightIn4', 6)}
+                </div>`;
         } else if (type === 'mx1616') {
             html = `
-                <div style="margin-bottom:0.5em;"><strong>Motor Izquierdo:</strong> IN1: <input type="text" id="pinMotorLeftIn1" value="11" style="width:40px;"> IN2: <input type="text" id="pinMotorLeftIn2" value="9" style="width:40px;"></div>
-                <div><strong>Motor Derecho:</strong> IN3: <input type="text" id="pinMotorRightIn3" value="10" style="width:40px;"> IN4: <input type="text" id="pinMotorRightIn4" value="6" style="width:40px;"></div>
-             `;
+                <div class="pin-row">
+                    <span><strong>Motor Izq.</strong> — IN1 (PWM~):</span>
+                    ${pinSelect('pinMotorLeftIn1', 11, true)}
+                </div>
+                <div class="pin-row">
+                    <span>IN2 (PWM~):</span>
+                    ${pinSelect('pinMotorLeftIn2', 9, true)}
+                </div>
+                <div class="pin-row" style="margin-top:0.5em;">
+                    <span><strong>Motor Der.</strong> — IN3 (PWM~):</span>
+                    ${pinSelect('pinMotorRightIn3', 10, true)}
+                </div>
+                <div class="pin-row">
+                    <span>IN4 (PWM~):</span>
+                    ${pinSelect('pinMotorRightIn4', 6, true)}
+                </div>`;
         } else { // single / ESCs
             html = `
-                <div style="margin-bottom:0.5em;"><strong>Motor Izquierdo (ESC):</strong> PWM: <input type="text" id="pinMotorLeftPWM" value="9" style="width:50px;"></div>
-                <div><strong>Motor Derecho (ESC):</strong> PWM: <input type="text" id="pinMotorRightPWM" value="10" style="width:50px;"></div>
-             `;
+                <div class="pin-row">
+                    <span><strong>Motor Izq. (ESC)</strong> — PWM~:</span>
+                    ${pinSelect('pinMotorLeftPWM', 9, true)}
+                </div>
+                <div class="pin-row">
+                    <span><strong>Motor Der. (ESC)</strong> — PWM~:</span>
+                    ${pinSelect('pinMotorRightPWM', 10, true)}
+                </div>`;
         }
         elems.motorConnectionsContainer.innerHTML = html;
 
-        // Re-bind listeners for the newly injected inputs to trigger preview updates if we wanted to show them on the robot (we do!)
-        const inputs = elems.motorConnectionsContainer.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => { window.forceGeometrySync(); });
+        // Re-bind listeners for the newly injected selects
+        const selects = elems.motorConnectionsContainer.querySelectorAll('select');
+        selects.forEach(sel => {
+            sel.addEventListener('change', () => { window.forceGeometrySync(); });
         });
     }
 
@@ -100,22 +180,19 @@ export function initRobotEditor(appInterface) {
         });
         updateMotorConnectionsUI(); // Initial call
 
-        // Also bind inputs for sensors to trigger sync
-        [elems.pinSensorFarLeftInput, elems.pinSensorLeftInput, elems.pinSensorCenterInput, elems.pinSensorRightInput, elems.pinSensorFarRightInput].forEach(inp => {
-            if (inp) inp.addEventListener('input', () => { window.forceGeometrySync(); });
+        // Bind sensor selects to trigger sync (selects use 'change', not 'input')
+        [elems.pinSensorFarLeftInput, elems.pinSensorLeftInput, elems.pinSensorCenterInput, elems.pinSensorRightInput, elems.pinSensorFarRightInput].forEach(sel => {
+            if (sel) sel.addEventListener('change', () => { window.forceGeometrySync(); });
         });
     }
 
     function updateSensorConnectionsUI(count) {
-        if (elems.pinSensorFarLeftInput) {
-            elems.pinSensorFarLeftInput.parentElement.style.display = (count >= 4) ? 'block' : 'none';
-        }
-        if (elems.pinSensorCenterInput) {
-            elems.pinSensorCenterInput.parentElement.style.display = (count % 2 !== 0) ? 'block' : 'none'; // 3 or 5
-        }
-        if (elems.pinSensorFarRightInput) {
-            elems.pinSensorFarRightInput.parentElement.style.display = (count >= 4) ? 'block' : 'none';
-        }
+        const rowFarLeft = document.getElementById('rowSensorFarLeft');
+        const rowCenter = document.getElementById('rowSensorCenter');
+        const rowFarRight = document.getElementById('rowSensorFarRight');
+        if (rowFarLeft) rowFarLeft.style.display = (count >= 4) ? 'flex' : 'none';
+        if (rowCenter) rowCenter.style.display = (count % 2 !== 0) ? 'flex' : 'none'; // 3 or 5
+        if (rowFarRight) rowFarRight.style.display = (count >= 4) ? 'flex' : 'none';
     }
 
     // --- Sensor count dropdown logic ---
@@ -422,13 +499,7 @@ function setFormValues(geometry) {
 
     // Visually show/hide sensor rows
     if (typeof updateSensorConnectionsUI === 'function') {
-        const countToUpdate = geometry.sensorCount || 3;
-        const e1 = elems.pinSensorFarLeftInput; // Need to grab them fresh if scope is weird
-        if (e1 && e1.parentElement) {
-            e1.parentElement.style.display = (countToUpdate >= 4) ? 'block' : 'none';
-            if (elems.pinSensorCenterInput) elems.pinSensorCenterInput.parentElement.style.display = (countToUpdate % 2 !== 0) ? 'block' : 'none';
-            if (elems.pinSensorFarRightInput) elems.pinSensorFarRightInput.parentElement.style.display = (countToUpdate >= 4) ? 'block' : 'none';
-        }
+        updateSensorConnectionsUI(geometry.sensorCount || 3);
     }
 
     syncDecorativeSensorsWithGeometry();
@@ -517,8 +588,9 @@ export function renderRobotPreview() {
     previewCtx.restore();
 
     previewCtx.save();
-    // Center the robot in the preview canvas
+    // Center the robot in the preview canvas and apply zoom
     previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
+    previewCtx.scale(previewZoom, previewZoom);
 
     // Draw robot
     const tempX = previewRobot.x_m;
@@ -578,11 +650,12 @@ export function renderRobotPreview() {
 
     console.log("Drawing decorative parts...");
     // Draw decorative parts
-    drawRobotPreview();
+    drawRobotPreview(previewZoom);
 
     // Draw sensors on top
     previewCtx.save();
     previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
+    previewCtx.scale(previewZoom, previewZoom);
 
     // Draw Center of Mass Symbol
     const comY_px = -previewRobot.comOffset_m * PIXELS_PER_METER;

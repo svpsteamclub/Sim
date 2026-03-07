@@ -46,15 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Called by TrackEditor when "Use this Track" is clicked
         loadTrackFromEditor: (trackCanvas, startX_m, startY_m, startAngle_rad) => {
             if (simulationInstance) {
-                // Marcar el canvas como proveniente del editor para evitar que se limpie el estado
                 trackCanvas.dataset.fromEditor = 'true';
                 simulationInstance.loadTrack(trackCanvas, startX_m, startY_m, startAngle_rad,
                     (success, trackWidth, trackHeight) => {
                         if (success) {
-                            elems.simulationDisplayCanvas.width = trackWidth;
-                            elems.simulationDisplayCanvas.height = trackHeight;
-                            simulationInstance.centerCameraOnTrack(elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
-                            drawCurrentSimulationState(); // Draw initial state of new track
+                            // Mantener el canvas en su tamaño CSS (no al tamaño de la pista)
+                            // para que los clicks del mouse y la cámara estén en el mismo sistema de coordenadas.
+                            const displayW = elems.simulationDisplayCanvas.offsetWidth || elems.simulationDisplayCanvas.width;
+                            const displayH = elems.simulationDisplayCanvas.offsetHeight || elems.simulationDisplayCanvas.height;
+                            elems.simulationDisplayCanvas.width = displayW;
+                            elems.simulationDisplayCanvas.height = displayH;
+                            simulationInstance.centerCameraOnTrack(displayW, displayH);
+                            drawCurrentSimulationState();
                         } else {
                             alert("Error al cargar la pista del editor en la simulación.");
                         }
@@ -156,8 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Load a default track or wait for user
             // For now, let's assume track editor handles its default view.
             // Simulation will start with no track until one is exported from editor.
-            elems.simulationDisplayCanvas.width = 700; // Default size
-            elems.simulationDisplayCanvas.height = 500;
+            // Usar el tamaño CSS real del canvas para que los clicks y la cámara estén alineados
+            elems.simulationDisplayCanvas.width = elems.simulationDisplayCanvas.offsetWidth || 700;
+            elems.simulationDisplayCanvas.height = elems.simulationDisplayCanvas.offsetHeight || 500;
 
             // Initial Camera Fit
             simulationInstance.centerCameraOnTrack(elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
@@ -355,6 +359,16 @@ document.addEventListener('DOMContentLoaded', () => {
     elems.stopSimButton.addEventListener('click', stopSimulation);
     elems.resetSimButton.addEventListener('click', resetSimulation);
     elems.applySimParamsButton.addEventListener('click', applySimulationParameters);
+
+    // Botón aplicar código en el editor
+    elems.applyCodeButton.addEventListener('click', () => {
+        if (loadUserCode(window.monacoEditor.getValue())) {
+            updateCodeTypeDisplay(getCurrentCodeType());
+            alert("✅ Código aplicado con éxito. Puedes iniciar la simulación.");
+        } else {
+            alert("❌ Error en el código. Revisa el Monitor Serial para más detalles.");
+        }
+    });
 
     // --- Event Listeners for Camera ---
     const simZoomInBtn = document.getElementById('simZoomInBtn');

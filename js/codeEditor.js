@@ -11,6 +11,7 @@ let sharedSimulationState = null; // To access robot sensors and track
 // but we need a way to track PWM states on any pin the user targets.
 let _pinModes = {};
 let _motorPWMValues = {}; // Will store whatever pins the user writes to
+let _warnedPins = new Set(); // Track pins used without pinMode to warn once
 
 // NUEVO: Token para cancelar ejecuciones asíncronas flotantes al reiniciar
 let currentSimToken = 0;
@@ -57,7 +58,24 @@ const ArduinoSerial = {
 const arduinoAPI = {
     pinMode: (pin, mode) => {
         _pinModes[pin] = mode;
-        // ArduinoSerial.println(`Pin ${pin} mode set to ${mode}.`);
+        _warnedPins.delete(pin); // Reset warning if pin is now configured
+
+        // Validate against Robot Editor connections if available
+        if (sharedSimulationState && sharedSimulationState.robot && sharedSimulationState.robot.connections) {
+            const conns = sharedSimulationState.robot.connections;
+            const sensorPins = Object.values(conns.sensorPins).map(p => {
+                if (typeof p === 'string' && p.startsWith('A')) return 14 + parseInt(p.substring(1));
+                return parseInt(p);
+            });
+            const motorPins = Object.values(conns.motorPins).map(p => parseInt(p));
+
+            if (sensorPins.includes(pin) && mode === arduinoAPI.OUTPUT) {
+                ArduinoSerial.println(`Advertencia: Pin ${pin} es un SENSOR en el editor, pero lo declaraste como OUTPUT.`);
+            }
+            if (motorPins.includes(pin) && mode === arduinoAPI.INPUT) {
+                ArduinoSerial.println(`Advertencia: Pin ${pin} es un MOTOR en el editor, pero lo declaraste como INPUT.`);
+            }
+        }
     },
     digitalRead: (pin) => {
         if (!sharedSimulationState || !sharedSimulationState.robot || !sharedSimulationState.robot.connections) return 1;
@@ -68,13 +86,36 @@ const arduinoAPI = {
         // Since the UI might have "A2", and our API parses "A2" to 2, we need a helper:
         const resolveUIPin = (uiVal) => {
             if (typeof uiVal === 'string' && uiVal.startsWith('A')) {
-                // Return the constant defined in API
-                return arduinoAPI[uiVal];
+                const num = parseInt(uiVal.substring(1));
+                return 14 + num; // Map A0-A5 to 14-19
             }
             return parseInt(uiVal);
         }
 
-        let val = 1;
+        if (_pinModes[pin] !== arduinoAPI.INPUT) {
+            if (!_warnedPins.has(pin)) {
+                ArduinoSerial.println(`Error: Pin ${pin} no configurado como INPUT. Usa pinMode(${pin}, INPUT) en setup().`);
+                _warnedPins.add(pin);
+            }
+            return 0; // Default to 0 (off line) if not configured
+        }
+
+        // Validate if this pin is actually connected to a sensor in Robot Editor
+        if (sharedSimulationState && sharedSimulationState.robot && sharedSimulationState.robot.connections) {
+            const conns = sharedSimulationState.robot.connections.sensorPins;
+            const sensorPins = Object.values(conns).map(p => {
+                if (typeof p === 'string' && p.startsWith('A')) return 14 + parseInt(p.substring(1));
+                return parseInt(p);
+            });
+            if (!sensorPins.includes(pin)) {
+                if (!_warnedPins.has(pin + "_not_sensor")) {
+                    ArduinoSerial.println(`Advertencia: digitalRead(${pin}) - El pin ${pin} no está conectado a ningún sensor en el Editor de Robot.`);
+                    _warnedPins.add(pin + "_not_sensor");
+                }
+            }
+        }
+
+        let val = 0; // Default to 0 (off line)
         if (pin === resolveUIPin(conns.left)) val = sharedSimulationState.robot.sensors.left;
         else if (pin === resolveUIPin(conns.center)) val = sharedSimulationState.robot.sensors.center;
         else if (pin === resolveUIPin(conns.right)) val = sharedSimulationState.robot.sensors.right;
@@ -91,6 +132,25 @@ const arduinoAPI = {
         arduinoAPI.analogWrite(pin, value === arduinoAPI.HIGH ? 255 : 0);
     },
     analogWrite: (pin, value) => {
+        if (_pinModes[pin] !== arduinoAPI.OUTPUT) {
+            if (!_warnedPins.has(pin)) {
+                ArduinoSerial.println(`Error: Pin ${pin} no configurado como OUTPUT. Usa pinMode(${pin}, OUTPUT) en setup().`);
+                _warnedPins.add(pin);
+            }
+            return;
+        }
+
+        // Validate if this pin is actually connected to a motor in Robot Editor
+        if (sharedSimulationState && sharedSimulationState.robot && sharedSimulationState.robot.connections) {
+            const motorPins = Object.values(sharedSimulationState.robot.connections.motorPins).map(p => parseInt(p));
+            if (!motorPins.includes(pin)) {
+                if (!_warnedPins.has(pin + "_not_motor")) {
+                    ArduinoSerial.println(`Advertencia: analogWrite(${pin}) - El pin ${pin} no está conectado a ningún motor en el Editor de Robot.`);
+                    _warnedPins.add(pin + "_not_motor");
+                }
+            }
+        }
+
         const pwmValue = Math.max(-255, Math.min(255, Math.round(value)));
 
         // Update the tracked PWM for the specific pin dynamically
@@ -159,7 +219,7 @@ const arduinoAPI = {
     LOW: 0,
     INPUT: "INPUT",
     OUTPUT: "OUTPUT",
-    A0: 0, A1: 1, A2: 2, A3: 4, A4: 3, A5: 5, // Map analog pins. A2=Left, A4=Center, A3=Right
+    A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19, // Standard Arduino Uno mapping
     // User code might also define their own constants like LEFT_SENSOR_PIN etc.
 };
 
@@ -306,6 +366,7 @@ export function loadUserCode(code) {
     ArduinoSerial.clear(); // Clear serial on new code load
     _pinModes = {};
     _motorPWMValues = {}; // Reset fully
+    _warnedPins = new Set(); // Reset warnings
 
     // Detectar el tipo de código (opcional, solo mantendremos 'onoff')
     currentCodeType = 'onoff';

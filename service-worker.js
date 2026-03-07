@@ -1,5 +1,5 @@
 // service-worker.js
-const CACHE_NAME = 'sim-pwa-v3';
+const CACHE_NAME = 'sim-pwa-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -19,7 +19,6 @@ const urlsToCache = [
   '/js/track.js',
   '/js/trackEditor.js',
   '/assets/Logo%20guaroduino.png',
-  // Puedes agregar más archivos y assets aquí
 ];
 
 self.addEventListener('install', event => {
@@ -39,10 +38,11 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Network-First strategy
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
     })
   );
 });

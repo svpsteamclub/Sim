@@ -142,9 +142,9 @@
                         <label for="motorEfficiency">Eficiencia Motor (0-1):</label>
                         <input type="number" id="motorEfficiency" value="0.85" step="0.01" min="0.1" max="1">
                         <label for="motorImbalance">Diferencia Motores (-0.5 a 0.5):</label>
-                        <input type="number" id="motorImbalance" value="0.0" step="0.01" min="-0.5" max="0.5">
+                        <input type="number" id="motorImbalance" value="0.1" step="0.01" min="-0.5" max="0.5">
                         <label for="motorResponse">Respuesta Motor (0-1):</label>
-                        <input type="number" id="motorResponse" value="0.1" step="0.01" min="0.01" max="1">
+                        <input type="number" id="motorResponse" value="0.04" step="0.01" min="0.01" max="1">
                         <label for="sensorNoise">Ruido Sensor (0-1):</label>
                         <input type="number" id="sensorNoise" value="0.0" step="0.01" min="0" max="1">
                         <label for="movementPerturb">Perturb. Movim. (0-1):</label>
@@ -173,7 +173,7 @@
             <div class="code-editor-layout">
                 <div class="code-editor-container">
                     <div style="margin-bottom: 0.5em;">
-                        <strong>Código Actual:</strong> Código On/Off Simple
+                        <strong>Código Actual:</strong> <span id="currentCodeType">Código On/Off Simple</span>
                     </div>
                     <div id="monacoContainer" style="height: 600px; border: 1px solid #ccc;"></div>
                     <div style="display:flex; gap:0.5em; margin:1em 0;">
@@ -267,9 +267,17 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
         <div id="robot-editor" class="tab-content">
             <div class="robot-editor-layout">
                 <div class="robot-preview">
-                    <h3>Vista Previa del Robot</h3>
-                    <canvas id="robotPreviewCanvas" width="300" height="300"
-                        style="display: block; margin: 0 auto; border: 1px solid #eee; border-radius: 8px;"></canvas>
+                    <div class="preview-header">
+                        <h3>Vista Previa del Robot</h3>
+                        <div class="preview-controls">
+                            <button id="zoomInBtn" title="Acercar">+</button>
+                            <button id="zoomOutBtn" title="Alejar">−</button>
+                            <button id="zoomResetBtn" title="Resetear Zoom">1:1</button>
+                        </div>
+                    </div>
+                    <div class="preview-canvas-container">
+                        <canvas id="robotPreviewCanvas" width="500" height="300"></canvas>
+                    </div>
                     <div class="robot-parts-palette">
                         <h4>Partes Decorativas</h4>
                         <div style="display: flex; gap: 0.5em; margin-bottom: 0.5em;">
@@ -371,23 +379,141 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                     <h3 style="margin-top: 1em; border-top: 1px solid var(--border-color); padding-top: 10px;">
                         Conexiones (Pines Arduino)</h3>
                     <div id="sensorConnectionsContainer">
-                        <label for="pinSensorFarLeft" class="sensor-pin-config" style="display:none;">
-                            Pin Sensor Extremo Izq.: <input type="text" id="pinSensorFarLeft" value="A0"
-                                style="width:60px;">
-                        </label>
-                        <label for="pinSensorLeft" class="sensor-pin-config">
-                            Pin Sensor Izquierdo: <input type="text" id="pinSensorLeft" value="A2" style="width:60px;">
-                        </label>
-                        <label for="pinSensorCenter" class="sensor-pin-config">
-                            Pin Sensor Centro: <input type="text" id="pinSensorCenter" value="A4" style="width:60px;">
-                        </label>
-                        <label for="pinSensorRight" class="sensor-pin-config">
-                            Pin Sensor Derecho: <input type="text" id="pinSensorRight" value="A3" style="width:60px;">
-                        </label>
-                        <label for="pinSensorFarRight" class="sensor-pin-config" style="display:none;">
-                            Pin Sensor Extremo Der.: <input type="text" id="pinSensorFarRight" value="A5"
-                                style="width:60px;">
-                        </label>
+                        <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFarLeft">
+                            <span>Pin Sensor Extremo Izq.:</span>
+                            <select id="pinSensorFarLeft">
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0" selected>A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="pin-row sensor-pin-config">
+                            <span>Pin Sensor Izquierdo:</span>
+                            <select id="pinSensorLeft">
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2" selected>A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="pin-row sensor-pin-config" id="rowSensorCenter">
+                            <span>Pin Sensor Centro:</span>
+                            <select id="pinSensorCenter">
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4" selected>A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="pin-row sensor-pin-config">
+                            <span>Pin Sensor Derecho:</span>
+                            <select id="pinSensorRight">
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3" selected>A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFarRight">
+                            <span>Pin Sensor Extremo Der.:</span>
+                            <select id="pinSensorFarRight">
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5" selected>A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
                     </div>
 
                     <label for="motorDriverType" style="margin-top:0.5em;">
