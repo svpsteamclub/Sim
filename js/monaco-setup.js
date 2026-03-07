@@ -1,53 +1,19 @@
 // Esquemas de código
 const codeTemplates = {
     simpleOnOff: `void setup() {
-    // Configurar pines de los sensores (A2, A4, A3)
-    pinMode(A2, INPUT);   // Sensor Izquierdo
-    pinMode(A4, INPUT);   // Sensor Centro
-    pinMode(A3, INPUT);   // Sensor Derecho
+  // put your setup code here, to run once:
 
-    // Configurar pines del driver L298N
-    pinMode(11, OUTPUT);  // Motor Izq IN1
-    pinMode(9, OUTPUT);   // Motor Izq IN2
-    pinMode(3, OUTPUT);   // Motor Izq ENA (PWM)
-    
-    pinMode(10, OUTPUT);  // Motor Der IN3
-    pinMode(6, OUTPUT);   // Motor Der IN4
-    pinMode(5, OUTPUT);   // Motor Der ENB (PWM)
 }
 
 void loop() {
-    // Leer los sensores (HIGH = Vio línea negra)
-    int izq = digitalRead(A2);
-    int cen = digitalRead(A4);
-    int der = digitalRead(A3);
-    
-    // Fijar la velocidad general (0 a 255)
-    analogWrite(3, 120); 
-    analogWrite(5, 120);
+  // put your main code here, to run repeatedly:
 
-    // Lógica Simple
-    if (cen == HIGH) {
-        // Avanzar: ambos motores adelante
-        digitalWrite(11, HIGH); digitalWrite(9, LOW);
-        digitalWrite(10, HIGH); digitalWrite(6, LOW);
-    } 
-    else if (izq == HIGH) {
-        // Girar Izquierda: frena llanta izquierda, avanza derecha
-        digitalWrite(11, LOW);  digitalWrite(9, LOW);
-        digitalWrite(10, HIGH); digitalWrite(6, LOW);
-    } 
-    else if (der == HIGH) {
-        // Girar Derecha: avanza izquierda, frena derecha
-        digitalWrite(11, HIGH); digitalWrite(9, LOW);
-        digitalWrite(10, LOW);  digitalWrite(6, LOW);
-    } 
 }`
 };
 
 // Textos explicativos para cada plantilla
 const codeExplanations = {
-    simpleOnOff: `🌟 <b>Código Seguidor de Línea (L298N)</b>\n\nEste código utiliza los 6 pines necesarios para controlar un puente H L298N. Los pines <b>ENA (3)</b> y <b>ENB (5)</b> definen la <i>velocidad</i> (PWM), mientras que los pines <b>IN1/IN2</b> e <b>IN3/IN4</b> definen la <i>dirección</i>.\n\nEs fácil de entender y perfecto para tus primeras pruebas.\n\n<b>¿Qué puedes probar?</b>\n- Cambia el valor <b>120</b> en <code>analogWrite</code> para hacer que el robot corra más rápido o más lento.\n- Prueba diferentes pistas y mira cómo reacciona en las curvas.`
+    simpleOnOff: `🌟 <b>Nuevo Proyecto</b>\n\nEste es un lienzo en blanco para tu código de Arduino. \n\n<b>Pasos recomendados:</b>\n1. Configura tus pines en <code>setup()</code> usando <code>pinMode()</code>.\n2. Escribe tu lógica de control en <code>loop()</code>.\n3. Consulta la <b>Guía del Editor</b> de abajo para ver los pines según tu robot.`
 };
 
 // Initialize Monaco Editor
