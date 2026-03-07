@@ -463,11 +463,50 @@ void girar_der_fuerte() {
     async function resetSimulation() {
         _forceStop(); // Siempre fuerza la parada (no depende de simulationRunning)
         if (simulationInstance) {
-            if (!isDemoMode) {
+            if (isDemoMode) {
+                // --- Salir del modo Demo limpiamente ---
+                isDemoMode = false;
+
+                // Restaurar la geometría del usuario desde el Robot Editor
+                const userGeo = getCurrentRobotGeometry();
                 const params = getSimulationParamsFromUI();
-                params.robotGeometry = getCurrentRobotGeometry();
+                params.robotGeometry = userGeo;
                 simulationInstance.updateParameters(params);
+
+                // Limpiar las partes decorativas del robot demo
+                simulationInstance.robot.setDecorativeParts([]);
+                simulationInstance.robot.customWheels = null;
+
+                // Reposicionar en la línea de salida con la geometría del usuario
+                let startX = 0.1, startY = 0.1, startAngle = 0;
+                if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
+                    startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
+                    startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
+                    const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
+                    const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
+                    startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+                }
+                simulationInstance.resetSimulationState(startX, startY, startAngle, userGeo);
+
+                // Restaurar el código del usuario desde Monaco y hacer setup
+                const userCode = window.monacoEditor ? window.monacoEditor.getValue() : '';
+                if (window.monacoEditor) window.monacoEditor.updateOptions({ readOnly: false });
+                if (loadUserCode(userCode)) {
+                    updateCodeTypeDisplay(getCurrentCodeType());
+                    try { await executeUserSetup(); } catch (e) { /* mostrado en Serial */ }
+                }
+                clearSerial();
+
+                drawCurrentSimulationState();
+                updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData());
+                updateTelemetry({});
+                return;
             }
+
+            // --- Reset normal (sin demo) ---
+            const params = getSimulationParamsFromUI();
+            params.robotGeometry = getCurrentRobotGeometry();
+            simulationInstance.updateParameters(params);
 
             const currentGeo = simulationInstance.getCurrentRobotGeometry();
 
@@ -480,19 +519,11 @@ void girar_der_fuerte() {
                 const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
                 startAngle = Math.atan2(dy, dx) + Math.PI / 2;
             }
-
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
 
-            // Reload user code and re-run setup (awaited so it's fully ready before drawing)
-            const codeToLoad = isDemoMode ? DEMO_CODE : window.monacoEditor.getValue();
-            if (loadUserCode(codeToLoad)) {
-                try {
-                    await executeUserSetup();
-                } catch (e) {
-                    // Error en setup (ya mostrado en Serial Monitor por executeUserSetup)
-                }
-            } else {
-                ArduinoSerial && ArduinoSerial.println && ArduinoSerial.println("Error recargando código durante reinicio.");
+            // Reload user code and re-run setup
+            if (loadUserCode(window.monacoEditor.getValue())) {
+                try { await executeUserSetup(); } catch (e) { /* mostrado en Serial */ }
             }
             clearSerial();
 
@@ -641,7 +672,7 @@ void girar_der_fuerte() {
 
         elems.startSimButton.disabled = true;
         elems.stopSimButton.disabled = false;
-        elems.resetSimButton.disabled = true;
+        elems.resetSimButton.disabled = false; // Permitir reiniciar/salir de la demo en cualquier momento
         if (window.monacoEditor) {
             window.monacoEditor.updateOptions({ readOnly: true });
         }

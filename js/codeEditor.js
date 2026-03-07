@@ -224,6 +224,28 @@ const arduinoAPI = {
     INPUT: "INPUT",
     OUTPUT: "OUTPUT",
     A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19, // Standard Arduino Uno mapping
+    // Arduino math functions (global in C++, but need Math.* in JS)
+    abs: (x) => Math.abs(x),
+    min: (a, b) => Math.min(a, b),
+    max: (a, b) => Math.max(a, b),
+    sq: (x) => x * x,
+    sqrt: (x) => Math.sqrt(x),
+    pow: (base, exp) => Math.pow(base, exp),
+    sin: (x) => Math.sin(x),
+    cos: (x) => Math.cos(x),
+    tan: (x) => Math.tan(x),
+    floor: (x) => Math.floor(x),
+    ceil: (x) => Math.ceil(x),
+    round: (x) => Math.round(x),
+    log: (x) => Math.log(x),
+    constrain: (val, a, b) => Math.min(Math.max(val, a), b),
+    map: (val, inMin, inMax, outMin, outMax) => (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin,
+    millis: () => performance.now(),
+    micros: () => performance.now() * 1000,
+    random: (minOrMax, max) => {
+        if (max === undefined) return Math.floor(Math.random() * minOrMax);
+        return Math.floor(Math.random() * (max - minOrMax)) + minOrMax;
+    },
     // User code might also define their own constants like LEFT_SENSOR_PIN etc.
 };
 
