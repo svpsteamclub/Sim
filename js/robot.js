@@ -367,9 +367,9 @@ export class Robot {
             });
         }
 
-        ctx.restore();
+        ctx.restore(); // <-- End robot-local transform
 
-        // Draw Trails
+        // Draw Trails (world space)
         const drawTrail = (trail, color, lineWidth) => {
             if (trail.length > 1) {
                 ctx.beginPath();
@@ -386,47 +386,42 @@ export class Robot {
         drawTrail(this.leftWheelTrail, 'rgba(255, 0, 0, 0.2)', 2);
         drawTrail(this.rightWheelTrail, 'rgba(0, 255, 0, 0.2)', 2);
 
-        // Draw Sensors if states provided for display
+        // Draw Sensors (world space, after transform restored)
         if (displaySensorStates) {
             this.drawSensorsForDisplay(ctx, displaySensorStates);
         }
     }
 
     drawSensorsForDisplay(ctx, sensorReadings) {
-        const sensorPositions_m = this.getSensorPositions_world_m();
+        // Called in WORLD-SPACE (outside robot local transform)
+        // getSensorPositions_world_m() returns world meter coords -> convert to world pixels
+        const sensorPositions_world = this.getSensorPositions_world_m();
         const sensorRadiusPx = Math.max(2, (this.sensorDiameter_m / 2) * PIXELS_PER_METER);
-        for (const key in sensorPositions_m) {
-            const pos_m = sensorPositions_m[key];
+
+        for (const key in sensorPositions_world) {
+            const pos = sensorPositions_world[key];
+            const px = pos.x_m * PIXELS_PER_METER;
+            const py = pos.y_m * PIXELS_PER_METER;
             const isOnLine = sensorReadings[key];
+
             ctx.beginPath();
-            ctx.arc(pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER, sensorRadiusPx, 0, 2 * Math.PI);
+            ctx.arc(px, py, sensorRadiusPx, 0, 2 * Math.PI);
             ctx.fillStyle = isOnLine ? 'lime' : 'gray';
             ctx.fill();
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
             ctx.stroke();
-            // Mostrar número de pin dentro del círculo
-            ctx.save();
-            ctx.fillStyle = 'black';
-            ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            // Get pin number from geometry connections if available
-            if (this.customWheels !== undefined && this.wheelbase_m /* dirty check if geometry is somewhat attached to this instance */) {
-                // Note: we can't easily access the raw connections config here directly 
-                // unless we stored it in updateGeometry. Let's do that.
-            }
 
+            // Pin number label
             let pinNumber = '';
             const conns = this.connections?.sensorPins;
             if (conns) {
-                if (key === 'left') pinNumber = conns.left;
-                else if (key === 'center') pinNumber = conns.center;
-                else if (key === 'right') pinNumber = conns.right;
-                else if (key === 'farLeft') pinNumber = conns.farLeft;
-                else if (key === 'farRight') pinNumber = conns.farRight;
+                if (key === 'left') pinNumber = conns.left || '';
+                else if (key === 'center') pinNumber = conns.center || '';
+                else if (key === 'right') pinNumber = conns.right || '';
+                else if (key === 'farLeft') pinNumber = conns.farLeft || '';
+                else if (key === 'farRight') pinNumber = conns.farRight || '';
             } else {
-                // Fallback
                 if (this.sensorCount === 2) {
                     if (key === 'left') pinNumber = '2';
                     else if (key === 'right') pinNumber = '3';
@@ -448,55 +443,15 @@ export class Robot {
                 }
             }
 
-            ctx.fillText(pinNumber, pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER);
-            ctx.restore();
-        }
-        // Mostrar pines de motores cerca de las ruedas
-        ctx.save();
-        ctx.fillStyle = 'blue';
-        ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-
-        let leftMotorText = '';
-        let rightMotorText = '';
-        if (this.connections && this.connections.motorPins) {
-            const m = this.connections.motorPins;
-            const filterPins = (pins) => pins.filter(p => p && p.trim() !== '').join(', ');
-
-            if (this.connections.driverType === 'l298n') {
-                const lp = filterPins([m.leftEn, m.leftIn1, m.leftIn2]);
-                const rp = filterPins([m.rightEn, m.rightIn3, m.rightIn4]);
-                leftMotorText = lp ? `(${lp})` : '';
-                rightMotorText = rp ? `(${rp})` : '';
-            } else if (this.connections.driverType === 'mx1616') {
-                const lp = filterPins([m.leftIn1, m.leftIn2]);
-                const rp = filterPins([m.rightIn3, m.rightIn4]);
-                leftMotorText = lp ? `(${lp})` : '';
-                rightMotorText = rp ? `(${rp})` : '';
-            } else {
-                leftMotorText = m.leftPWM ? `(${m.leftPWM})` : '';
-                rightMotorText = m.rightPWM ? `(${m.rightPWM})` : '';
+            if (pinNumber) {
+                ctx.save();
+                ctx.fillStyle = 'black';
+                ctx.font = `${Math.max(8, sensorRadiusPx * 0.9)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(pinNumber, px, py);
+                ctx.restore();
             }
         }
-
-        // Motor izquierdo 
-        if (leftMotorText) {
-            ctx.save();
-            ctx.translate(-this.wheelbase_m / 2 * PIXELS_PER_METER - 22, 0);
-            ctx.rotate(0);
-            ctx.fillText(leftMotorText, 0, 0);
-            ctx.restore();
-        }
-
-        // Motor derecho 
-        if (rightMotorText) {
-            ctx.save();
-            ctx.translate(this.wheelbase_m / 2 * PIXELS_PER_METER + 22, 0);
-            ctx.rotate(0);
-            ctx.fillText(rightMotorText, 0, 0);
-            ctx.restore();
-        }
-        ctx.restore();
     }
 }

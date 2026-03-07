@@ -132,41 +132,43 @@
                         <button id="placeStartLineSimButton">Ubicar Línea de Comienzo</button>
                     </div>
                 </div>
-                <div class="simulation-parameters">
-                    <details id="simParamsDetails">
-                        <summary>
-                            <h3 style="display:inline; font-size:1.1em; font-weight:600; margin:0;">Parámetros de
-                                Simulación</h3>
-                        </summary>
-                        <label for="timeStep">Paso de Tiempo (s):</label>
-                        <input type="number" id="timeStep" value="0.01" step="0.001" min="0.001">
-                        <label for="maxRobotSpeed">Vel. Máx. Robot (m/s):</label>
-                        <input type="number" id="maxRobotSpeed" value="1.0" step="0.05" min="0.05">
-                        <label for="motorEfficiency">Eficiencia Motor (0-1):</label>
-                        <input type="number" id="motorEfficiency" value="0.85" step="0.01" min="0.1" max="1">
-                        <label for="motorImbalance">Diferencia Motores (-0.5 a 0.5):</label>
-                        <input type="number" id="motorImbalance" value="0.1" step="0.01" min="-0.5" max="0.5">
-                        <label for="motorResponse">Respuesta Motor (0-1):</label>
-                        <input type="number" id="motorResponse" value="0.04" step="0.01" min="0.01" max="1">
-                        <label for="sensorNoise">Ruido Sensor (0-1):</label>
-                        <input type="number" id="sensorNoise" value="0.0" step="0.01" min="0" max="1">
-                        <label for="movementPerturb">Perturb. Movim. (0-1):</label>
-                        <input type="number" id="movementPerturb" value="0.0" step="0.01" min="0" max="1">
-                        <label for="motorDeadband">PWM Banda Muerta Motor:</label>
-                        <input type="number" id="motorDeadband" value="40" step="1" min="0">
-                        <label for="lineThreshold">Umbral Línea (0-255):</label>
-                        <input type="number" id="lineThreshold" value="100" step="1" min="0" max="255">
+                <div class="sim-right-panel">
+                    <div class="simulation-parameters">
+                        <details id="simParamsDetails">
+                            <summary>
+                                <h3 style="display:inline; font-size:1.1em; font-weight:600; margin:0;">Parámetros de
+                                    Simulación</h3>
+                            </summary>
+                            <label for="timeStep">Paso de Tiempo (s):</label>
+                            <input type="number" id="timeStep" value="0.01" step="0.001" min="0.001">
+                            <label for="maxRobotSpeed">Vel. Máx. Robot (m/s):</label>
+                            <input type="number" id="maxRobotSpeed" value="1.0" step="0.05" min="0.05">
+                            <label for="motorEfficiency">Eficiencia Motor (0-1):</label>
+                            <input type="number" id="motorEfficiency" value="0.85" step="0.01" min="0.1" max="1">
+                            <label for="motorImbalance">Diferencia Motores (-0.5 a 0.5):</label>
+                            <input type="number" id="motorImbalance" value="0.1" step="0.01" min="-0.5" max="0.5">
+                            <label for="motorResponse">Respuesta Motor (0-1):</label>
+                            <input type="number" id="motorResponse" value="0.04" step="0.01" min="0.01" max="1">
+                            <label for="sensorNoise">Ruido Sensor (0-1):</label>
+                            <input type="number" id="sensorNoise" value="0.0" step="0.01" min="0" max="1">
+                            <label for="movementPerturb">Perturb. Movim. (0-1):</label>
+                            <input type="number" id="movementPerturb" value="0.0" step="0.01" min="0" max="1">
+                            <label for="motorDeadband">PWM Banda Muerta Motor:</label>
+                            <input type="number" id="motorDeadband" value="40" step="1" min="0">
+                            <label for="lineThreshold">Umbral Línea (0-255):</label>
+                            <input type="number" id="lineThreshold" value="100" step="1" min="0" max="255">
 
-                        <button id="applySimParamsButton" style="grid-column: 1 / -1; margin-top: 10px;">Aplicar
-                            Parámetros</button>
-                    </details>
-                </div>
-                <div class="sim-monitor-column">
-                    <h4>Monitor Serial</h4>
-                    <pre id="serialMonitorOutput"></pre>
-                    <button id="clearSerialButton" type="button">Limpiar Serial</button>
-                    <h4>Cronómetro</h4>
-                    <pre id="lapTimerOutput">Vueltas: 0 | Mejor: --:--:--- | Actual: --:--:---</pre>
+                            <button id="applySimParamsButton" style="grid-column: 1 / -1; margin-top: 10px;">Aplicar
+                                Parámetros</button>
+                        </details>
+                    </div>
+                    <div class="sim-monitor-column">
+                        <h4>Monitor Serial</h4>
+                        <pre id="serialMonitorOutput"></pre>
+                        <button id="clearSerialButton" type="button">Limpiar Serial</button>
+                        <h4>Cronómetro</h4>
+                        <pre id="lapTimerOutput">Vueltas: 0 | Mejor: --:--:--- | Actual: --:--:---</pre>
+                    </div>
                 </div>
             </div>
         </div>

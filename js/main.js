@@ -545,7 +545,7 @@ void girar_der_fuerte() {
         }
 
         const confirmDemo = confirm(
-            "Se iniciará una simulación demostrativa con un Robot SVP 2025 (3 sensores) y código Arduino precargado.\n\n" +
+            "Se iniciará una simulación demostrativa con el Robot SLC SVP 2025 (3 sensores) y código Arduino precargado.\n\n" +
             "Tus diseños y códigos actuales en los otros paneles se conservarán intactos y volverán a cargarse automáticamente al terminar la prueba y presionar 'Iniciar'.\n\n" +
             "¿Continuar?"
         );
@@ -554,17 +554,69 @@ void girar_der_fuerte() {
 
         isDemoMode = true;
 
+        // --- Load SLC SVP 2025 template ---
+        let svpGeometry = DEMO_GEOMETRY; // fallback
+        let svpParts = [];
+        try {
+            const response = await fetch('assets/robots/SLC_SVP_2025.json');
+            if (response.ok) {
+                const robotData = await response.json();
+                if (robotData.geometry) {
+                    // Merge template geometry with DEMO pin connections and sensorCount
+                    svpGeometry = {
+                        ...DEMO_GEOMETRY,         // provides connections, mass, grip, etc.
+                        ...robotData.geometry,    // overrides width, sensorOffset, sensorSpread, sensorDiameter
+                        sensorCount: DEMO_GEOMETRY.sensorCount,      // keep 3 sensors
+                        connections: DEMO_GEOMETRY.connections        // keep demo pin config
+                    };
+                }
+                if (robotData.parts) {
+                    svpParts = robotData.parts;
+                }
+            }
+        } catch (err) {
+            console.warn('[DEMO] Could not load SLC_SVP_2025.json, using fallback geometry:', err);
+        }
+
+        // Apply SVP geometry to simulation
         const params = getSimulationParamsFromUI();
-        params.robotGeometry = DEMO_GEOMETRY;
+        params.robotGeometry = svpGeometry;
         simulationInstance.updateParameters(params);
 
+        // Load decorative parts DIRECTLY into simulation robot (no Robot Editor involvement)
+        if (svpParts.length > 0) {
+            const PART_SRCS = {
+                robot_body: 'parts/robot_body.png',
+                robot_body_2: 'parts/robot_body_2.png',
+                robot_board: 'parts/robot_board.png'
+                // add more part IDs here if needed
+            };
+            const directParts = await Promise.all(svpParts.map(p => new Promise(resolve => {
+                const src = PART_SRCS[p.id];
+                if (!src) return resolve(null);
+                const img = new Image();
+                const assetPath = window.getAssetPath ? window.getAssetPath(src) : `assets/${src}`;
+                // Apply same transform as getPlacedParts(): rotate90(x,y) + PI/2 to rotation
+                const rx = -p.y; // rotate90
+                const ry = p.x;
+                img.onload = () => resolve({ id: p.id, name: p.name, img, x: rx, y: ry, rotation: (p.rotation || 0) + Math.PI / 2 });
+                img.onerror = () => resolve(null);
+                img.src = assetPath;
+            })));
+            simulationInstance.robot.setDecorativeParts(directParts.filter(Boolean));
+        } else {
+            simulationInstance.robot.decorativeParts = [];
+        }
+        simulationInstance.robot.customWheels = null; // use real wheel image
+
+        // Load demo code
         if (!loadUserCode(DEMO_CODE)) {
             alert("Error al cargar código Demo.");
             return;
         }
         updateCodeTypeDisplay('arduino');
 
-        // Position the robot at the start line FIRST, then show it
+        // Position the robot at the start line
         let startX = simulationInstance.robot.x_m, startY = simulationInstance.robot.y_m, startAngle = simulationInstance.robot.angle_rad;
         if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
             startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
@@ -573,9 +625,8 @@ void girar_der_fuerte() {
             const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
             startAngle = Math.atan2(dy, dx) + Math.PI / 2;
         }
-        simulationInstance.resetSimulationState(startX, startY, startAngle, DEMO_GEOMETRY);
+        simulationInstance.resetSimulationState(startX, startY, startAngle, svpGeometry);
         simulationInstance.robotVisible = true;
-        console.log('[DEMO] Robot positioned at:', startX, startY, startAngle, '| visible:', simulationInstance.robotVisible);
         drawCurrentSimulationState();
 
         try {
@@ -673,6 +724,17 @@ void girar_der_fuerte() {
         }
     };
 
+    const fitTrackToCanvas = () => {
+        if (simulationInstance && elems.simulationDisplayCanvas) {
+            const displayW = elems.simulationDisplayCanvas.offsetWidth || 700;
+            const displayH = elems.simulationDisplayCanvas.offsetHeight || 500;
+            elems.simulationDisplayCanvas.width = displayW;
+            elems.simulationDisplayCanvas.height = displayH;
+            simulationInstance.centerCameraOnTrack(displayW, displayH);
+            drawCurrentSimulationState();
+        }
+    };
+
     if (simFullscreenBtn) {
         simFullscreenBtn.addEventListener('click', () => {
             if (!simulationLayout.classList.contains('is-fullscreen')) {
@@ -685,18 +747,19 @@ void girar_der_fuerte() {
                     document.exitFullscreen();
                 } else {
                     simulationLayout.classList.remove('is-fullscreen');
-                    resizeCanvasForSimulation();
+                    setTimeout(fitTrackToCanvas, 100);
                 }
             }
-            // Retraso para dejar que el layout cambie
-            setTimeout(resizeCanvasForSimulation, 50);
+            // Retraso para dejar que el layout cambie, luego zoom extents
+            setTimeout(fitTrackToCanvas, 150);
         });
 
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement) {
                 simulationLayout.classList.remove('is-fullscreen');
             }
-            setTimeout(resizeCanvasForSimulation, 50);
+            // Zoom extents al terminar la transición
+            setTimeout(fitTrackToCanvas, 150);
         });
 
         // Also listen to window resize just in case

@@ -142,7 +142,9 @@ const arduinoAPI = {
 
         // Validate if this pin is actually connected to a motor in Robot Editor
         if (sharedSimulationState && sharedSimulationState.robot && sharedSimulationState.robot.connections) {
-            const motorPins = Object.values(sharedSimulationState.robot.connections.motorPins).map(p => parseInt(p));
+            const motorPins = Object.values(sharedSimulationState.robot.connections.motorPins)
+                .filter(p => p !== 'VCC' && p !== 'GND')
+                .map(p => parseInt(p));
             if (!motorPins.includes(pin)) {
                 if (!_warnedPins.has(pin + "_not_motor")) {
                     ArduinoSerial.println(`Advertencia: analogWrite(${pin}) - El pin ${pin} no está conectado a ningún motor en el Editor de Robot.`);
@@ -162,38 +164,40 @@ const arduinoAPI = {
             let finalLeftPWM = 0;
             let finalRightPWM = 0;
 
+            // Helper: resolves a raw pin value (number string, 'VCC', or 'GND') to its effective PWM value.
+            // 'VCC' -> 255 (permanently HIGH), 'GND' -> 0 (permanently LOW), number -> stored _motorPWMValues.
+            const getPinEffectiveValue = (rawPin) => {
+                if (rawPin === 'VCC') return 255;
+                if (rawPin === 'GND') return 0;
+                const n = parseInt(rawPin);
+                if (isNaN(n)) return 0;
+                return _motorPWMValues[n] || 0;
+            };
+
             if (conns.driverType === 'l298n') {
-                const lIn1 = parseInt(conns.motorPins.leftIn1);
-                const lIn2 = parseInt(conns.motorPins.leftIn2);
-                const lEn = parseInt(conns.motorPins.leftEn);
-                const rIn3 = parseInt(conns.motorPins.rightIn3);
-                const rIn4 = parseInt(conns.motorPins.rightIn4);
-                const rEn = parseInt(conns.motorPins.rightEn);
+                const vIn1 = getPinEffectiveValue(conns.motorPins.leftIn1);
+                const vIn2 = getPinEffectiveValue(conns.motorPins.leftIn2);
+                const vEn = getPinEffectiveValue(conns.motorPins.leftEn);
+                const vIn3 = getPinEffectiveValue(conns.motorPins.rightIn3);
+                const vIn4 = getPinEffectiveValue(conns.motorPins.rightIn4);
+                const vEnB = getPinEffectiveValue(conns.motorPins.rightEn);
 
-                const dirL = ((_motorPWMValues[lIn1] > 0) ? 1 : 0) - ((_motorPWMValues[lIn2] > 0) ? 1 : 0);
-                const dirR = ((_motorPWMValues[rIn3] > 0) ? 1 : 0) - ((_motorPWMValues[rIn4] > 0) ? 1 : 0);
+                const dirL = ((vIn1 > 0) ? 1 : 0) - ((vIn2 > 0) ? 1 : 0);
+                const dirR = ((vIn3 > 0) ? 1 : 0) - ((vIn4 > 0) ? 1 : 0);
 
-                finalLeftPWM = (_motorPWMValues[lEn] || 0) * dirL;
-                finalRightPWM = (_motorPWMValues[rEn] || 0) * dirR;
+                finalLeftPWM = vEn * dirL;
+                finalRightPWM = vEnB * dirR;
 
                 // Debug logging to serial monitor
-                // ArduinoSerial.println(`L298N Update | pin: ${pin} | lEn: ${lEn} = ${_motorPWMValues[lEn]}, lIn1: ${lIn1} = ${_motorPWMValues[lIn1]}, lIn2: ${lIn2} = ${_motorPWMValues[lIn2]} | dirL: ${dirL} | finalLeft: ${finalLeftPWM}`);
-
+                // ArduinoSerial.println(`L298N Update | pin: ${pin} | vEn: ${vEn}, vIn1: ${vIn1}, vIn2: ${vIn2} | dirL: ${dirL} | finalLeft: ${finalLeftPWM}`);
 
             } else if (conns.driverType === 'mx1616') {
-                const lIn1 = parseInt(conns.motorPins.leftIn1);
-                const lIn2 = parseInt(conns.motorPins.leftIn2);
-                const rIn3 = parseInt(conns.motorPins.rightIn3);
-                const rIn4 = parseInt(conns.motorPins.rightIn4);
-
-                finalLeftPWM = (_motorPWMValues[lIn1] || 0) - (_motorPWMValues[lIn2] || 0);
-                finalRightPWM = (_motorPWMValues[rIn3] || 0) - (_motorPWMValues[rIn4] || 0);
+                finalLeftPWM = getPinEffectiveValue(conns.motorPins.leftIn1) - getPinEffectiveValue(conns.motorPins.leftIn2);
+                finalRightPWM = getPinEffectiveValue(conns.motorPins.rightIn3) - getPinEffectiveValue(conns.motorPins.rightIn4);
 
             } else { // single, legacy, ESCs
-                const lPWM = parseInt(conns.motorPins.leftPWM);
-                const rPWM = parseInt(conns.motorPins.rightPWM);
-                finalLeftPWM = _motorPWMValues[lPWM] || 0;
-                finalRightPWM = _motorPWMValues[rPWM] || 0;
+                finalLeftPWM = getPinEffectiveValue(conns.motorPins.leftPWM);
+                finalRightPWM = getPinEffectiveValue(conns.motorPins.rightPWM);
             }
 
             sharedSimulationState.robot.motorPWMSpeeds.left = finalLeftPWM;
