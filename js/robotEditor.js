@@ -63,14 +63,72 @@ export function initRobotEditor(appInterface) {
         renderRobotPreview();
     };
 
+    // --- Dynamic UI for Connections ---
+    function updateMotorConnectionsUI() {
+        if (!elems.motorDriverTypeSelect || !elems.motorConnectionsContainer) return;
+        const type = elems.motorDriverTypeSelect.value;
+        let html = '';
+        if (type === 'l298n') {
+            html = `
+                <div style="margin-bottom:0.5em;"><strong>Motor Izquierdo:</strong> ENA: <input type="text" id="pinMotorLeftEn" value="3" style="width:30px;"> IN1: <input type="text" id="pinMotorLeftIn1" value="11" style="width:30px;"> IN2: <input type="text" id="pinMotorLeftIn2" value="9" style="width:30px;"></div>
+                <div><strong>Motor Derecho:</strong> IN3: <input type="text" id="pinMotorRightIn3" value="10" style="width:30px;"> IN4: <input type="text" id="pinMotorRightIn4" value="6" style="width:30px;"> ENB: <input type="text" id="pinMotorRightEn" value="5" style="width:30px;"></div>
+             `;
+        } else if (type === 'mx1616') {
+            html = `
+                <div style="margin-bottom:0.5em;"><strong>Motor Izquierdo:</strong> IN1: <input type="text" id="pinMotorLeftIn1" value="11" style="width:40px;"> IN2: <input type="text" id="pinMotorLeftIn2" value="9" style="width:40px;"></div>
+                <div><strong>Motor Derecho:</strong> IN3: <input type="text" id="pinMotorRightIn3" value="10" style="width:40px;"> IN4: <input type="text" id="pinMotorRightIn4" value="6" style="width:40px;"></div>
+             `;
+        } else { // single / ESCs
+            html = `
+                <div style="margin-bottom:0.5em;"><strong>Motor Izquierdo (ESC):</strong> PWM: <input type="text" id="pinMotorLeftPWM" value="9" style="width:50px;"></div>
+                <div><strong>Motor Derecho (ESC):</strong> PWM: <input type="text" id="pinMotorRightPWM" value="10" style="width:50px;"></div>
+             `;
+        }
+        elems.motorConnectionsContainer.innerHTML = html;
+
+        // Re-bind listeners for the newly injected inputs to trigger preview updates if we wanted to show them on the robot (we do!)
+        const inputs = elems.motorConnectionsContainer.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => { window.forceGeometrySync(); });
+        });
+    }
+
+    if (elems.motorDriverTypeSelect) {
+        elems.motorDriverTypeSelect.addEventListener('change', () => {
+            updateMotorConnectionsUI();
+            window.forceGeometrySync();
+        });
+        updateMotorConnectionsUI(); // Initial call
+
+        // Also bind inputs for sensors to trigger sync
+        [elems.pinSensorFarLeftInput, elems.pinSensorLeftInput, elems.pinSensorCenterInput, elems.pinSensorRightInput, elems.pinSensorFarRightInput].forEach(inp => {
+            if (inp) inp.addEventListener('input', () => { window.forceGeometrySync(); });
+        });
+    }
+
+    function updateSensorConnectionsUI(count) {
+        if (elems.pinSensorFarLeftInput) {
+            elems.pinSensorFarLeftInput.parentElement.style.display = (count >= 4) ? 'block' : 'none';
+        }
+        if (elems.pinSensorCenterInput) {
+            elems.pinSensorCenterInput.parentElement.style.display = (count % 2 !== 0) ? 'block' : 'none'; // 3 or 5
+        }
+        if (elems.pinSensorFarRightInput) {
+            elems.pinSensorFarRightInput.parentElement.style.display = (count >= 4) ? 'block' : 'none';
+        }
+    }
+
     // --- Sensor count dropdown logic ---
     if (elems.sensorCountSelect) {
         elems.sensorCountSelect.addEventListener('change', () => {
-            currentGeometry.sensorCount = parseInt(elems.sensorCountSelect.value);
+            const count = parseInt(elems.sensorCountSelect.value);
+            currentGeometry.sensorCount = count;
+            updateSensorConnectionsUI(count);
             previewRobot.updateGeometry(currentGeometry);
             syncDecorativeSensorsWithGeometry();
             renderRobotPreview();
         });
+        updateSensorConnectionsUI(parseInt(elems.sensorCountSelect.value) || 3);
     }
 
     // Update preview dynamically as user types
@@ -240,6 +298,45 @@ function syncDecorativeSensorsWithGeometry() {
 
 function getFormValues() {
     const elems = getDOMElements();
+
+    // Connections state extraction
+    const driverType = elems.motorDriverTypeSelect ? elems.motorDriverTypeSelect.value : 'legacy';
+    let motorPins = {};
+    if (driverType === 'l298n') {
+        motorPins = {
+            leftEn: document.getElementById('pinMotorLeftEn')?.value || '3',
+            leftIn1: document.getElementById('pinMotorLeftIn1')?.value || '11',
+            leftIn2: document.getElementById('pinMotorLeftIn2')?.value || '9',
+            rightIn3: document.getElementById('pinMotorRightIn3')?.value || '10',
+            rightIn4: document.getElementById('pinMotorRightIn4')?.value || '6',
+            rightEn: document.getElementById('pinMotorRightEn')?.value || '5'
+        };
+    } else if (driverType === 'mx1616') {
+        motorPins = {
+            leftIn1: document.getElementById('pinMotorLeftIn1')?.value || '11',
+            leftIn2: document.getElementById('pinMotorLeftIn2')?.value || '9',
+            rightIn3: document.getElementById('pinMotorRightIn3')?.value || '10',
+            rightIn4: document.getElementById('pinMotorRightIn4')?.value || '6'
+        };
+    } else { // single / ESCs
+        motorPins = {
+            leftPWM: document.getElementById('pinMotorLeftPWM')?.value || '9',
+            rightPWM: document.getElementById('pinMotorRightPWM')?.value || '10'
+        };
+    }
+
+    const connections = {
+        sensorPins: {
+            farLeft: elems.pinSensorFarLeftInput?.value || 'A0',
+            left: elems.pinSensorLeftInput?.value || 'A2',
+            center: elems.pinSensorCenterInput?.value || 'A4',
+            right: elems.pinSensorRightInput?.value || 'A3',
+            farRight: elems.pinSensorFarRightInput?.value || 'A5',
+        },
+        driverType: driverType,
+        motorPins: motorPins
+    };
+
     // Leer valores en milímetros y convertir a metros (o valores por default)
     return {
         width_m: parseFloat(elems.robotWidthInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.width_m,
@@ -250,7 +347,8 @@ function getFormValues() {
         robotMass_kg: elems.robotMassInput ? parseFloat(elems.robotMassInput.value) : DEFAULT_ROBOT_GEOMETRY.robotMass_kg,
         comOffset_m: elems.comOffsetInput ? (parseFloat(elems.comOffsetInput.value) / 1000) : DEFAULT_ROBOT_GEOMETRY.comOffset_m,
         tireGrip: elems.tireGripInput ? parseFloat(elems.tireGripInput.value) : DEFAULT_ROBOT_GEOMETRY.tireGrip,
-        customWheels: currentGeometry ? currentGeometry.customWheels : null
+        customWheels: currentGeometry ? currentGeometry.customWheels : null,
+        connections: connections
     };
 }
 
@@ -278,6 +376,59 @@ function setFormValues(geometry) {
         currentGeometry.customWheels = geometry.customWheels;
     } else {
         currentGeometry.customWheels = null;
+    }
+
+    // Set Connections
+    if (geometry.connections) {
+        const c = geometry.connections;
+        if (elems.pinSensorFarLeftInput && c.sensorPins.farLeft) elems.pinSensorFarLeftInput.value = c.sensorPins.farLeft;
+        if (elems.pinSensorLeftInput && c.sensorPins.left) elems.pinSensorLeftInput.value = c.sensorPins.left;
+        if (elems.pinSensorCenterInput && c.sensorPins.center) elems.pinSensorCenterInput.value = c.sensorPins.center;
+        if (elems.pinSensorRightInput && c.sensorPins.right) elems.pinSensorRightInput.value = c.sensorPins.right;
+        if (elems.pinSensorFarRightInput && c.sensorPins.farRight) elems.pinSensorFarRightInput.value = c.sensorPins.farRight;
+
+        if (elems.motorDriverTypeSelect && c.driverType) {
+            elems.motorDriverTypeSelect.value = c.driverType;
+            // Force UI update for motor connections container so the inputs exist
+            if (typeof updateMotorConnectionsUI === 'function') updateMotorConnectionsUI();
+            // The listener for change triggered it in getFormValues context but here we must manually set values
+            // Workaround since updateMotorConnectionsUI might not be in scope if not careful, actually we can just re-dispatch the event
+            const event = new Event('change');
+            elems.motorDriverTypeSelect.dispatchEvent(event);
+
+            // Now populate the inputs if they exist
+            setTimeout(() => { // wait a tick for DOM update
+                if (c.driverType === 'l298n') {
+                    const lEn = document.getElementById('pinMotorLeftEn'); if (lEn) lEn.value = c.motorPins.leftEn || '3';
+                    const lIn1 = document.getElementById('pinMotorLeftIn1'); if (lIn1) lIn1.value = c.motorPins.leftIn1 || '11';
+                    const lIn2 = document.getElementById('pinMotorLeftIn2'); if (lIn2) lIn2.value = c.motorPins.leftIn2 || '9';
+                    const rIn3 = document.getElementById('pinMotorRightIn3'); if (rIn3) rIn3.value = c.motorPins.rightIn3 || '10';
+                    const rIn4 = document.getElementById('pinMotorRightIn4'); if (rIn4) rIn4.value = c.motorPins.rightIn4 || '6';
+                    const rEn = document.getElementById('pinMotorRightEn'); if (rEn) rEn.value = c.motorPins.rightEn || '5';
+                } else if (c.driverType === 'mx1616') {
+                    const lIn1 = document.getElementById('pinMotorLeftIn1'); if (lIn1) lIn1.value = c.motorPins.leftIn1 || '11';
+                    const lIn2 = document.getElementById('pinMotorLeftIn2'); if (lIn2) lIn2.value = c.motorPins.leftIn2 || '9';
+                    const rIn3 = document.getElementById('pinMotorRightIn3'); if (rIn3) rIn3.value = c.motorPins.rightIn3 || '10';
+                    const rIn4 = document.getElementById('pinMotorRightIn4'); if (rIn4) rIn4.value = c.motorPins.rightIn4 || '6';
+                } else { // single / ESCs
+                    const lPWM = document.getElementById('pinMotorLeftPWM'); if (lPWM) lPWM.value = c.motorPins.leftPWM || '9';
+                    const rPWM = document.getElementById('pinMotorRightPWM'); if (rPWM) rPWM.value = c.motorPins.rightPWM || '10';
+                }
+                // Trigger geometry sync after setting values
+                if (window.forceGeometrySync) { window.forceGeometrySync(); }
+            }, 0);
+        }
+    }
+
+    // Visually show/hide sensor rows
+    if (typeof updateSensorConnectionsUI === 'function') {
+        const countToUpdate = geometry.sensorCount || 3;
+        const e1 = elems.pinSensorFarLeftInput; // Need to grab them fresh if scope is weird
+        if (e1 && e1.parentElement) {
+            e1.parentElement.style.display = (countToUpdate >= 4) ? 'block' : 'none';
+            if (elems.pinSensorCenterInput) elems.pinSensorCenterInput.parentElement.style.display = (countToUpdate % 2 !== 0) ? 'block' : 'none';
+            if (elems.pinSensorFarRightInput) elems.pinSensorFarRightInput.parentElement.style.display = (countToUpdate >= 4) ? 'block' : 'none';
+        }
     }
 
     syncDecorativeSensorsWithGeometry();

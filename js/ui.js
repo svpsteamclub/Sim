@@ -14,6 +14,7 @@ export function getDOMElements() {
         timeStepInput: document.getElementById('timeStep'),
         maxRobotSpeedInput: document.getElementById('maxRobotSpeed'),
         motorEfficiencyInput: document.getElementById('motorEfficiency'),
+        motorImbalanceInput: document.getElementById('motorImbalance'),
         motorResponseInput: document.getElementById('motorResponse'),
         sensorNoiseInput: document.getElementById('sensorNoise'),
         movementPerturbInput: document.getElementById('movementPerturb'),
@@ -44,6 +45,16 @@ export function getDOMElements() {
         saveRobotButton: document.getElementById('saveRobotButton'),
         loadRobotInput: document.getElementById('loadRobotInput'),
         robotSelectionDropdown: document.getElementById('robotSelectionDropdown'),
+
+        // Pin Connections UI
+        sensorConnectionsContainer: document.getElementById('sensorConnectionsContainer'),
+        pinSensorFarLeftInput: document.getElementById('pinSensorFarLeft'),
+        pinSensorLeftInput: document.getElementById('pinSensorLeft'),
+        pinSensorCenterInput: document.getElementById('pinSensorCenter'),
+        pinSensorRightInput: document.getElementById('pinSensorRight'),
+        pinSensorFarRightInput: document.getElementById('pinSensorFarRight'),
+        motorDriverTypeSelect: document.getElementById('motorDriverType'),
+        motorConnectionsContainer: document.getElementById('motorConnectionsContainer'),
 
         // Custom Parts UI
         addCustomWheelsBtn: document.getElementById('addCustomWheelsBtn'),

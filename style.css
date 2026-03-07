@@ -682,6 +682,19 @@ hr {
     color: var(--text-secondary);
 }
 
+.robot-parameters label.sensor-pin-config {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+    gap: 0.5em;
+}
+
+.robot-parameters label.sensor-pin-config input[type="text"] {
+    width: 60px;
+    margin-top: 0;
+}
+
 .robot-parameters input[type="number"] {
     width: 100%;
     padding: var(--spacing-xs);

@@ -28,6 +28,7 @@ export class Simulation {
             timeStep: 0.02, // Corresponds to user code delay(20) for ~50 FPS
             maxRobotSpeedMPS: 0.5, // Max physical speed robot can achieve at 255 PWM
             motorEfficiency: 0.85, // Factor reducing max speed
+            motorImbalance: 0.0, // Differencial imbalance factor (-0.5 to 0.5)
             motorResponseFactor: 0.1, // How quickly motors reach target speed (0-1, higher is faster)
             sensorNoiseProb: 0.0, // Probability (0-1) of a sensor flipping its reading
             movementPerturbFactor: 0.0, // Random perturbation to movement (0-1)
@@ -172,6 +173,7 @@ export class Simulation {
         this.params.timeStep = newParams.timeStep ?? this.params.timeStep;
         this.params.maxRobotSpeedMPS = newParams.maxRobotSpeedMPS ?? this.params.maxRobotSpeedMPS;
         this.params.motorEfficiency = newParams.motorEfficiency ?? this.params.motorEfficiency;
+        this.params.motorImbalance = newParams.motorImbalance ?? this.params.motorImbalance;
         this.params.motorResponseFactor = newParams.motorResponseFactor ?? this.params.motorResponseFactor;
         this.params.sensorNoiseProb = newParams.sensorNoiseProb ?? this.params.sensorNoiseProb;
         this.params.movementPerturbFactor = newParams.movementPerturbFactor ?? this.params.movementPerturbFactor;
@@ -297,8 +299,15 @@ export class Simulation {
         rightPWM = (Math.abs(rightPWM) < this.params.motorDeadbandPWM && rightPWM !== 0) ? 0 : rightPWM;
 
         const effectiveMaxSpeed = this.params.maxRobotSpeedMPS * this.params.motorEfficiency;
-        let target_vL_mps = (leftPWM / 255.0) * effectiveMaxSpeed;
-        let target_vR_mps = (rightPWM / 255.0) * effectiveMaxSpeed;
+
+        // Motor Imbalance
+        const imbalance = this.params.motorImbalance;
+        // If > 0, left motor is weaker. If < 0, right motor is weaker.
+        const leftFactor = 1.0 - Math.max(0, imbalance);
+        const rightFactor = 1.0 - Math.max(0, -imbalance);
+
+        let target_vL_mps = (leftPWM / 255.0) * effectiveMaxSpeed * leftFactor;
+        let target_vR_mps = (rightPWM / 255.0) * effectiveMaxSpeed * rightFactor;
 
         // 3. Update robot physics (movement)
         this.robot.updateMovement(

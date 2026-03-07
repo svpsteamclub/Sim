@@ -326,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             timeStep: parseFloat(elems.timeStepInput.value),
             maxRobotSpeedMPS: parseFloat(elems.maxRobotSpeedInput.value),
             motorEfficiency: parseFloat(elems.motorEfficiencyInput.value),
+            motorImbalance: parseFloat(elems.motorImbalanceInput.value),
             motorResponseFactor: parseFloat(elems.motorResponseInput.value),
             sensorNoiseProb: parseFloat(elems.sensorNoiseInput.value),
             movementPerturbFactor: parseFloat(elems.movementPerturbInput.value),

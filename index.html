@@ -141,6 +141,8 @@
                         <input type="number" id="maxRobotSpeed" value="1.0" step="0.05" min="0.05">
                         <label for="motorEfficiency">Eficiencia Motor (0-1):</label>
                         <input type="number" id="motorEfficiency" value="0.85" step="0.01" min="0.1" max="1">
+                        <label for="motorImbalance">Diferencia Motores (-0.5 a 0.5):</label>
+                        <input type="number" id="motorImbalance" value="0.0" step="0.01" min="-0.5" max="0.5">
                         <label for="motorResponse">Respuesta Motor (0-1):</label>
                         <input type="number" id="motorResponse" value="0.1" step="0.01" min="0.01" max="1">
                         <label for="sensorNoise">Ruido Sensor (0-1):</label>
@@ -198,14 +200,31 @@
                             recuperar el código original.</p>
 
                         <h4>¿Cómo referenciar componentes en tu código?</h4>
-                        <ul>
-                            <li><b>Sensores Analógicos a Digitales (<code>digitalRead</code>):</b> <code>pin 2</code>
-                                (Derecho), <code>pin 3</code> (Centro), <code>pin 4</code> (Izquierdo)</li>
-                            <li><b>Control de Motores (<code>analogWrite</code>):</b> <code>pin 9</code> (Motor
-                                Derecho), <code>pin 10</code> (Motor Izquierdo)</li>
+                        <p style="margin-bottom:0.8em">Los <b>pines de los sensores</b> varían dependiendo de la
+                            cantidad configurada en la pestaña <b>Editor de Robot</b>. Usan
+                            <code>digitalRead(pin)</code>:
+                        </p>
+                        <ul style="margin-top:0">
+                            <li><b>Robot de 2 Sensores:</b> <code>pin 2</code> (Izquierdo) y <code>pin 4</code>
+                                (Derecho)</li>
+                            <li><b>Robot de 3 Sensores:</b> <code>pin 2</code> (Izq.), <code>pin 3</code> (Centro),
+                                <code>pin 4</code> (Der.)
+                            </li>
+                            <li><b>Robot de 4 Sensores:</b> <code>pin 5</code> (Extremo Izq.), <code>pin 2</code>
+                                (Izq.), <code>pin 4</code> (Der.), <code>pin 6</code> (Extremo Der.)</li>
+                            <li><b>Robot de 5 Sensores:</b> <code>pin 5</code>, <code>pin 2</code>, <code>pin 3</code>,
+                                <code>pin 4</code>, <code>pin 6</code> (De la izquierda a la derecha)
+                            </li>
                         </ul>
-                        <p>Usa solo los pines que correspondan a la cantidad de sensores de tu robot; el simulador
-                            ignora los no leídos.</p>
+                        <p style="margin-bottom:0.8em">Los <b>pines de los motores</b> son siempre los mismos. Usan
+                            <code>analogWrite(pin, valor)</code> (0 a 255):
+                        </p>
+                        <ul style="margin-top:0">
+                            <li><b>Motor Izquierdo:</b> <code>pin 9</code></li>
+                            <li><b>Motor Derecho:</b> <code>pin 10</code></li>
+                        </ul>
+                        <p>Usa solo los pines que correspondan a tu robot; el simulador asume que los sensores no
+                            conectados siempre leen <b>1</b> (afuera de la línea).</p>
 
                         <h4>Funciones que puedes usar:</h4>
                         <ul>
@@ -225,10 +244,10 @@
                             (igualdad), <b>=</b> (asignación), <b>&gt;</b>, <b>&lt;</b>, <b>&amp;&amp;</b> (y
                             lógico), <b>||</b> (o lógico) para tomar decisiones. Ejemplo básico:</p>
                         <pre
-                            style="background:#ffffff; border:1px solid #ddd; border-radius:6px; padding:0.5em; margin: 1em 0;">if (digitalRead(4) == 0) {
-// Si el sensor Izquierdo (4) ve la línea, Gira a la izquierda
-analogWrite(10, 0);   // Frena motor Izquierdo
-analogWrite(9, 100);  // Avanza motor Derecho
+                            style="background:#ffffff; border:1px solid #ddd; border-radius:6px; padding:0.5em; margin: 1em 0;">if (digitalRead(2) == 0) {
+// Si el sensor Izquierdo (2) ve la línea, gira a la izquierda
+analogWrite(9, 0);    // Frena motor Izquierdo (9)
+analogWrite(10, 100); // Avanza motor Derecho (10)
 }</pre>
                         <p>Recuerda declarar todas tus variables con tipos de dato de C++ (<code>int</code>,
                             <code>float</code>, etc.) en lugar de <code>let</code>.
@@ -348,6 +367,43 @@ analogWrite(9, 100);  // Avanza motor Derecho
                             <option value="5">5</option>
                         </select>
                     </label>
+
+                    <h3 style="margin-top: 1em; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                        Conexiones (Pines Arduino)</h3>
+                    <div id="sensorConnectionsContainer">
+                        <label for="pinSensorFarLeft" class="sensor-pin-config" style="display:none;">
+                            Pin Sensor Extremo Izq.: <input type="text" id="pinSensorFarLeft" value="A0"
+                                style="width:60px;">
+                        </label>
+                        <label for="pinSensorLeft" class="sensor-pin-config">
+                            Pin Sensor Izquierdo: <input type="text" id="pinSensorLeft" value="A2" style="width:60px;">
+                        </label>
+                        <label for="pinSensorCenter" class="sensor-pin-config">
+                            Pin Sensor Centro: <input type="text" id="pinSensorCenter" value="A4" style="width:60px;">
+                        </label>
+                        <label for="pinSensorRight" class="sensor-pin-config">
+                            Pin Sensor Derecho: <input type="text" id="pinSensorRight" value="A3" style="width:60px;">
+                        </label>
+                        <label for="pinSensorFarRight" class="sensor-pin-config" style="display:none;">
+                            Pin Sensor Extremo Der.: <input type="text" id="pinSensorFarRight" value="A5"
+                                style="width:60px;">
+                        </label>
+                    </div>
+
+                    <label for="motorDriverType" style="margin-top:0.5em;">
+                        Tipo de Controlador de Motores:
+                        <select id="motorDriverType">
+                            <option value="l298n" selected>L298N / L293D (6 pines: ENA, IN1, IN2, IN3, IN4, ENB)
+                            </option>
+                            <option value="mx1616">MX1616 / TB6612 (4 pines: IN1, IN2, IN3, IN4)</option>
+                            <option value="single">ESCs (2 pines: 1 PWM por motor)</option>
+                        </select>
+                    </label>
+
+                    <div id="motorConnectionsContainer"
+                        style="margin-top:0.5em; padding-left:1em; border-left: 2px solid var(--primary-color);">
+                        <!-- Generado dinámicamente según motorDriverType -->
+                    </div>
 
                     <h3 style="margin-top: 1em; border-top: 1px solid var(--border-color); padding-top: 10px;">Físicas
                         del Robot</h3>

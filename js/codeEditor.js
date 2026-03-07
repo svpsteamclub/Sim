@@ -7,23 +7,10 @@ let currentCodeType = 'onoff'; // Track the current code type
 
 let sharedSimulationState = null; // To access robot sensors and track
 
-// Arduino Pin constants from user's code (will be defined there)
-// We need to know which PWM pins map to which motor. This is hardcoded for now.
-const SIM_MOTOR_LEFT_PWM_PIN = 9;
-const SIM_MOTOR_RIGHT_PWM_PIN = 10;
-const SIM_LEFT_SENSOR_PIN = 2;
-const SIM_CENTER_SENSOR_PIN = 3;
-const SIM_RIGHT_SENSOR_PIN = 4;
-const SIM_FAR_LEFT_SENSOR_PIN = 5;
-const SIM_FAR_RIGHT_SENSOR_PIN = 6;
-
-// Store pin modes (not strictly necessary for this sim, but good for API completeness)
+// We will determine pins on the fly from sharedSimulationState.robot.geometry.connections
+// but we need a way to track PWM states on any pin the user targets.
 let _pinModes = {};
-// Store motor PWM values set by user's analogWrite
-let _motorPWMValues = {
-    [SIM_MOTOR_LEFT_PWM_PIN]: 0,
-    [SIM_MOTOR_RIGHT_PWM_PIN]: 0,
-};
+let _motorPWMValues = {}; // Will store whatever pins the user writes to
 
 // Serial object for user code
 const ArduinoSerial = {
@@ -70,32 +57,84 @@ const arduinoAPI = {
         // ArduinoSerial.println(`Pin ${pin} mode set to ${mode}.`);
     },
     digitalRead: (pin) => {
-        if (!sharedSimulationState || !sharedSimulationState.robot) return 1; // Default to off-line if no sim state
+        if (!sharedSimulationState || !sharedSimulationState.robot || !sharedSimulationState.robot.connections) return 1;
 
-        // Robot sensors: 0 = on line, 1 = off line
-        if (pin === SIM_LEFT_SENSOR_PIN) return sharedSimulationState.robot.sensors.left;
-        if (pin === SIM_CENTER_SENSOR_PIN) return sharedSimulationState.robot.sensors.center;
-        if (pin === SIM_RIGHT_SENSOR_PIN) return sharedSimulationState.robot.sensors.right;
-        if (pin === SIM_FAR_LEFT_SENSOR_PIN) return sharedSimulationState.robot.sensors.farLeft;
-        if (pin === SIM_FAR_RIGHT_SENSOR_PIN) return sharedSimulationState.robot.sensors.farRight;
+        const conns = sharedSimulationState.robot.connections.sensorPins;
+        // The user code pin might be A2 (which equates to 2 due to injected constants)
+        // We match `pin` to the mapped value of whatever the user typed in the UI
+        // Since the UI might have "A2", and our API parses "A2" to 2, we need a helper:
+        const resolveUIPin = (uiVal) => {
+            if (typeof uiVal === 'string' && uiVal.startsWith('A')) {
+                // Return the constant defined in API
+                return arduinoAPI[uiVal];
+            }
+            return parseInt(uiVal);
+        }
 
-        // ArduinoSerial.println(`Warning: digitalRead from unmapped pin ${pin}. Returning HIGH.`);
-        return 1; // Default to HIGH (off line) for unmapped pins
+        let val = 1;
+        if (pin === resolveUIPin(conns.left)) val = sharedSimulationState.robot.sensors.left;
+        else if (pin === resolveUIPin(conns.center)) val = sharedSimulationState.robot.sensors.center;
+        else if (pin === resolveUIPin(conns.right)) val = sharedSimulationState.robot.sensors.right;
+        else if (pin === resolveUIPin(conns.farLeft)) val = sharedSimulationState.robot.sensors.farLeft;
+        else if (pin === resolveUIPin(conns.farRight)) val = sharedSimulationState.robot.sensors.farRight;
+
+        // Debug
+        // ArduinoSerial.println(`digitalRead(${pin}) -> ${val} (left: ${resolveUIPin(conns.left)}, center: ${resolveUIPin(conns.center)}, right: ${resolveUIPin(conns.right)})`);
+
+        return val;
+    },
+    // Add digitalWrite for completeness, as some use it for full forward/reverse on L298N
+    digitalWrite: (pin, value) => {
+        arduinoAPI.analogWrite(pin, value === arduinoAPI.HIGH ? 255 : 0);
     },
     analogWrite: (pin, value) => {
         const pwmValue = Math.max(-255, Math.min(255, Math.round(value)));
-        if (pin === SIM_MOTOR_LEFT_PWM_PIN) {
-            _motorPWMValues[SIM_MOTOR_LEFT_PWM_PIN] = pwmValue;
-            if (sharedSimulationState && sharedSimulationState.robot) {
-                sharedSimulationState.robot.motorPWMSpeeds.left = pwmValue;
+
+        // Update the tracked PWM for the specific pin dynamically
+        _motorPWMValues[pin] = pwmValue;
+
+        if (sharedSimulationState && sharedSimulationState.robot && sharedSimulationState.robot.connections) {
+            const conns = sharedSimulationState.robot.connections;
+
+            let finalLeftPWM = 0;
+            let finalRightPWM = 0;
+
+            if (conns.driverType === 'l298n') {
+                const lIn1 = parseInt(conns.motorPins.leftIn1);
+                const lIn2 = parseInt(conns.motorPins.leftIn2);
+                const lEn = parseInt(conns.motorPins.leftEn);
+                const rIn3 = parseInt(conns.motorPins.rightIn3);
+                const rIn4 = parseInt(conns.motorPins.rightIn4);
+                const rEn = parseInt(conns.motorPins.rightEn);
+
+                const dirL = ((_motorPWMValues[lIn1] > 0) ? 1 : 0) - ((_motorPWMValues[lIn2] > 0) ? 1 : 0);
+                const dirR = ((_motorPWMValues[rIn3] > 0) ? 1 : 0) - ((_motorPWMValues[rIn4] > 0) ? 1 : 0);
+
+                finalLeftPWM = (_motorPWMValues[lEn] || 0) * dirL;
+                finalRightPWM = (_motorPWMValues[rEn] || 0) * dirR;
+
+                // Debug logging to serial monitor
+                // ArduinoSerial.println(`L298N Update | pin: ${pin} | lEn: ${lEn} = ${_motorPWMValues[lEn]}, lIn1: ${lIn1} = ${_motorPWMValues[lIn1]}, lIn2: ${lIn2} = ${_motorPWMValues[lIn2]} | dirL: ${dirL} | finalLeft: ${finalLeftPWM}`);
+
+
+            } else if (conns.driverType === 'mx1616') {
+                const lIn1 = parseInt(conns.motorPins.leftIn1);
+                const lIn2 = parseInt(conns.motorPins.leftIn2);
+                const rIn3 = parseInt(conns.motorPins.rightIn3);
+                const rIn4 = parseInt(conns.motorPins.rightIn4);
+
+                finalLeftPWM = (_motorPWMValues[lIn1] || 0) - (_motorPWMValues[lIn2] || 0);
+                finalRightPWM = (_motorPWMValues[rIn3] || 0) - (_motorPWMValues[rIn4] || 0);
+
+            } else { // single, legacy, ESCs
+                const lPWM = parseInt(conns.motorPins.leftPWM);
+                const rPWM = parseInt(conns.motorPins.rightPWM);
+                finalLeftPWM = _motorPWMValues[lPWM] || 0;
+                finalRightPWM = _motorPWMValues[rPWM] || 0;
             }
-        } else if (pin === SIM_MOTOR_RIGHT_PWM_PIN) {
-            _motorPWMValues[SIM_MOTOR_RIGHT_PWM_PIN] = pwmValue;
-            if (sharedSimulationState && sharedSimulationState.robot) {
-                sharedSimulationState.robot.motorPWMSpeeds.right = pwmValue;
-            }
-        } else {
-            // ArduinoSerial.println(`Warning: analogWrite to unmapped pin ${pin} with value ${pwmValue}.`);
+
+            sharedSimulationState.robot.motorPWMSpeeds.left = finalLeftPWM;
+            sharedSimulationState.robot.motorPWMSpeeds.right = finalRightPWM;
         }
     },
     delay: async (ms) => {
@@ -112,41 +151,108 @@ const arduinoAPI = {
     LOW: 0,
     INPUT: "INPUT",
     OUTPUT: "OUTPUT",
+    A0: 0, A1: 1, A2: 2, A3: 4, A4: 3, A5: 5, // Map analog pins. A2=Left, A4=Center, A3=Right
     // User code might also define their own constants like LEFT_SENSOR_PIN etc.
 };
 
 // Define the custom code template
-const customCodeTemplate = `// Pin Definitions (as used in the simulator)
-const LEFT_SENSOR_PIN = 2;   // Digital (Connected to Robot's Left Sensor)
-const CENTER_SENSOR_PIN = 3; // Digital (Connected to Robot's Center Sensor, if present)
-const RIGHT_SENSOR_PIN = 4;  // Digital (Connected to Robot's Right Sensor)
-const FAR_LEFT_SENSOR_PIN = 5; // Digital (Connected to Robot's Far Left Sensor, if present)
-const FAR_RIGHT_SENSOR_PIN = 6; // Digital (Connected to Robot's Far Right Sensor, if present)
+const customCodeTemplate = `// Pines de Sensores (0 = LOW = Negro, 1 = HIGH = Blanco)
+const SENSOR_IZQ = A2;
+const SENSOR_CEN = A4;
+const SENSOR_DER = A3;
 
-const MOTOR_LEFT_PWM = 6;    // analogWrite for Left Motor Speed
-const MOTOR_RIGHT_PWM = 5;   // analogWrite for Right Motor Speed
+// Pines L298N Motor Izquierdo
+const IN1 = 11;
+const IN2 = 9;
+const ENA = 3;
 
-const SPEED = 200;      // Velocidad de velocidad de motores
+// Pines L298N Motor Derecho
+const IN3 = 10;
+const IN4 = 6;
+const ENB = 5;
 
-function setup() {
+// Velocidad base
+const SPEED = 120;
+
+void setup() {
     Serial.begin(9600);
-    pinMode(LEFT_SENSOR_PIN, INPUT);
-    pinMode(CENTER_SENSOR_PIN, INPUT); // Only if using 3 or 5 sensors
-    pinMode(RIGHT_SENSOR_PIN, INPUT);
-    pinMode(FAR_LEFT_SENSOR_PIN, INPUT); // Only if using 4 or 5 sensors
-    pinMode(FAR_RIGHT_SENSOR_PIN, INPUT); // Only if using 4 or 5 sensors
-    pinMode(MOTOR_LEFT_PWM, OUTPUT);
-    pinMode(MOTOR_RIGHT_PWM, OUTPUT);
-    Serial.println("Robot Setup Complete. Custom Code.");
+    
+    // Configurar Sensores
+    pinMode(SENSOR_IZQ, INPUT);
+    pinMode(SENSOR_CEN, INPUT);
+    pinMode(SENSOR_DER, INPUT);
+
+    // Configurar Motores
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+    pinMode(ENA, OUTPUT);
+    pinMode(IN3, OUTPUT);
+    pinMode(IN4, OUTPUT);
+    pinMode(ENB, OUTPUT);
+    
+    Serial.println("Robot Line Follower Listo.");
 }
 
-async function loop() {
-    //Escribe aqui el codigo de lectura de sensores y logica de control
-    // Usa digitalRead(LEFT_SENSOR_PIN), digitalRead(CENTER_SENSOR_PIN), etc.
-    analogWrite(MOTOR_LEFT_PWM, SPEED);
-    analogWrite(MOTOR_RIGHT_PWM, SPEED);          
-    await delay(10);
+void loop() {
+    int izq = digitalRead(SENSOR_IZQ);
+    int cen = digitalRead(SENSOR_CEN);
+    int der = digitalRead(SENSOR_DER);
+    
+    // Activar potencia en ambos motores
+    analogWrite(ENA, SPEED);
+    analogWrite(ENB, SPEED);
+    
+    // LOGICA DE SEGUIDOR DE LINEA (0 = LOW = Negra)
+    if (cen == LOW) {
+        // El centro está en la línea: Avanzar
+        digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+        digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+    }
+    else if (izq == LOW) {
+        // La línea está a la izquierda: Girar a la izquierda
+        digitalWrite(IN1, LOW);  digitalWrite(IN2, HIGH); // Invierte rueda izquierda
+        digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);  // Rueda derecha avanza
+    }
+    else if (der == LOW) {
+        // La línea está a la derecha: Girar a la derecha
+        digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);  // Rueda izquierda avanza
+        digitalWrite(IN3, LOW);  digitalWrite(IN4, HIGH); // Invierte rueda derecha
+    }
+    else {
+        // Si pierde la línea (todos en HIGH = Blanco), detenerse
+        digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
+        digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+    }
 }`;
+/**
+ * Transpila código básico de Arduino (C++) a JavaScript asíncrono
+ */
+function traducirArduinoAJS(codigoArduino) {
+    let jsCode = codigoArduino.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    return jsCode
+        // 1. Elimina las librerías (#include <...>)
+        .replace(/#include\s*[<"].*?[>"]/g, '')
+        // 2. Elimina/ignora Serial.begin(baudios);
+        .replace(/\bSerial\s*\.\s*begin\s*\([^)]*\)\s*;/g, '')
+        // 3. Convierte Serial.print(ln) a console.log
+        .replace(/\bSerial\s*\.\s*println?\b/g, 'console.log')
+        // 4. Transforma funciones: elimina tipos de retorno y tipos de argumentos
+        .replace(/\b(void|int|float|double|long|bool|unsigned\s+long|String|char)\s+(\w+)\s*\(([^)]*)\)/g, (match, tipo, nombre, args) => {
+            let argsLimpios = args.replace(/\b(?:const\s+)?(?:unsigned\s+long|int|float|double|long|bool|String|char)\s+[\*\&]*\s*(\w+)/g, '$1');
+            if (nombre === 'setup') return `function setup(${argsLimpios})`;
+            if (nombre === 'loop') return `async function loop(${argsLimpios})`;
+            return `function ${nombre}(${argsLimpios})`;
+        })
+        // 5. Constantes: C++ "const int" -> JS "const"
+        .replace(/\bconst\s+(?:unsigned\s+long|int|float|double|long|bool|String|char)\b/g, 'const')
+        // 6. Variables: C++ "int", "float" -> JS "let"
+        .replace(/\b(?:unsigned\s+long|int|float|double|long|bool|String|char)\b/g, 'let')
+        // 7. Gestión de Tiempo: "delay(X)" -> "await delay(X)"
+        .replace(/\bdelay\s*\(/g, 'await delay(')
+        // 8. Prevención de cuelgues: obliga delay(10) al final del loop
+        .replace(/(async\s+function\s+loop\s*\([^)]*\)\s*\{)([\s\S]*?)(\s*\})(?=\s*$|\s*function\b)/g,
+            '$1$2\n    await delay(10);\n$3');
+}
 
 export function initCodeEditor(simulationState) {
     sharedSimulationState = simulationState; // Give API access to robot state
@@ -169,20 +275,14 @@ export function initCodeEditor(simulationState) {
 export function loadUserCode(code) {
     ArduinoSerial.clear(); // Clear serial on new code load
     _pinModes = {};
-    _motorPWMValues = { [SIM_MOTOR_LEFT_PWM_PIN]: 0, [SIM_MOTOR_RIGHT_PWM_PIN]: 0 };
+    _motorPWMValues = {}; // Reset fully
 
     // Detectar el tipo de código (opcional, solo mantendremos 'onoff')
     currentCodeType = 'onoff';
 
     try {
-        // C++ to JS Parser overrides:
-        let jsCode = code
-            // Replace C++ variable types with "let"
-            .replace(/\b(int|float|double|bool|String|long)\s+/g, 'let ')
-            // Replace "void setup()" with "function setup()" 
-            .replace(/void\s+setup\s*\(\s*\)/g, 'function setup()')
-            // Replace "void loop()" with "async function loop()" to allow delays
-            .replace(/void\s+loop\s*\(\s*\)/g, 'async function loop()');
+        // C++ to JS Parser overrides (Transpilación de Arduino a JS asíncrono)
+        let jsCode = traducirArduinoAJS(code);
 
         // Create a function scope for the user's code, injecting the Arduino API
         // The user code should define setup() and loop()
@@ -229,7 +329,7 @@ export async function executeUserSetup() {
             ArduinoSerial.println("setup() ejecutado.");
         } catch (e) {
             console.error("Error ejecutando setup() del usuario:", e);
-            Arduinoln("Error en setup(): " + e.message);
+            ArduinoSerial.println("Error en setup(): " + e.message);
             throw e; // Re-throw to stop simulation if setup fails
         }
     }

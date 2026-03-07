@@ -87,6 +87,9 @@ export class Robot {
         // Asignar llantas paramétricas si existen
         this.customWheels = geometry.customWheels || null;
 
+        // Asignar conexiones de pines
+        this.connections = geometry.connections || null;
+
         this._initSensorState();
 
         if (resetTrails) this.resetTrails();
@@ -406,46 +409,77 @@ export class Robot {
             ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            let pinNumber = '';
-            if (this.sensorCount === 2) {
-                if (key === 'left') pinNumber = '2';
-                else if (key === 'right') pinNumber = '3';
-            } else if (this.sensorCount === 3) {
-                if (key === 'left') pinNumber = '2';
-                else if (key === 'center') pinNumber = '3';
-                else if (key === 'right') pinNumber = '4';
-            } else if (this.sensorCount === 4) {
-                if (key === 'farLeft') pinNumber = '2';
-                else if (key === 'left') pinNumber = '3';
-                else if (key === 'right') pinNumber = '4';
-                else if (key === 'farRight') pinNumber = '5';
-            } else if (this.sensorCount === 5) {
-                if (key === 'farLeft') pinNumber = '2';
-                else if (key === 'left') pinNumber = '3';
-                else if (key === 'center') pinNumber = '4';
-                else if (key === 'right') pinNumber = '5';
-                else if (key === 'farRight') pinNumber = '6';
+            // Get pin number from geometry connections if available
+            if (this.customWheels !== undefined && this.wheelbase_m /* dirty check if geometry is somewhat attached to this instance */) {
+                // Note: we can't easily access the raw connections config here directly 
+                // unless we stored it in updateGeometry. Let's do that.
             }
+
+            let pinNumber = '';
+            const conns = this.connections?.sensorPins;
+            if (conns) {
+                if (key === 'left') pinNumber = conns.left;
+                else if (key === 'center') pinNumber = conns.center;
+                else if (key === 'right') pinNumber = conns.right;
+                else if (key === 'farLeft') pinNumber = conns.farLeft;
+                else if (key === 'farRight') pinNumber = conns.farRight;
+            } else {
+                // Fallback
+                if (this.sensorCount === 2) {
+                    if (key === 'left') pinNumber = '2';
+                    else if (key === 'right') pinNumber = '3';
+                } else if (this.sensorCount === 3) {
+                    if (key === 'left') pinNumber = '2';
+                    else if (key === 'center') pinNumber = '3';
+                    else if (key === 'right') pinNumber = '4';
+                } else if (this.sensorCount === 4) {
+                    if (key === 'farLeft') pinNumber = '2';
+                    else if (key === 'left') pinNumber = '3';
+                    else if (key === 'right') pinNumber = '4';
+                    else if (key === 'farRight') pinNumber = '5';
+                } else if (this.sensorCount === 5) {
+                    if (key === 'farLeft') pinNumber = '2';
+                    else if (key === 'left') pinNumber = '3';
+                    else if (key === 'center') pinNumber = '4';
+                    else if (key === 'right') pinNumber = '5';
+                    else if (key === 'farRight') pinNumber = '6';
+                }
+            }
+
             ctx.fillText(pinNumber, pos_m.x_m * PIXELS_PER_METER, pos_m.y_m * PIXELS_PER_METER);
             ctx.restore();
         }
-        // Mostrar pines de motores cerca de las ruedas (ajustar para que estén a la izquierda y derecha del robot, y con orientación del chasis)
+        // Mostrar pines de motores cerca de las ruedas
         ctx.save();
         ctx.fillStyle = 'blue';
         ctx.font = `${Math.max(10, sensorRadiusPx)}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        // Motor izquierdo (pin 10)
+
+        let leftMotorText = '9';
+        let rightMotorText = '10';
+        if (this.connections && this.connections.motorPins) {
+            if (this.connections.driverType === 'l298n') {
+                leftMotorText = `${this.connections.motorPins.leftFwd}/${this.connections.motorPins.leftRev}`;
+                rightMotorText = `${this.connections.motorPins.rightFwd}/${this.connections.motorPins.rightRev}`;
+            } else {
+                leftMotorText = this.connections.motorPins.leftPWM;
+                rightMotorText = this.connections.motorPins.rightPWM;
+            }
+        }
+
+        // Motor izquierdo 
         ctx.save();
-        ctx.translate(-this.wheelbase_m / 2 * PIXELS_PER_METER - 18, 0);
-        ctx.rotate(0); // Ya está en el sistema del robot, así que 0
-        ctx.fillText('10', 0, 0);
+        ctx.translate(-this.wheelbase_m / 2 * PIXELS_PER_METER - 22, 0);
+        ctx.rotate(0);
+        ctx.fillText(leftMotorText, 0, 0);
         ctx.restore();
-        // Motor derecho (pin 9)
+
+        // Motor derecho 
         ctx.save();
-        ctx.translate(this.wheelbase_m / 2 * PIXELS_PER_METER + 18, 0);
-        ctx.rotate(0); // Ya está en el sistema del robot, así que 0
-        ctx.fillText('9', 0, 0);
+        ctx.translate(this.wheelbase_m / 2 * PIXELS_PER_METER + 22, 0);
+        ctx.rotate(0);
+        ctx.fillText(rightMotorText, 0, 0);
         ctx.restore();
         ctx.restore();
     }

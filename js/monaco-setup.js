@@ -1,40 +1,53 @@
 // Esquemas de código
 const codeTemplates = {
-    simpleOnOff: `function setup() {
-    pinMode(4, INPUT);   // Sensor Izquierdo
-    pinMode(3, INPUT);   // Sensor Centro
-    pinMode(2, INPUT);   // Sensor Derecho
-    pinMode(10, OUTPUT); // Motor Izquierdo
-    pinMode(9, OUTPUT);  // Motor Derecho
+    simpleOnOff: `void setup() {
+    // Configurar pines de los sensores (A2, A4, A3)
+    pinMode(A2, INPUT);   // Sensor Izquierdo
+    pinMode(A4, INPUT);   // Sensor Centro
+    pinMode(A3, INPUT);   // Sensor Derecho
+
+    // Configurar pines del driver L298N
+    pinMode(11, OUTPUT);  // Motor Izq IN1
+    pinMode(9, OUTPUT);   // Motor Izq IN2
+    pinMode(3, OUTPUT);   // Motor Izq ENA (PWM)
+    
+    pinMode(10, OUTPUT);  // Motor Der IN3
+    pinMode(6, OUTPUT);   // Motor Der IN4
+    pinMode(5, OUTPUT);   // Motor Der ENB (PWM)
 }
 
-async function loop() {
-    let izq = digitalRead(4);
-    let cen = digitalRead(3);
-    let der = digitalRead(2);
+void loop() {
+    // Leer los sensores (HIGH = Vio línea negra)
+    int izq = digitalRead(A2);
+    int cen = digitalRead(A4);
+    int der = digitalRead(A3);
     
-    if (cen === 0) {
-        analogWrite(10, 100);  // Avanzar
-        analogWrite(9, 100);
-    } 
-    else if (izq === 0) {
-        analogWrite(10, -100); // Girar Izquierda
-        analogWrite(9, 100);
-    } 
-    else if (der === 0) {
-        analogWrite(10, 100);  // Girar Derecha
-        analogWrite(9, -100);
-    } 
-    // Al quitar el "else", el robot no tiene instrucción de detenerse.
-    // Automáticamente recordará y mantendrá la última acción que ejecutó.
+    // Fijar la velocidad general (0 a 255)
+    analogWrite(3, 120); 
+    analogWrite(5, 120);
 
-    await delay(10); // Pausa obligatoria del simulador
+    // Lógica Simple
+    if (cen == HIGH) {
+        // Avanzar: ambos motores adelante
+        digitalWrite(11, HIGH); digitalWrite(9, LOW);
+        digitalWrite(10, HIGH); digitalWrite(6, LOW);
+    } 
+    else if (izq == HIGH) {
+        // Girar Izquierda: frena llanta izquierda, avanza derecha
+        digitalWrite(11, LOW);  digitalWrite(9, LOW);
+        digitalWrite(10, HIGH); digitalWrite(6, LOW);
+    } 
+    else if (der == HIGH) {
+        // Girar Derecha: avanza izquierda, frena derecha
+        digitalWrite(11, HIGH); digitalWrite(9, LOW);
+        digitalWrite(10, LOW);  digitalWrite(6, LOW);
+    } 
 }`
 };
 
 // Textos explicativos para cada plantilla
 const codeExplanations = {
-    simpleOnOff: `🌟 <b>Código on/off simple</b>\n\nEste código es como un semáforo sencillo para tu robot. Si el sensor del centro (Pin 3) ve la línea negra, el robot avanza. Si la pierde por la izquierda o la derecha, frena esa rueda para hacer que el robot gire y busque la línea.\n\nEs fácil de entender y perfecto para tus primeras pruebas. En este caso:\n- <b>Pin 10</b> controla el Motor Izquierdo\n- <b>Pin 9</b> controla el Motor Derecho\n\n<b>¿Qué puedes probar?</b>\n- Cambia el valor <b>100</b> en <code>analogWrite</code> para hacer que el robot corra más rápido o más lento.\n- Prueba diferentes pistas y mira cómo reacciona en las curvas.`
+    simpleOnOff: `🌟 <b>Código Seguidor de Línea (L298N)</b>\n\nEste código utiliza los 6 pines necesarios para controlar un puente H L298N. Los pines <b>ENA (3)</b> y <b>ENB (5)</b> definen la <i>velocidad</i> (PWM), mientras que los pines <b>IN1/IN2</b> e <b>IN3/IN4</b> definen la <i>dirección</i>.\n\nEs fácil de entender y perfecto para tus primeras pruebas.\n\n<b>¿Qué puedes probar?</b>\n- Cambia el valor <b>120</b> en <code>analogWrite</code> para hacer que el robot corra más rápido o más lento.\n- Prueba diferentes pistas y mira cómo reacciona en las curvas.`
 };
 
 // Initialize Monaco Editor
