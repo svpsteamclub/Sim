@@ -205,26 +205,43 @@ export function updateDynamicCodeHelp(geometry) {
     const count = geometry.sensorCount;
 
     // --- 1. Guía del Código (code-explanation) ---
-    let guideHtml = `<h3>Guía del Código</h3><div style='font-family:inherit; white-space:pre-wrap;'>`;
+    let guideHtml = `<h3>Guía de Configuración</h3><div style='font-family:inherit; white-space:pre-wrap;'>`;
+
+    // Instrucciones del Driver
     if (driverType === 'l298n') {
-        guideHtml += `🌟 <b>Código Seguidor de Línea (L298N)</b>
-
-Este código utiliza los 6 pines para controlar un puente H L298N. Los pines <b>ENA (${motorPins.leftEn})</b> y <b>ENB (${motorPins.rightEn})</b> definen la <i>velocidad</i> (PWM), mientras que los pines <b>IN1 (${motorPins.leftIn1}) / IN2 (${motorPins.leftIn2})</b> e <b>IN3 (${motorPins.rightIn3}) / IN4 (${motorPins.rightIn4})</b> definen la <i>dirección</i>.`;
+        guideHtml += `🎮 <b>Para usar el driver L298N:</b>
+Debes configurar los pines <b>ENA (${motorPins.leftEn})</b> y <b>ENB (${motorPins.rightEn})</b> como <code>OUTPUT</code> para controlar la <i>velocidad</i> (PWM). Para la <i>dirección</i>, usa los pines <b>IN1 (${motorPins.leftIn1})/IN2 (${motorPins.leftIn2})</b> para el motor izquierdo e <b>IN3 (${motorPins.rightIn3})/IN4 (${motorPins.rightIn4})</b> para el derecho.`;
     } else if (driverType === 'mx1616') {
-        guideHtml += `🌟 <b>Código Seguidor de Línea (MX1616)</b>
-
-Este driver utiliza 4 pines PWM para controlar dos motores. Los pines <b>IN1 (${motorPins.leftIn1}) / IN2 (${motorPins.leftIn2})</b> controlan el motor izquierdo, y los pines <b>IN3 (${motorPins.rightIn3}) / IN4 (${motorPins.rightIn4})</b> el motor derecho. La velocidad se calcula como la diferencia entre ambos pines.`;
+        guideHtml += `🎮 <b>Para usar el driver MX1616:</b>
+Debes usar 4 pines PWM (p.ej. <code>analogWrite</code>). Controla el motor izquierdo con <b>IN1 (${motorPins.leftIn1})</b> e <b>IN2 (${motorPins.leftIn2})</b>, y el motor derecho con <b>IN3 (${motorPins.rightIn3})</b> e <b>IN4 (${motorPins.rightIn4})</b>.`;
     } else {
-        guideHtml += `🌟 <b>Código Seguidor de Línea (ESCs)</b>
-
-Configuración simplificada usando 1 pin PWM por motor. El pin <b>IZQ (${motorPins.leftPWM})</b> controla el motor izquierdo y el pin <b>DER (${motorPins.rightPWM})</b> el motor derecho.`;
+        guideHtml += `🎮 <b>Para usar ESCs:</b>
+Debes conectar el pin <b>IZQ (${motorPins.leftPWM})</b> al motor izquierdo y el pin <b>DER (${motorPins.rightPWM})</b> al motor derecho, ambos configurados como <code>OUTPUT</code> para señales PWM.`;
     }
 
-    guideHtml += `
+    guideHtml += `\n\n`;
 
-<b>¿Qué puedes probar?</b>
-- Cambia el valor de velocidad en <code>analogWrite</code> para ajustar el ritmo del robot.
-- Prueba diferentes pistas y observa cómo reacciona en las curvas.
+    // Instrucciones de los Sensores
+    if (count == 1) {
+        guideHtml += `📡 <b>Para usar 1 sensor:</b>
+Debes leer el pin <b>${sensorPins.center}</b> (Centro). Recuerda que <code>HIGH</code> significa que ha detectado la línea negra.`;
+    } else if (count == 2) {
+        guideHtml += `📡 <b>Para usar 2 sensores:</b>
+Debes leer los pines <b>${sensorPins.left}</b> (Izq.) y <b>${sensorPins.right}</b> (Der.). Si el izquierdo detecta <code>HIGH</code>, el robot debe girar a la izquierda.`;
+    } else if (count == 3) {
+        guideHtml += `📡 <b>Para usar 3 sensores:</b>
+Debes leer los pines <b>${sensorPins.left}</b>, <b>${sensorPins.center}</b> y <b>${sensorPins.right}</b>. El sensor central te indica si el robot está centrado en la línea.`;
+    } else if (count == 4) {
+        guideHtml += `📡 <b>Para usar 4 sensores:</b>
+Debes leer desde <b>${sensorPins.farLeft}</b> hasta <b>${sensorPins.farRight}</b>. Los sensores externos son ideales para detectar curvas cerradas.`;
+    } else if (count == 5) {
+        guideHtml += `📡 <b>Para usar 5 sensores:</b>
+Debes leer los 5 pines configurados (desde <b>${sensorPins.farLeft}</b> hasta <b>${sensorPins.farRight}</b>) para un control de precisión máxima sobre la línea.`;
+    }
+
+    guideHtml += `\n\n<b>¿Qué puedes probar?</b>
+- Cambia la velocidad en <code>analogWrite</code> para ajustar el ritmo.
+- Observa cómo reacciona el robot en las curvas según la lectura de los sensores.
 </div>`;
     elems.codeExplanation.innerHTML = guideHtml;
 
