@@ -425,7 +425,40 @@ export class Simulation {
             displayCtx.restore();
         }
 
+        // Guardar la matriz de cámara antes de restaurar para poder invertirla en screenToWorld()
+        // getTransform() devuelve la matriz ACTUAL (con el camera transform aplicado)
+        this._cameraMatrix = displayCtx.getTransform();
+
         displayCtx.restore();
+    }
+
+    /**
+     * Convierte posición de pantalla (CSS px relativo al canvas) a coordenadas del mundo (px de pista).
+     * Usa la inversa de la verdadera matriz de cámara usada en draw(), garantizando precisión exacta.
+     * @param {number} cssPx_x  - event.clientX - canvas.getBoundingClientRect().left
+     * @param {number} cssPx_y  - event.clientY - canvas.getBoundingClientRect().top
+     * @param {HTMLCanvasElement} canvas
+     * @returns {{ x: number, y: number }} world pixel coordinates
+     */
+    screenToWorld(cssPx_x, cssPx_y, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        // Convertir CSS px → canvas internal px (el canvas puede estar escalado por CSS)
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const internalX = cssPx_x * scaleX;
+        const internalY = cssPx_y * scaleY;
+
+        if (!this._cameraMatrix) {
+            // Fallback si draw() nunca fue llamado
+            return { x: internalX, y: internalY };
+        }
+
+        // Invertir la matriz de cámara exacta
+        const inv = this._cameraMatrix.inverse();
+        return {
+            x: inv.a * internalX + inv.c * internalY + inv.e,
+            y: inv.b * internalX + inv.d * internalY + inv.f,
+        };
     }
 
     // Utility to get current robot geometry
@@ -436,7 +469,12 @@ export class Simulation {
             sensorOffset_m: this.robot.sensorForwardProtrusion_m,
             sensorSpread_m: this.robot.sensorSideSpread_m,
             sensorDiameter_m: this.robot.sensorDiameter_m,
-            sensorCount: this.robot.sensorCount // <-- Mantener la cantidad de sensores
+            sensorCount: this.robot.sensorCount, // <-- Mantener la cantidad de sensores
+            robotMass_kg: this.robot.robotMass_kg,
+            comOffset_m: this.robot.comOffset_m,
+            tireGrip: this.robot.tireGrip,
+            customWheels: this.robot.customWheels || null,
+            connections: this.robot.connections || null, // ← CRÍTICO: sin esto, se pierde la config de pines al reiniciar
         };
     }
 }

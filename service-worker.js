@@ -1,5 +1,5 @@
 // service-worker.js
-const CACHE_NAME = 'sim-pwa-v2';
+const CACHE_NAME = 'sim-pwa-v3';
 const urlsToCache = [
   '/',
   '/index.html',

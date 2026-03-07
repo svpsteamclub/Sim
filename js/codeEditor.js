@@ -12,6 +12,9 @@ let sharedSimulationState = null; // To access robot sensors and track
 let _pinModes = {};
 let _motorPWMValues = {}; // Will store whatever pins the user writes to
 
+// NUEVO: Token para cancelar ejecuciones asíncronas flotantes al reiniciar
+let currentSimToken = 0;
+
 // Serial object for user code
 const ArduinoSerial = {
     _buffer: "",
@@ -138,12 +141,17 @@ const arduinoAPI = {
         }
     },
     delay: async (ms) => {
-        // In a real Arduino, delay blocks. In JS, we must use async/await.
-        // The simulation loop will control actual timing. This delay is more for user code structure.
-        // For this simulator, we'll make it a true JS delay, but the simulation step time is fixed.
-        // If sim is not running, this promise might not resolve as expected if sim controls it.
-        // For now, a simple JS timeout.
-        return new Promise(resolve => setTimeout(resolve, ms));
+        const myToken = currentSimToken;
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                // Si el token cambió, significa que el usuario clickó "Reiniciar"
+                if (myToken === currentSimToken) {
+                    resolve();
+                } else {
+                    reject(new Error("Abortado por reinicio"));
+                }
+            }, ms);
+        });
     },
     Serial: ArduinoSerial,
     // Constants for user code (these are usually #defined in Arduino C++)
@@ -230,7 +238,6 @@ void loop() {
 function traducirArduinoAJS(codigoArduino) {
     let jsCode = codigoArduino.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 
-    // Tipos de datos de Arduino/C++ reconocidos (orden: más específico primero)
     const TYPES = [
         'unsigned\\s+long\\s+long', 'unsigned\\s+long', 'unsigned\\s+int',
         'unsigned\\s+short', 'unsigned\\s+char',
@@ -243,36 +250,36 @@ function traducirArduinoAJS(codigoArduino) {
         'String', 'char',
     ].join('|');
 
-    const TYPE_RE = new RegExp(`(?<![\\w.])(?:${TYPES})(?![\\w(])`, 'g');
+    // Usamos \b en lugar de (?<!...) para máxima compatibilidad con iPads y navegadores
+    const TYPE_RE = new RegExp(`\\b(?:${TYPES})\\b`, 'g');
     const CONST_RE = new RegExp(`\\bconst\\s+(?:${TYPES})\\b`, 'g');
-    const FN_RE = new RegExp(`\\b(void|${TYPES})\\s+(\\w+)\\s*\\(([^)]*)\\)`, 'g');
+    const FN_RE = new RegExp(`\\b(?:void|${TYPES})\\s+(\\w+)\\s*\\(([^)]*)\\)`, 'g');
     const FN_ARG_RE = new RegExp(`\\b(?:const\\s+)?(?:${TYPES})\\s+[*&]*\\s*(\\w+)`, 'g');
 
     return jsCode
-        // FIX 3: #define MACRO valor  →  const MACRO = valor;
+        // #define MACRO valor  →  const MACRO = valor;
         .replace(/^#define\s+(\w+)\s+(.+)$/gm, (_, name, val) => `const ${name} = ${val.trim()};`)
         // Elimina directivas #include
         .replace(/#include\s*[<"].*?[>"]/g, '')
-        // Elimina Serial.begin(...)  (solo esta, las demás las maneja el objeto Serial inyectado)
+        // Elimina Serial.begin(...)
         .replace(/\bSerial\s*\.\s*begin\s*\([^)]*\)\s*;/g, '')
-        // FIX 2: NO se convierte Serial.println/print → el objeto Serial ya está en la API inyectada
-        // Transforma definiciones de funciones: quita tipos de retorno y de argumentos
-        .replace(FN_RE, (match, tipo, nombre, args) => {
+        // Transforma definiciones de funciones
+        .replace(FN_RE, (match, nombre, args) => {
             const argsLimpios = args.replace(FN_ARG_RE, '$1');
-            // FIX 1: setup es ahora async para poder usar await delay() dentro de ella
             if (nombre === 'setup') return `async function setup(${argsLimpios})`;
             if (nombre === 'loop') return `async function loop(${argsLimpios})`;
             return `function ${nombre}(${argsLimpios})`;
         })
-        // FIX 4: "const byte/word/boolean/unsigned int/..." → "const"
+        // "const int" -> "const"
         .replace(CONST_RE, 'const')
-        // FIX 4: "byte/word/boolean/int/float/..." → "let"
+        // "int" -> "let"
         .replace(TYPE_RE, 'let')
-        // 7. Gestión de Tiempo: "delay(X)" -> "await delay(X)"
+        // delay(X) -> await delay(X)
         .replace(/\bdelay\s*\(/g, 'await delay(')
-        // Prevención de cuelgues: fuerza await delay(10) al final del loop si no hay ninguno
-        .replace(/(async\s+function\s+loop\s*\([^)]*\)\s*\{)([\s\S]*?)(\s*\})(?=\s*$|\s*(?:async\s+)?function\b)/g,
-            '$1$2\n    await delay(10);\n$3');
+        // MÁS SEGURO: Inyectar await delay(1) en bucles while/for para evitar que congelen el navegador
+        .replace(/\b(while|for)\s*\(([^)]+)\)\s*\{/g, '$1 ($2) { await delay(1); ')
+        // MÁS SEGURO: Inyectar un micro-delay al inicio del loop
+        .replace(/\b(async\s+function\s+loop\s*\([^)]*\)\s*\{)/g, '$1\n    await delay(1);\n');
 }
 
 export function initCodeEditor(simulationState) {
@@ -294,6 +301,8 @@ export function initCodeEditor(simulationState) {
 }
 
 export function loadUserCode(code) {
+    currentSimToken++; // CLAVE: cancela cualquier delay() flotante de la ejecución anterior
+
     ArduinoSerial.clear(); // Clear serial on new code load
     _pinModes = {};
     _motorPWMValues = {}; // Reset fully
@@ -346,12 +355,15 @@ export function loadUserCode(code) {
 export async function executeUserSetup() {
     if (typeof userSetupFunction === 'function') {
         try {
-            await userSetupFunction(); // setup might be async if it uses delay
+            await userSetupFunction();
             ArduinoSerial.println("setup() ejecutado.");
         } catch (e) {
-            console.error("Error ejecutando setup() del usuario:", e);
-            ArduinoSerial.println("Error en setup(): " + e.message);
-            throw e; // Re-throw to stop simulation if setup fails
+            // Ignorar el error si fue causado por darle al botón de reiniciar
+            if (e.message !== "Abortado por reinicio") {
+                console.error("Error ejecutando setup() del usuario:", e);
+                ArduinoSerial.println("Error en setup(): " + e.message);
+                throw e;
+            }
         }
     }
 }
@@ -361,9 +373,11 @@ export async function executeUserLoop() {
         try {
             await userLoopFunction();
         } catch (e) {
-            console.error("Error ejecutando loop() del usuario:", e);
-            ArduinoSerial.println("Error en loop(): " + e.message);
-            throw e; // Re-throw to stop simulation if loop fails
+            if (e.message !== "Abortado por reinicio") {
+                console.error("Error ejecutando loop() del usuario:", e);
+                ArduinoSerial.println("Error en loop(): " + e.message);
+                throw e;
+            }
         }
     }
 }

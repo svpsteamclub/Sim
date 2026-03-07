@@ -265,11 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
         animationFrameId = requestAnimationFrame(simulationLoop);
     }
 
-    function stopSimulation() {
-        if (!simulationRunning) return;
+    function _forceStop() {
+        // Siempre detiene el loop y reactiva los botones, sin importar simulationRunning
         simulationRunning = false;
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
         }
         elems.startSimButton.disabled = false;
         elems.stopSimButton.disabled = true;
@@ -280,37 +281,43 @@ document.addEventListener('DOMContentLoaded', () => {
         elems.applySimParamsButton.disabled = false;
     }
 
-    function resetSimulation() {
-        stopSimulation(); // Ensure it's stopped
+    function stopSimulation() {
+        if (!simulationRunning) return;
+        _forceStop();
+    }
+
+    async function resetSimulation() {
+        _forceStop(); // Siempre fuerza la parada (no depende de simulationRunning)
         if (simulationInstance) {
-            const currentGeo = simulationInstance.getCurrentRobotGeometry(); // Preserve current geometry
+            const currentGeo = simulationInstance.getCurrentRobotGeometry();
 
             // Get the original start position from the lap timer's start line
             let startX = 0.1, startY = 0.1, startAngle = 0;
             if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
-                // Calculate the center point of the start line
                 startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
                 startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
-
-                // Calculate angle perpendicular to the start line
                 const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
                 const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
-                startAngle = Math.atan2(dy, dx) + Math.PI / 2; // Perpendicular to line
+                startAngle = Math.atan2(dy, dx) + Math.PI / 2;
             }
 
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
 
-            // Reload user code and re-run setup for a clean state
+            // Reload user code and re-run setup (awaited so it's fully ready before drawing)
             if (loadUserCode(window.monacoEditor.getValue())) {
-                executeUserSetup().catch(e => alert("Error en setup() durante el reinicio."));
+                try {
+                    await executeUserSetup();
+                } catch (e) {
+                    // Error en setup (ya mostrado en Serial Monitor por executeUserSetup)
+                }
             } else {
-                alert("Error recargando código durante reinicio.");
+                ArduinoSerial && ArduinoSerial.println && ArduinoSerial.println("Error recargando código durante reinicio.");
             }
-            clearSerial(); // Clear serial monitor on reset
+            clearSerial();
 
             drawCurrentSimulationState();
             updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData());
-            updateTelemetry({}); // Clear telemetry
+            updateTelemetry({});
         }
     }
 
@@ -407,37 +414,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Mouse Events ---
+    // Helper: usa la inversa de la matriz de cámara exacta capturada en draw() para máxima precisión
+    function screenToWorld(event) {
+        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
+        const cx = event.clientX - rect.left;
+        const cy = event.clientY - rect.top;
+        return simulationInstance.screenToWorld(cx, cy, elems.simulationDisplayCanvas);
+    }
+
     elems.simulationDisplayCanvas.addEventListener('mousedown', (event) => {
         if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track.imageData) return;
-
-        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const scale = elems.simulationDisplayCanvas.width / rect.width;
-        const x = (event.clientX - rect.left) * scale;
-        const y = (event.clientY - rect.top) * scale;
-
-        startLineStartPoint = { x, y };
+        startLineStartPoint = screenToWorld(event);
     });
 
     elems.simulationDisplayCanvas.addEventListener('mousemove', (event) => {
         if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
 
-        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const scale = elems.simulationDisplayCanvas.width / rect.width;
-        const x = (event.clientX - rect.left) * scale;
-        const y = (event.clientY - rect.top) * scale;
+        const world = screenToWorld(event);
 
-        // Draw current track state
+        // Draw preview line using world->canvas transform to keep it aligned with the camera
+        const canvasW = elems.simulationDisplayCanvas.width;
+        const canvasH = elems.simulationDisplayCanvas.height;
+        const zoom = simulationInstance.cameraZoom;
+        const camX = simulationInstance.cameraX;
+        const camY = simulationInstance.cameraY;
+        const toCanvas = (wx, wy) => ({
+            x: (wx - camX) * zoom + canvasW / 2,
+            y: (wy - camY) * zoom + canvasH / 2,
+        });
+
+        const startCanvas = toCanvas(startLineStartPoint.x, startLineStartPoint.y);
+        const endCanvas = toCanvas(world.x, world.y);
+
         const ctx = elems.simulationDisplayCanvas.getContext('2d');
-        simulationInstance.draw(ctx, elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
-
-        // Draw preview line
+        simulationInstance.draw(ctx, canvasW, canvasH);
         ctx.save();
         ctx.setLineDash([5, 5]);
         ctx.strokeStyle = "#FF00FF";
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(startLineStartPoint.x, startLineStartPoint.y);
-        ctx.lineTo(x, y);
+        ctx.moveTo(startCanvas.x, startCanvas.y);
+        ctx.lineTo(endCanvas.x, endCanvas.y);
         ctx.stroke();
         ctx.restore();
     });
@@ -445,21 +462,18 @@ document.addEventListener('DOMContentLoaded', () => {
     elems.simulationDisplayCanvas.addEventListener('mouseup', (event) => {
         if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
 
-        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const scale = elems.simulationDisplayCanvas.width / rect.width;
-        const x = (event.clientX - rect.left) * scale;
-        const y = (event.clientY - rect.top) * scale;
+        const world = screenToWorld(event);
 
         // Convert to meters for simulation
         const x1_m = startLineStartPoint.x / PIXELS_PER_METER;
         const y1_m = startLineStartPoint.y / PIXELS_PER_METER;
-        const x2_m = x / PIXELS_PER_METER;
-        const y2_m = y / PIXELS_PER_METER;
+        const x2_m = world.x / PIXELS_PER_METER;
+        const y2_m = world.y / PIXELS_PER_METER;
 
-        // Calculate angle for robot orientation (perpendicular to line)
+        // Calculate angle for robot orientation (perpendicular to line, facing forward)
         const dx = x2_m - x1_m;
         const dy = y2_m - y1_m;
-        const angle_rad = Math.atan2(dy, dx) + Math.PI / 2; // Perpendicular to line
+        const angle_rad = Math.atan2(dy, dx) - Math.PI / 2; // FIX: -PI/2 para que mire hacia adelante en la pista
 
         // Calculate center point of line for robot position
         const center_x_m = (x1_m + x2_m) / 2;
