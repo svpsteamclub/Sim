@@ -174,25 +174,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let userLoopActive = false;
+    let userLoopToken = 0;
+
+    async function startUserLoop() {
+        const myToken = ++userLoopToken;
+        if (userLoopActive) return;
+        userLoopActive = true;
+
+        while (simulationRunning && myToken === userLoopToken) {
+            try {
+                await executeUserLoop();
+                // Breve espera para no saturar si el loop es muy corto
+                await new Promise(resolve => setTimeout(resolve, 1));
+            } catch (e) {
+                if (e.message !== "Abortado por reinicio") {
+                    console.error("Error en user loop:", e);
+                    stopSimulation();
+                    alert("Error en tu función loop(). Revisa el Monitor Serial.");
+                }
+                break;
+            }
+        }
+        userLoopActive = false;
+    }
+
     // --- Simulation Loop ---
-    async function simulationLoop(timestamp) {
+    function simulationLoop(timestamp) {
         if (!simulationRunning) return;
 
-        const deltaTime = (timestamp - lastFrameTime) / 1000.0; // Seconds
+        // Note: we don't 'await' anything here anymore to keep FPS high
+        const deltaTime = (timestamp - lastFrameTime) / 1000.0;
         lastFrameTime = timestamp;
 
-        // Execute user's Arduino-like code (loop function)
-        try {
-            await executeUserLoop(); // This will call analogWrite, updating robot.motorPWMSpeeds in simulationInstance
-        } catch (e) {
-            stopSimulation();
-            alert("Error en tu función loop(). La simulación se ha detenido. Revisa la consola y el Monitor Serial.");
-            return;
-        }
-
-        // Get PWMs that user code set (via analogWrite which updated robot.motorPWMSpeeds)
-        const userPWMs = simulationInstance.robot.motorPWMSpeeds; // {left, right}
-        // Alternative: const userPWMs = getMotorPWMOutputs();
+        // Get PWMs that user code set (set asynchronously by startUserLoop)
+        const userPWMs = simulationInstance.robot.motorPWMSpeeds;
 
         // Step the simulation physics and logic with these PWMs
         const simData = simulationInstance.simulationStep(userPWMs.left, userPWMs.right);
@@ -205,27 +221,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update UI
         drawCurrentSimulationState();
-        updateTelemetry({ // Pass relevant data for display
-            error: simData.pidTerms?.error, // If PID is internal to sim (not here)
-            pidTerms: simData.pidTerms,    // If PID is internal to sim (not here)
-            motorPWMs: { leftPWM: userPWMs.left, rightPWM: userPWMs.right, leftDirForward: true, rightDirForward: true }, // Assuming forward
+        updateTelemetry({
+            motorPWMs: { leftPWM: userPWMs.left, rightPWM: userPWMs.right, leftDirForward: true, rightDirForward: true },
             sensorStates: simData.sensorStates,
             simTime: simData.simTime_s,
             outOfBounds: simData.outOfBounds
         });
         updateLapTimerDisplay(simData.lapData);
-        elems.serialMonitorOutput.textContent = getSerialOutput(); // Update serial from codeEditor module
-        if (elems.serialMonitorOutput.textContent.length > 0) { // Auto-scroll serial
+
+        // El serial monitor se actualiza desde el loop asíncrono o aquí
+        elems.serialMonitorOutput.textContent = getSerialOutput();
+        if (elems.serialMonitorOutput.textContent.length > 0) {
             elems.serialMonitorOutput.scrollTop = elems.serialMonitorOutput.scrollHeight;
         }
 
-
         if (simData.outOfBounds) {
             stopSimulation();
-            // alert("¡El robot se salió de la pista!");
         }
 
-        if (simulationRunning) { // Check again, as errors might stop it
+        if (simulationRunning) {
             animationFrameId = requestAnimationFrame(simulationLoop);
         }
     }
@@ -256,6 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         simulationRunning = true;
+        startUserLoop(); // Lanzar el loop de código de usuario en paralelo
+
         elems.startSimButton.disabled = true;
         elems.stopSimButton.disabled = false;
         elems.resetSimButton.disabled = true; // Disable reset while running
@@ -272,6 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function _forceStop() {
         // Siempre detiene el loop y reactiva los botones, sin importar simulationRunning
         simulationRunning = false;
+        userLoopToken++; // CLAVE: Detener cualquier loop de usuario asíncrono que esté en medio de un delay
+
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
