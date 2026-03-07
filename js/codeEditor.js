@@ -229,28 +229,49 @@ void loop() {
  */
 function traducirArduinoAJS(codigoArduino) {
     let jsCode = codigoArduino.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // Tipos de datos de Arduino/C++ reconocidos (orden: más específico primero)
+    const TYPES = [
+        'unsigned\\s+long\\s+long', 'unsigned\\s+long', 'unsigned\\s+int',
+        'unsigned\\s+short', 'unsigned\\s+char',
+        'long\\s+long', 'long',
+        'boolean', 'bool',
+        'byte', 'word',
+        'unsigned',
+        'double', 'float',
+        'short', 'int',
+        'String', 'char',
+    ].join('|');
+
+    const TYPE_RE = new RegExp(`(?<![\\w.])(?:${TYPES})(?![\\w(])`, 'g');
+    const CONST_RE = new RegExp(`\\bconst\\s+(?:${TYPES})\\b`, 'g');
+    const FN_RE = new RegExp(`\\b(void|${TYPES})\\s+(\\w+)\\s*\\(([^)]*)\\)`, 'g');
+    const FN_ARG_RE = new RegExp(`\\b(?:const\\s+)?(?:${TYPES})\\s+[*&]*\\s*(\\w+)`, 'g');
+
     return jsCode
-        // 1. Elimina las librerías (#include <...>)
+        // FIX 3: #define MACRO valor  →  const MACRO = valor;
+        .replace(/^#define\s+(\w+)\s+(.+)$/gm, (_, name, val) => `const ${name} = ${val.trim()};`)
+        // Elimina directivas #include
         .replace(/#include\s*[<"].*?[>"]/g, '')
-        // 2. Elimina/ignora Serial.begin(baudios);
+        // Elimina Serial.begin(...)  (solo esta, las demás las maneja el objeto Serial inyectado)
         .replace(/\bSerial\s*\.\s*begin\s*\([^)]*\)\s*;/g, '')
-        // 3. Convierte Serial.print(ln) a console.log
-        .replace(/\bSerial\s*\.\s*println?\b/g, 'console.log')
-        // 4. Transforma funciones: elimina tipos de retorno y tipos de argumentos
-        .replace(/\b(void|int|float|double|long|bool|unsigned\s+long|String|char)\s+(\w+)\s*\(([^)]*)\)/g, (match, tipo, nombre, args) => {
-            let argsLimpios = args.replace(/\b(?:const\s+)?(?:unsigned\s+long|int|float|double|long|bool|String|char)\s+[\*\&]*\s*(\w+)/g, '$1');
-            if (nombre === 'setup') return `function setup(${argsLimpios})`;
+        // FIX 2: NO se convierte Serial.println/print → el objeto Serial ya está en la API inyectada
+        // Transforma definiciones de funciones: quita tipos de retorno y de argumentos
+        .replace(FN_RE, (match, tipo, nombre, args) => {
+            const argsLimpios = args.replace(FN_ARG_RE, '$1');
+            // FIX 1: setup es ahora async para poder usar await delay() dentro de ella
+            if (nombre === 'setup') return `async function setup(${argsLimpios})`;
             if (nombre === 'loop') return `async function loop(${argsLimpios})`;
             return `function ${nombre}(${argsLimpios})`;
         })
-        // 5. Constantes: C++ "const int" -> JS "const"
-        .replace(/\bconst\s+(?:unsigned\s+long|int|float|double|long|bool|String|char)\b/g, 'const')
-        // 6. Variables: C++ "int", "float" -> JS "let"
-        .replace(/\b(?:unsigned\s+long|int|float|double|long|bool|String|char)\b/g, 'let')
+        // FIX 4: "const byte/word/boolean/unsigned int/..." → "const"
+        .replace(CONST_RE, 'const')
+        // FIX 4: "byte/word/boolean/int/float/..." → "let"
+        .replace(TYPE_RE, 'let')
         // 7. Gestión de Tiempo: "delay(X)" -> "await delay(X)"
         .replace(/\bdelay\s*\(/g, 'await delay(')
-        // 8. Prevención de cuelgues: obliga delay(10) al final del loop
-        .replace(/(async\s+function\s+loop\s*\([^)]*\)\s*\{)([\s\S]*?)(\s*\})(?=\s*$|\s*function\b)/g,
+        // Prevención de cuelgues: fuerza await delay(10) al final del loop si no hay ninguno
+        .replace(/(async\s+function\s+loop\s*\([^)]*\)\s*\{)([\s\S]*?)(\s*\})(?=\s*$|\s*(?:async\s+)?function\b)/g,
             '$1$2\n    await delay(10);\n$3');
 }
 

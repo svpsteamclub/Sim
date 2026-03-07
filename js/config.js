@@ -15,7 +15,25 @@ export const DEFAULT_ROBOT_GEOMETRY = {
     sensorDiameter_m: 0.005, // Diámetro de cada punto sensor
     robotMass_kg: 0.25,
     comOffset_m: 0.0,
-    tireGrip: 0.8
+    tireGrip: 0.8,
+    connections: {
+        driverType: 'l298n',
+        sensorPins: {
+            farLeft: 'A0',
+            left: 'A2',
+            center: 'A4',
+            right: 'A3',
+            farRight: 'A5'
+        },
+        motorPins: {
+            leftEn: '3',
+            leftIn1: '11',
+            leftIn2: '9',
+            rightIn3: '10',
+            rightIn4: '6',
+            rightEn: '5'
+        }
+    }
 };
 
 // Para el PID del código de usuario de ejemplo (si lo usa)
