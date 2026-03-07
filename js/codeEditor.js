@@ -316,19 +316,27 @@ function traducirArduinoAJS(codigoArduino) {
     const FN_RE = new RegExp(`\\b(?:void|${TYPES})\\s+(\\w+)\\s*\\(([^)]*)\\)`, 'g');
     const FN_ARG_RE = new RegExp(`\\b(?:const\\s+)?(?:${TYPES})\\s+[*&]*\\s*(\\w+)`, 'g');
 
-    return jsCode
+    // 1. Extraer nombres de todas las funciones definidas por el usuario
+    const userFunctions = [];
+    let match;
+    // Reset lastIndex for safety
+    FN_RE.lastIndex = 0;
+    while ((match = FN_RE.exec(jsCode)) !== null) {
+        userFunctions.push(match[1]);
+    }
+
+    // 2. Transpilación básica
+    let transpiled = jsCode
         // #define MACRO valor  →  const MACRO = valor;
         .replace(/^#define\s+(\w+)\s+(.+)$/gm, (_, name, val) => `const ${name} = ${val.trim()};`)
         // Elimina directivas #include
         .replace(/#include\s*[<"].*?[>"]/g, '')
         // Elimina Serial.begin(...)
         .replace(/\bSerial\s*\.\s*begin\s*\([^)]*\)\s*;/g, '')
-        // Transforma definiciones de funciones
+        // Transforma TODAS las definiciones de funciones a async
         .replace(FN_RE, (match, nombre, args) => {
             const argsLimpios = args.replace(FN_ARG_RE, '$1');
-            if (nombre === 'setup') return `async function setup(${argsLimpios})`;
-            if (nombre === 'loop') return `async function loop(${argsLimpios})`;
-            return `function ${nombre}(${argsLimpios})`;
+            return `async function ${nombre}(${argsLimpios})`;
         })
         // "const int" -> "const"
         .replace(CONST_RE, 'const')
@@ -340,6 +348,23 @@ function traducirArduinoAJS(codigoArduino) {
         .replace(/\b(while|for)\s*\(([^)]+)\)\s*\{/g, '$1 ($2) { await delay(1); ')
         // MÁS SEGURO: Inyectar un micro-delay al inicio del loop
         .replace(/\b(async\s+function\s+loop\s*\([^)]*\)\s*\{)/g, '$1\n    await delay(1);\n');
+
+    // 3. Prefixing calls to user functions with await
+    const allAsyncFns = [...new Set([...userFunctions, 'setup', 'loop'])];
+    allAsyncFns.forEach(fnName => {
+        // Buscamos el nombre de la función seguido de '(' que NO sea precedido por 'function ' o 'async function '
+        // Usamos una estrategia de reemplazo que verifique el contexto previo manualmente si es necesario, 
+        // pero para transpilación simple esto suele bastar:
+        const callRE = new RegExp(`(\\s|^|;|\\{)\\b${fnName}\\s*\\(`, 'g');
+        transpiled = transpiled.replace(callRE, (match, p1) => {
+            // Si el match completo empieza con 'function' o 'async function', no reemplazamos
+            // (Aunque el regex anterior intenta evitarlo con el inicio de palabra \b)
+            if (match.includes('function')) return match;
+            return `${p1}await ${fnName}(`;
+        });
+    });
+
+    return transpiled;
 }
 
 export function initCodeEditor(simulationState) {
