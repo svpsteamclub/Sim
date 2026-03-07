@@ -144,7 +144,8 @@ export class Track {
 
         // Draw watermark if available
         if (this.watermarkImage && this.watermarkImage.complete && this.watermarkImage.naturalWidth > 0) {
-            const maxSize = Math.min(displayCanvasWidth, displayCanvasHeight) * 0.3; // Watermark size relative to canvas
+            // El watermark se dibuja sobre la pista, así que centramos y dimensionamos respecto a track size
+            const maxSize = Math.min(this.width_px, this.height_px) * 0.4;
             const aspectRatio = this.watermarkImage.naturalWidth / this.watermarkImage.naturalHeight;
             let watermarkWidth, watermarkHeight;
 
@@ -156,8 +157,8 @@ export class Track {
                 watermarkWidth = maxSize * aspectRatio;
             }
 
-            const x = (displayCanvasWidth - watermarkWidth) / 2;
-            const y = (displayCanvasHeight - watermarkHeight) / 2;
+            const x = (this.width_px - watermarkWidth) / 2;
+            const y = (this.height_px - watermarkHeight) / 2;
 
             displayCtx.save();
             displayCtx.globalAlpha = 0.10; // Watermark opacity

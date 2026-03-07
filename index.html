@@ -120,6 +120,9 @@
                             <button id="simZoomOutBtn" title="Alejar Cámara" class="cam-btn">-</button>
                             <button id="simFitTrackBtn" title="Pista Completa" class="cam-btn">[ ]</button>
                             <button id="simFollowRobotBtn" title="Seguir Robot" class="cam-btn">🤖</button>
+                            <button id="simFullscreenBtn" title="Pantalla Completa" class="cam-btn">🔲</button>
+                            <button id="simDemoBtn" title="Demo SVP 2025" class="cam-btn"
+                                style="margin-top: 10px;">🏎️</button>
                         </div>
                     </div>
                     <div class="simulation-controls">
@@ -270,9 +273,12 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                     <div class="preview-header">
                         <h3>Vista Previa del Robot</h3>
                         <div class="preview-controls">
-                            <button id="zoomInBtn" title="Acercar">+</button>
-                            <button id="zoomOutBtn" title="Alejar">−</button>
-                            <button id="zoomResetBtn" title="Resetear Zoom">1:1</button>
+                            <button id="editorPanBtn" title="Activar/Desactivar Paneo"
+                                style="margin-right: 0.5em; cursor: pointer;">✋</button>
+                            <button id="editorZoomInBtn" title="Acercar">+</button>
+                            <button id="editorZoomOutBtn" title="Alejar">−</button>
+                            <button id="editorZoomResetBtn" title="Resetear Zoom (1:1)">1:1</button>
+                            <button id="editorZoomExtentsBtn" title="Ajustar Vista">🔍</button>
                         </div>
                     </div>
                     <div class="preview-canvas-container">
@@ -382,8 +388,11 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFarLeft">
                             <span>Pin Sensor Extremo Izq.:</span>
                             <select id="pinSensorFarLeft">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
                                 <optgroup label="⚡ Analógicos (A0–A5)">
-                                    <option value="A0" selected>A0 — Analógico</option>
+                                    <option value="A0">A0 — Analógico</option>
                                     <option value="A1">A1 — Analógico</option>
                                     <option value="A2">A2 — Analógico</option>
                                     <option value="A3">A3 — Analógico</option>
@@ -409,10 +418,13 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         <div class="pin-row sensor-pin-config">
                             <span>Pin Sensor Izquierdo:</span>
                             <select id="pinSensorLeft">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
                                 <optgroup label="⚡ Analógicos (A0–A5)">
                                     <option value="A0">A0 — Analógico</option>
                                     <option value="A1">A1 — Analógico</option>
-                                    <option value="A2" selected>A2 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
                                     <option value="A3">A3 — Analógico</option>
                                     <option value="A4">A4 — Analógico / I2C SDA</option>
                                     <option value="A5">A5 — Analógico / I2C SCL</option>
@@ -436,12 +448,15 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         <div class="pin-row sensor-pin-config" id="rowSensorCenter">
                             <span>Pin Sensor Centro:</span>
                             <select id="pinSensorCenter">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
                                 <optgroup label="⚡ Analógicos (A0–A5)">
                                     <option value="A0">A0 — Analógico</option>
                                     <option value="A1">A1 — Analógico</option>
                                     <option value="A2">A2 — Analógico</option>
                                     <option value="A3">A3 — Analógico</option>
-                                    <option value="A4" selected>A4 — Analógico / I2C SDA</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
                                     <option value="A5">A5 — Analógico / I2C SCL</option>
                                 </optgroup>
                                 <optgroup label="🔵 Digitales (D2–D13)">
@@ -463,11 +478,14 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         <div class="pin-row sensor-pin-config">
                             <span>Pin Sensor Derecho:</span>
                             <select id="pinSensorRight">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
                                 <optgroup label="⚡ Analógicos (A0–A5)">
                                     <option value="A0">A0 — Analógico</option>
                                     <option value="A1">A1 — Analógico</option>
                                     <option value="A2">A2 — Analógico</option>
-                                    <option value="A3" selected>A3 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
                                     <option value="A4">A4 — Analógico / I2C SDA</option>
                                     <option value="A5">A5 — Analógico / I2C SCL</option>
                                 </optgroup>
@@ -490,13 +508,16 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFarRight">
                             <span>Pin Sensor Extremo Der.:</span>
                             <select id="pinSensorFarRight">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
                                 <optgroup label="⚡ Analógicos (A0–A5)">
                                     <option value="A0">A0 — Analógico</option>
                                     <option value="A1">A1 — Analógico</option>
                                     <option value="A2">A2 — Analógico</option>
                                     <option value="A3">A3 — Analógico</option>
                                     <option value="A4">A4 — Analógico / I2C SDA</option>
-                                    <option value="A5" selected>A5 — Analógico / I2C SCL</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
                                 </optgroup>
                                 <optgroup label="🔵 Digitales (D2–D13)">
                                     <option value="2">2 — Digital</option>

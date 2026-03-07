@@ -26,6 +26,7 @@ export function initRobotEditor(appInterface) {
     previewCtx = previewCanvas.getContext('2d');
     console.log("Zoom buttons found:", { in: !!elems.zoomInBtn, out: !!elems.zoomOutBtn, reset: !!elems.zoomResetBtn });
     window.renderRobotPreview = renderRobotPreview;
+    window.previewCenterOffset = { x: 0, y: 0 }; // Initialize for panning
 
     // Set fixed canvas size to 500x300 pixels (50cm x 30cm)
     previewCanvas.width = 500;
@@ -80,14 +81,59 @@ export function initRobotEditor(appInterface) {
     if (elems.zoomResetBtn) {
         elems.zoomResetBtn.addEventListener('click', () => setZoom(1.0));
     }
+    if (elems.zoomExtentsBtn) {
+        elems.zoomExtentsBtn.addEventListener('click', () => zoomExtents());
+    }
 
     window.getPreviewZoom = () => previewZoom;
+
+    function updateDisabledPins() {
+        // Obtenemos todos los selectores de pines relevantes (Sensores y Motores)
+        const sensorContainer = document.getElementById('sensorConnectionsContainer');
+        const motorContainer = elems.motorConnectionsContainer;
+        if (!sensorContainer && !motorContainer) return;
+
+        let allSelects = [];
+        if (sensorContainer) allSelects = allSelects.concat(Array.from(sensorContainer.querySelectorAll('select')));
+        if (motorContainer) allSelects = allSelects.concat(Array.from(motorContainer.querySelectorAll('select')));
+
+        // Recolectar pines en uso (ignorando repetibles como VCC y GND, o vacíos)
+        const usedPins = new Set();
+        allSelects.forEach(sel => {
+            const val = sel.value;
+            if (val && val !== 'VCC' && val !== 'GND') {
+                usedPins.add(val);
+            }
+        });
+
+        // Iterar de nuevo para deshabilitar las opciones usadas
+        allSelects.forEach(sel => {
+            const currentVal = sel.value;
+            Array.from(sel.options).forEach(opt => {
+                const optVal = opt.value;
+                if (!optVal || optVal === 'VCC' || optVal === 'GND' || opt.disabled === true && optVal === "") {
+                    // Mantenemos el placeholders "sin seleccionar" intacto
+                    return;
+                }
+
+                if (usedPins.has(optVal) && optVal !== currentVal) {
+                    opt.disabled = true;
+                    // opcional visual feedback (en uso)
+                    if (!opt.text.endsWith(' (En uso)')) opt.text += ' (En uso)';
+                } else {
+                    opt.disabled = false;
+                    opt.text = opt.text.replace(' (En uso)', '');
+                }
+            });
+        });
+    }
 
     window.forceGeometrySync = () => {
         currentGeometry = getFormValues();
         previewRobot.updateGeometry(currentGeometry);
         syncDecorativeSensorsWithGeometry();
         renderRobotPreview();
+        updateDisabledPins();
         updateDynamicCodeHelp(currentGeometry);
     };
 
@@ -98,9 +144,14 @@ export function initRobotEditor(appInterface) {
         const allPins = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
         const pins = pwmOnly ? pwmPins : allPins;
         const pwmSet = new Set(pwmPins);
-        const opts = pins.map(p => {
+
+        let opts = `<option value="" disabled selected>(sin seleccionar)</option>`;
+        opts += `<option value="VCC">Puente a Positivo (VCC)</option>`;
+        opts += `<option value="GND">Puente a Negativo (GND)</option>`;
+
+        opts += pins.map(p => {
             const label = pwmSet.has(p) ? `${p} — PWM~ / Digital` : `${p} — Digital`;
-            return `<option value="${p}"${p == defaultVal ? ' selected' : ''}>${label}</option>`;
+            return `<option value="${p}">${label}</option>`;
         }).join('');
         return `<select id="${id}">${opts}</select>`;
     }
@@ -113,55 +164,55 @@ export function initRobotEditor(appInterface) {
             html = `
                 <div class="pin-row">
                     <span><strong>Motor Izq.</strong> — ENA (PWM~):</span>
-                    ${pinSelect('pinMotorLeftEn', 3, true)}
+                    ${pinSelect('pinMotorLeftEn', '', true)}
                 </div>
                 <div class="pin-row">
                     <span>IN1 (dirección):</span>
-                    ${pinSelect('pinMotorLeftIn1', 11)}
+                    ${pinSelect('pinMotorLeftIn1', '')}
                 </div>
                 <div class="pin-row">
                     <span>IN2 (dirección):</span>
-                    ${pinSelect('pinMotorLeftIn2', 9)}
+                    ${pinSelect('pinMotorLeftIn2', '')}
                 </div>
                 <div class="pin-row" style="margin-top:0.5em;">
                     <span><strong>Motor Der.</strong> — ENB (PWM~):</span>
-                    ${pinSelect('pinMotorRightEn', 5, true)}
+                    ${pinSelect('pinMotorRightEn', '', true)}
                 </div>
                 <div class="pin-row">
                     <span>IN3 (dirección):</span>
-                    ${pinSelect('pinMotorRightIn3', 10)}
+                    ${pinSelect('pinMotorRightIn3', '')}
                 </div>
                 <div class="pin-row">
                     <span>IN4 (dirección):</span>
-                    ${pinSelect('pinMotorRightIn4', 6)}
+                    ${pinSelect('pinMotorRightIn4', '')}
                 </div>`;
         } else if (type === 'mx1616') {
             html = `
                 <div class="pin-row">
                     <span><strong>Motor Izq.</strong> — IN1 (PWM~):</span>
-                    ${pinSelect('pinMotorLeftIn1', 11, true)}
+                    ${pinSelect('pinMotorLeftIn1', '', true)}
                 </div>
                 <div class="pin-row">
                     <span>IN2 (PWM~):</span>
-                    ${pinSelect('pinMotorLeftIn2', 9, true)}
+                    ${pinSelect('pinMotorLeftIn2', '', true)}
                 </div>
                 <div class="pin-row" style="margin-top:0.5em;">
                     <span><strong>Motor Der.</strong> — IN3 (PWM~):</span>
-                    ${pinSelect('pinMotorRightIn3', 10, true)}
+                    ${pinSelect('pinMotorRightIn3', '', true)}
                 </div>
                 <div class="pin-row">
                     <span>IN4 (PWM~):</span>
-                    ${pinSelect('pinMotorRightIn4', 6, true)}
+                    ${pinSelect('pinMotorRightIn4', '', true)}
                 </div>`;
         } else { // single / ESCs
             html = `
                 <div class="pin-row">
                     <span><strong>Motor Izq. (ESC)</strong> — PWM~:</span>
-                    ${pinSelect('pinMotorLeftPWM', 9, true)}
+                    ${pinSelect('pinMotorLeftPWM', '', true)}
                 </div>
                 <div class="pin-row">
                     <span><strong>Motor Der. (ESC)</strong> — PWM~:</span>
-                    ${pinSelect('pinMotorRightPWM', 10, true)}
+                    ${pinSelect('pinMotorRightPWM', '', true)}
                 </div>`;
         }
         elems.motorConnectionsContainer.innerHTML = html;
@@ -231,6 +282,7 @@ export function initRobotEditor(appInterface) {
         //     window._defaultRobotLoaded = true;
         //     loadDefaultRobotJSON();
         // } else {
+        zoomExtents();
         renderRobotPreview();
         // }
     });
@@ -381,34 +433,34 @@ function getFormValues() {
     let motorPins = {};
     if (driverType === 'l298n') {
         motorPins = {
-            leftEn: document.getElementById('pinMotorLeftEn')?.value || '3',
-            leftIn1: document.getElementById('pinMotorLeftIn1')?.value || '11',
-            leftIn2: document.getElementById('pinMotorLeftIn2')?.value || '9',
-            rightIn3: document.getElementById('pinMotorRightIn3')?.value || '10',
-            rightIn4: document.getElementById('pinMotorRightIn4')?.value || '6',
-            rightEn: document.getElementById('pinMotorRightEn')?.value || '5'
+            leftEn: document.getElementById('pinMotorLeftEn')?.value || '',
+            leftIn1: document.getElementById('pinMotorLeftIn1')?.value || '',
+            leftIn2: document.getElementById('pinMotorLeftIn2')?.value || '',
+            rightIn3: document.getElementById('pinMotorRightIn3')?.value || '',
+            rightIn4: document.getElementById('pinMotorRightIn4')?.value || '',
+            rightEn: document.getElementById('pinMotorRightEn')?.value || ''
         };
     } else if (driverType === 'mx1616') {
         motorPins = {
-            leftIn1: document.getElementById('pinMotorLeftIn1')?.value || '11',
-            leftIn2: document.getElementById('pinMotorLeftIn2')?.value || '9',
-            rightIn3: document.getElementById('pinMotorRightIn3')?.value || '10',
-            rightIn4: document.getElementById('pinMotorRightIn4')?.value || '6'
+            leftIn1: document.getElementById('pinMotorLeftIn1')?.value || '',
+            leftIn2: document.getElementById('pinMotorLeftIn2')?.value || '',
+            rightIn3: document.getElementById('pinMotorRightIn3')?.value || '',
+            rightIn4: document.getElementById('pinMotorRightIn4')?.value || ''
         };
     } else { // single / ESCs
         motorPins = {
-            leftPWM: document.getElementById('pinMotorLeftPWM')?.value || '9',
-            rightPWM: document.getElementById('pinMotorRightPWM')?.value || '10'
+            leftPWM: document.getElementById('pinMotorLeftPWM')?.value || '',
+            rightPWM: document.getElementById('pinMotorRightPWM')?.value || ''
         };
     }
 
     const connections = {
         sensorPins: {
-            farLeft: elems.pinSensorFarLeftInput?.value || 'A0',
-            left: elems.pinSensorLeftInput?.value || 'A2',
-            center: elems.pinSensorCenterInput?.value || 'A4',
-            right: elems.pinSensorRightInput?.value || 'A3',
-            farRight: elems.pinSensorFarRightInput?.value || 'A5',
+            farLeft: elems.pinSensorFarLeftInput?.value || '',
+            left: elems.pinSensorLeftInput?.value || '',
+            center: elems.pinSensorCenterInput?.value || '',
+            right: elems.pinSensorRightInput?.value || '',
+            farRight: elems.pinSensorFarRightInput?.value || '',
         },
         driverType: driverType,
         motorPins: motorPins
@@ -476,20 +528,20 @@ function setFormValues(geometry) {
             // Now populate the inputs if they exist
             setTimeout(() => { // wait a tick for DOM update
                 if (c.driverType === 'l298n') {
-                    const lEn = document.getElementById('pinMotorLeftEn'); if (lEn) lEn.value = c.motorPins.leftEn || '3';
-                    const lIn1 = document.getElementById('pinMotorLeftIn1'); if (lIn1) lIn1.value = c.motorPins.leftIn1 || '11';
-                    const lIn2 = document.getElementById('pinMotorLeftIn2'); if (lIn2) lIn2.value = c.motorPins.leftIn2 || '9';
-                    const rIn3 = document.getElementById('pinMotorRightIn3'); if (rIn3) rIn3.value = c.motorPins.rightIn3 || '10';
-                    const rIn4 = document.getElementById('pinMotorRightIn4'); if (rIn4) rIn4.value = c.motorPins.rightIn4 || '6';
-                    const rEn = document.getElementById('pinMotorRightEn'); if (rEn) rEn.value = c.motorPins.rightEn || '5';
+                    const lEn = document.getElementById('pinMotorLeftEn'); if (lEn) lEn.value = c.motorPins.leftEn || '';
+                    const lIn1 = document.getElementById('pinMotorLeftIn1'); if (lIn1) lIn1.value = c.motorPins.leftIn1 || '';
+                    const lIn2 = document.getElementById('pinMotorLeftIn2'); if (lIn2) lIn2.value = c.motorPins.leftIn2 || '';
+                    const rIn3 = document.getElementById('pinMotorRightIn3'); if (rIn3) rIn3.value = c.motorPins.rightIn3 || '';
+                    const rIn4 = document.getElementById('pinMotorRightIn4'); if (rIn4) rIn4.value = c.motorPins.rightIn4 || '';
+                    const rEn = document.getElementById('pinMotorRightEn'); if (rEn) rEn.value = c.motorPins.rightEn || '';
                 } else if (c.driverType === 'mx1616') {
-                    const lIn1 = document.getElementById('pinMotorLeftIn1'); if (lIn1) lIn1.value = c.motorPins.leftIn1 || '11';
-                    const lIn2 = document.getElementById('pinMotorLeftIn2'); if (lIn2) lIn2.value = c.motorPins.leftIn2 || '9';
-                    const rIn3 = document.getElementById('pinMotorRightIn3'); if (rIn3) rIn3.value = c.motorPins.rightIn3 || '10';
-                    const rIn4 = document.getElementById('pinMotorRightIn4'); if (rIn4) rIn4.value = c.motorPins.rightIn4 || '6';
+                    const lIn1 = document.getElementById('pinMotorLeftIn1'); if (lIn1) lIn1.value = c.motorPins.leftIn1 || '';
+                    const lIn2 = document.getElementById('pinMotorLeftIn2'); if (lIn2) lIn2.value = c.motorPins.leftIn2 || '';
+                    const rIn3 = document.getElementById('pinMotorRightIn3'); if (rIn3) rIn3.value = c.motorPins.rightIn3 || '';
+                    const rIn4 = document.getElementById('pinMotorRightIn4'); if (rIn4) rIn4.value = c.motorPins.rightIn4 || '';
                 } else { // single / ESCs
-                    const lPWM = document.getElementById('pinMotorLeftPWM'); if (lPWM) lPWM.value = c.motorPins.leftPWM || '9';
-                    const rPWM = document.getElementById('pinMotorRightPWM'); if (rPWM) rPWM.value = c.motorPins.rightPWM || '10';
+                    const lPWM = document.getElementById('pinMotorLeftPWM'); if (lPWM) lPWM.value = c.motorPins.leftPWM || '';
+                    const rPWM = document.getElementById('pinMotorRightPWM'); if (rPWM) rPWM.value = c.motorPins.rightPWM || '';
                 }
                 // Trigger geometry sync after setting values
                 if (window.forceGeometrySync) { window.forceGeometrySync(); }
@@ -550,6 +602,69 @@ function drawDimensionLine(ctx, startX, startY, endX, endY, offset, text) {
     ctx.restore();
 }
 
+/**
+ * Ajusta el zoom para que el robot completo y sus piezas quepan en la vista
+ */
+export function zoomExtents() {
+    if (!previewRobot || !previewCanvas) return;
+
+    console.log("Calculating zoom extents...");
+    // 1. Determinar límites en metros
+    // Empezamos con el chasis básico (ruedas y sensores básicos)
+    let minX = -previewRobot.wheelbase_m / 2 - 0.02; // +2cm margin
+    let maxX = previewRobot.wheelbase_m / 2 + 0.02;
+    let minY = -previewRobot.sensorForwardProtrusion_m - 0.04; // +4cm margin forward for sensors
+    let maxY = 0.04; // +4cm margin backward
+
+    // Incluir piezas decorativas si existen
+    if (window.placedParts && window.placedParts.length > 0) {
+        window.placedParts.forEach(part => {
+            // Posición de la pieza en metros relativa al centro del canvas (origen del robot)
+            const px_m = (part.x - previewCanvas.width / 2) / PIXELS_PER_METER;
+            const py_m = (part.y - previewCanvas.height / 2) / PIXELS_PER_METER;
+
+            // Tamaño de la pieza en metros
+            let hw = 0.025; // Default radio 2.5cm
+            let hh = 0.025;
+
+            if (part.img && part.img.complete) {
+                hw = (part.img.width / 2) / PIXELS_PER_METER;
+                hh = (part.img.height / 2) / PIXELS_PER_METER;
+            }
+
+            minX = Math.min(minX, px_m - hw);
+            maxX = Math.max(maxX, px_m + hw);
+            minY = Math.min(minY, py_m - hh);
+            maxY = Math.max(maxY, py_m + hh);
+        });
+    }
+
+    const width_m = maxX - minX;
+    const height_m = maxY - minY;
+
+    // Guardar el centro del robot para usarlo en el renderizado
+    window.previewCenterOffset = {
+        x: (minX + maxX) / 2,
+        y: (minY + maxY) / 2
+    };
+
+    console.log("Robot bounds (m):", { minX, maxX, minY, maxY, width_m, height_m, center: window.previewCenterOffset });
+
+    // 2. Calcular zoom para encajar en 500x300 con margen del 15%
+    const margin = 0.85;
+    const zoomX = (previewCanvas.width * margin) / (width_m * PIXELS_PER_METER);
+    const zoomY = (previewCanvas.height * margin) / (height_m * PIXELS_PER_METER);
+
+    // Usamos el menor de los dos para asegurar que quepa en ambas dimensiones
+    let bestZoom = Math.min(zoomX, zoomY);
+
+    // Limitar al rango permitido
+    previewZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, bestZoom));
+
+    console.log("Auto-zoom calculated:", previewZoom);
+    renderRobotPreview();
+}
+
 export function renderRobotPreview() {
     if (!previewCtx || !previewRobot) {
         console.error("Missing previewCtx or previewRobot:", { previewCtx: !!previewCtx, previewRobot: !!previewRobot });
@@ -569,28 +684,33 @@ export function renderRobotPreview() {
     // Clear the canvas
     previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 
-    // Draw center guides
+    // We used to draw center guides here, but it's better to draw them after translation
+
     previewCtx.save();
-    previewCtx.strokeStyle = '#bbb';
+    // Centrar el rectángulo contenedor del robot en el canvas
+    const offsetX = window.previewCenterOffset ? window.previewCenterOffset.x * PIXELS_PER_METER : 0;
+    const offsetY = window.previewCenterOffset ? window.previewCenterOffset.y * PIXELS_PER_METER : 0;
+
+    previewCtx.translate(previewCanvas.width / 2 - offsetX * previewZoom, previewCanvas.height / 2 - offsetY * previewZoom);
+    previewCtx.scale(previewZoom, previewZoom);
+
+    // Draw center guides explicitly within the world coordinates
+    previewCtx.save();
+    previewCtx.strokeStyle = 'rgba(187, 187, 187, 0.5)';
     previewCtx.lineWidth = 1;
     previewCtx.setLineDash([5, 5]); // Dashed line
     // Vertical center line
     previewCtx.beginPath();
-    previewCtx.moveTo(previewCanvas.width / 2, 0);
-    previewCtx.lineTo(previewCanvas.width / 2, previewCanvas.height);
+    previewCtx.moveTo(0, -2000);
+    previewCtx.lineTo(0, 2000);
     previewCtx.stroke();
     // Horizontal center line
     previewCtx.beginPath();
-    previewCtx.moveTo(0, previewCanvas.height / 2);
-    previewCtx.lineTo(previewCanvas.width, previewCanvas.height / 2);
+    previewCtx.moveTo(-2000, 0);
+    previewCtx.lineTo(2000, 0);
     previewCtx.stroke();
     previewCtx.setLineDash([]); // Reset dash
     previewCtx.restore();
-
-    previewCtx.save();
-    // Center the robot in the preview canvas and apply zoom
-    previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
-    previewCtx.scale(previewZoom, previewZoom);
 
     // Draw robot
     const tempX = previewRobot.x_m;
@@ -622,7 +742,7 @@ export function renderRobotPreview() {
     drawDimensionLine(previewCtx,
         wheelbaseStartX, 20, // Horizontal line above
         wheelbaseEndX, 20,
-        20, `${(previewRobot.wheelbase_m * 100).toFixed(1)} cm`);
+        20, `${(previewRobot.wheelbase_m * 1000).toFixed(1)} mm`);
 
     // Sensor offset (vertical dimension, offset to the left)
     const sensorLineY = 0;
@@ -630,7 +750,7 @@ export function renderRobotPreview() {
     drawDimensionLine(previewCtx,
         -wheelbaseOffset, sensorLineY, // Offset to the left
         -wheelbaseOffset, sensorLineYEnd,
-        20, `${(previewRobot.sensorForwardProtrusion_m * 100).toFixed(1)} cm`);
+        20, `${(previewRobot.sensorForwardProtrusion_m * 1000).toFixed(1)} mm`);
 
     // Sensor spread (horizontal dimension, above sensors)
     const sensorSpreadStartX = -previewRobot.sensorSideSpread_m * PIXELS_PER_METER;
@@ -639,23 +759,19 @@ export function renderRobotPreview() {
     drawDimensionLine(previewCtx,
         sensorSpreadStartX, sensorSpreadYOffset,
         sensorSpreadEndX, sensorSpreadYOffset,
-        20, `${(previewRobot.sensorSideSpread_m * 200).toFixed(1)} cm`);
+        20, `${(previewRobot.sensorSideSpread_m * 2000).toFixed(1)} mm`);
 
     // Restore robot's original position
     previewRobot.x_m = tempX;
     previewRobot.y_m = tempY;
     previewRobot.angle_rad = tempAngle;
 
-    previewCtx.restore();
-
     console.log("Drawing decorative parts...");
-    // Draw decorative parts
+    // Draw decorative parts inside the transformed context
     drawRobotPreview(previewZoom);
 
     // Draw sensors on top
     previewCtx.save();
-    previewCtx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
-    previewCtx.scale(previewZoom, previewZoom);
 
     // Draw Center of Mass Symbol
     const comY_px = -previewRobot.comOffset_m * PIXELS_PER_METER;
@@ -705,6 +821,11 @@ export function renderRobotPreview() {
     previewRobot.x_m = tempX;
     previewRobot.y_m = tempY;
     previewRobot.angle_rad = tempAngle;
+
+    // Restore the main coordinate translation
+    previewCtx.restore();
+
+    // Pop the very first save() that setup the scaling/translation matrix
     previewCtx.restore();
 }
 
@@ -756,9 +877,10 @@ async function initRobotSelectionDropdown() {
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = 'Seleccionar robot...';
+    defaultOption.selected = true; // <--- Seleccionado por defecto para forzar cambio al elegir uno
     dropdown.appendChild(defaultOption);
 
-    // Add predefined robots (Robot Genérico OnOff como primero y seleccionado por defecto)
+    // Add predefined robots
     const robots = [
         { name: 'Robot Genérico OnOff', file: 'Robot Generico OnOff.json' },
         { name: 'SL Genérico', file: 'SL Generico.json' },
@@ -769,7 +891,6 @@ async function initRobotSelectionDropdown() {
         const option = document.createElement('option');
         option.value = robot.file;
         option.textContent = robot.name;
-        if (idx === 0) option.selected = true; // Selecciona por defecto el primero
         dropdown.appendChild(option);
     });
 
@@ -798,6 +919,7 @@ async function initRobotSelectionDropdown() {
             // Notificar a la simulación
             if (mainAppInterface && typeof mainAppInterface.updateRobotGeometry === 'function') {
                 const decorativeParts = window.getPlacedParts ? window.getPlacedParts() : [];
+                zoomExtents();
                 mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
             }
         } catch (err) {
@@ -807,7 +929,7 @@ async function initRobotSelectionDropdown() {
     });
 
     // Selecciona y carga el robot por defecto al iniciar
-    dropdown.value = robots[0].file;
+    // dropdown.value = robots[0].file;
     // const event = new Event('change');
     // dropdown.dispatchEvent(event);
 }

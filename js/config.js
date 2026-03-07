@@ -20,16 +20,21 @@ export const DEFAULT_ROBOT_GEOMETRY = {
     connections: {
         driverType: 'l298n',
         sensorPins: {
-            left: 'A2',
-            right: 'A3'
+            left: '',
+            center: '',
+            right: '',
+            farLeft: '',
+            farRight: ''
         },
         motorPins: {
-            leftEn: '3',
-            leftIn1: '11',
-            leftIn2: '9',
-            rightIn3: '10',
-            rightIn4: '6',
-            rightEn: '5'
+            leftEn: '',
+            leftIn1: '',
+            leftIn2: '',
+            rightIn3: '',
+            rightIn4: '',
+            rightEn: '',
+            leftPWM: '',
+            rightPWM: ''
         }
     }
 };

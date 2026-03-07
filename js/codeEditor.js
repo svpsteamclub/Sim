@@ -344,7 +344,9 @@ function traducirArduinoAJS(codigoArduino) {
         .replace(TYPE_RE, 'let')
         // delay(X) -> await delay(X)
         .replace(/\bdelay\s*\(/g, 'await delay(')
-        // MÁS SEGURO: Inyectar await delay(1) en bucles while/for para evitar que congelen el navegador
+        // MÁS SEGURO: Soporte para while(condicion); vacío
+        .replace(/\b(while|for)\s*\(([^)]+)\)\s*;/g, '$1 ($2) { await delay(1); }')
+        // MÁS SEGURO: Inyectar await delay(1) en bucles while/for con llaves
         .replace(/\b(while|for)\s*\(([^)]+)\)\s*\{/g, '$1 ($2) { await delay(1); ')
         // MÁS SEGURO: Inyectar un micro-delay al inicio del loop
         .replace(/\b(async\s+function\s+loop\s*\([^)]*\)\s*\{)/g, '$1\n    await delay(1);\n');

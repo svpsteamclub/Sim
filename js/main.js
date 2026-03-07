@@ -40,6 +40,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isPlacingStartLineSim = false;
     let lastPlacedStartLineSim = null;
+    let isDemoMode = false;
+
+    const DEMO_GEOMETRY = {
+        width_m: 0.10, length_m: 0.15, sensorOffset_m: 0.05, sensorSpread_m: 0.035,
+        sensorDiameter_m: 0.005, sensorCount: 3, robotMass_kg: 0.25,
+        comOffset_m: 0.0, tireGrip: 0.8,
+        connections: {
+            driverType: 'l298n',
+            sensorPins: { left: 'A1', center: 'A2', right: 'A3', farLeft: '', farRight: '' },
+            motorPins: { leftEn: '10', leftIn1: '3', leftIn2: '5', rightIn3: '6', rightIn4: '9', rightEn: '11', leftPWM: '', rightPWM: '' }
+        }
+    };
+
+    const DEMO_CODE = `// --- Configuración de Pines ---
+const int S_IZQ = A1;
+const int S_CEN = A2; // Sensor central añadido
+const int S_DER = A3;
+
+// Motor Izquierdo
+const int ENA = 10; 
+const int IN1 = 3;
+const int IN2 = 5;
+
+// Motor Derecho
+const int ENB = 11; 
+const int IN3 = 6;
+const int IN4 = 9;
+
+// --- Variables de Control ---
+int vel = 160;            
+int ultima_dir = 0;       // 0: Centro, 1: Izq, 2: Der
+bool turnoDerecha = true; 
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("--- Robot 3-Sensores (6-Pines) Iniciado ---");
+
+  pinMode(S_IZQ, INPUT);
+  pinMode(S_CEN, INPUT);
+  pinMode(S_DER, INPUT);
+  
+  pinMode(ENA, OUTPUT); pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT); pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+}
+
+void loop() {
+  int sIzq = digitalRead(S_IZQ);
+  int sCen = digitalRead(S_CEN);
+  int sDer = digitalRead(S_DER);
+
+  // 1. DETECCIÓN DE INTERSECCIÓN (Los 3 sensores o extremos detectan línea)
+  if (sIzq == HIGH && sDer == HIGH) {
+    if (turnoDerecha) {
+      Serial.println("INTERSECCION: Giro programado DERECHA");
+      girar_der_fuerte();
+      delay(350); 
+      while(digitalRead(S_CEN) == LOW); // Gira hasta que el centro encuentre la línea
+      turnoDerecha = false;
+    } else {
+      Serial.println("INTERSECCION: Giro programado IZQUIERDA");
+      girar_izq_fuerte();
+      delay(350);
+      while(digitalRead(S_CEN) == LOW); 
+      turnoDerecha = true;
+    }
+  }
+
+  // 2. SEGUIMIENTO DE LÍNEA
+  else if (sCen == HIGH) {
+    Serial.println("Estado: CENTRADO");
+    avanzar();
+    ultima_dir = 0;
+  }
+  else if (sIzq == HIGH) {
+    Serial.println("Estado: CORRIGIENDO IZQUIERDA");
+    girar_izq_suave();
+    ultima_dir = 1;
+  }
+  else if (sDer == HIGH) {
+    Serial.println("Estado: CORRIGIENDO DERECHA");
+    girar_der_suave();
+    ultima_dir = 2;
+  }
+
+  // 3. MEMORIA DE GIRO (Si todos están en blanco / 0)
+  else {
+    if (ultima_dir == 1) {
+      Serial.println("MEMORIA: Buscando a la IZQUIERDA");
+      girar_izq_fuerte();
+    } else if (ultima_dir == 2) {
+      Serial.println("MEMORIA: Buscando a la DERECHA");
+      girar_der_fuerte();
+    } else {
+      avanzar_lento(); // Si se pierde recto, busca al frente
+    }
+  }
+}
+
+// --- Funciones de Movimiento ---
+
+void avanzar() {
+  analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void avanzar_lento() {
+  analogWrite(ENA, 100); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  analogWrite(ENB, 100); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void girar_izq_suave() {
+  analogWrite(ENA, 80);  digitalWrite(IN1, LOW);  digitalWrite(IN2, LOW);
+  analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void girar_der_suave() {
+  analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  analogWrite(ENB, 80);  digitalWrite(IN3, LOW);  digitalWrite(IN4, LOW);
+}
+
+void girar_izq_fuerte() {
+  analogWrite(ENA, vel); digitalWrite(IN1, LOW);  digitalWrite(IN2, HIGH); 
+  analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);  
+}
+
+void girar_der_fuerte() {
+  analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);  
+  analogWrite(ENB, vel); digitalWrite(IN3, LOW);  digitalWrite(IN4, HIGH); 
+}`;
 
     // --- Main App Interface for modules ---
     const mainAppInterface = {
@@ -258,6 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        isDemoMode = false;
+
         // Ensure latest code from editor is loaded
         if (!loadUserCode(window.monacoEditor.getValue())) {
             alert("Error en el código del robot. No se puede iniciar la simulación. Revisa el Monitor Serial.");
@@ -266,7 +397,22 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCodeTypeDisplay(getCurrentCodeType()); // Update code type display
 
         // Ensure latest simulation parameters are applied
-        applySimulationParameters();
+        const params = getSimulationParamsFromUI();
+        params.robotGeometry = getCurrentRobotGeometry();
+        simulationInstance.updateParameters(params);
+
+        // Reset simulation instance position based on latest geometry 
+        // to avoid snapping issues if the user changed geometry
+        const currentGeo = simulationInstance.getCurrentRobotGeometry();
+        let startX = simulationInstance.robot.x_m, startY = simulationInstance.robot.y_m, startAngle = simulationInstance.robot.angle_rad;
+        if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
+            startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
+            startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
+            const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
+            const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
+            startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+        }
+        simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
 
         try {
             await executeUserSetup(); // Run user's setup() function
@@ -317,6 +463,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function resetSimulation() {
         _forceStop(); // Siempre fuerza la parada (no depende de simulationRunning)
         if (simulationInstance) {
+            if (!isDemoMode) {
+                const params = getSimulationParamsFromUI();
+                params.robotGeometry = getCurrentRobotGeometry();
+                simulationInstance.updateParameters(params);
+            }
+
             const currentGeo = simulationInstance.getCurrentRobotGeometry();
 
             // Get the original start position from the lap timer's start line
@@ -332,7 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
 
             // Reload user code and re-run setup (awaited so it's fully ready before drawing)
-            if (loadUserCode(window.monacoEditor.getValue())) {
+            const codeToLoad = isDemoMode ? DEMO_CODE : window.monacoEditor.getValue();
+            if (loadUserCode(codeToLoad)) {
                 try {
                     await executeUserSetup();
                 } catch (e) {
@@ -374,8 +527,77 @@ document.addEventListener('DOMContentLoaded', () => {
     function applySimulationParameters() {
         if (simulationInstance) {
             const params = getSimulationParamsFromUI();
+            if (!isDemoMode) {
+                params.robotGeometry = getCurrentRobotGeometry();
+            } else {
+                params.robotGeometry = DEMO_GEOMETRY;
+            }
             simulationInstance.updateParameters(params);
         }
+    }
+
+    async function startDemoSimulation() {
+        console.log('[DEMO] startDemoSimulation called. simulationInstance:', !!simulationInstance, 'track.imageData:', !!(simulationInstance && simulationInstance.track.imageData));
+        if (simulationRunning) stopSimulation();
+        if (!simulationInstance || !simulationInstance.track.imageData) {
+            alert("Carga una pista antes de reproducir la Demo.");
+            return;
+        }
+
+        const confirmDemo = confirm(
+            "Se iniciará una simulación demostrativa con un Robot SVP 2025 (3 sensores) y código Arduino precargado.\n\n" +
+            "Tus diseños y códigos actuales en los otros paneles se conservarán intactos y volverán a cargarse automáticamente al terminar la prueba y presionar 'Iniciar'.\n\n" +
+            "¿Continuar?"
+        );
+
+        if (!confirmDemo) return;
+
+        isDemoMode = true;
+
+        const params = getSimulationParamsFromUI();
+        params.robotGeometry = DEMO_GEOMETRY;
+        simulationInstance.updateParameters(params);
+
+        if (!loadUserCode(DEMO_CODE)) {
+            alert("Error al cargar código Demo.");
+            return;
+        }
+        updateCodeTypeDisplay('arduino');
+
+        // Position the robot at the start line FIRST, then show it
+        let startX = simulationInstance.robot.x_m, startY = simulationInstance.robot.y_m, startAngle = simulationInstance.robot.angle_rad;
+        if (simulationInstance.track.imageData && simulationInstance.lapTimer.startLine) {
+            startX = (simulationInstance.lapTimer.startLine.x1 + simulationInstance.lapTimer.startLine.x2) / 2;
+            startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
+            const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
+            const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
+            startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+        }
+        simulationInstance.resetSimulationState(startX, startY, startAngle, DEMO_GEOMETRY);
+        simulationInstance.robotVisible = true;
+        console.log('[DEMO] Robot positioned at:', startX, startY, startAngle, '| visible:', simulationInstance.robotVisible);
+        drawCurrentSimulationState();
+
+        try {
+            await executeUserSetup();
+        } catch (e) {
+            alert("Error en la demostración.");
+            return;
+        }
+
+        simulationRunning = true;
+        startUserLoop();
+
+        elems.startSimButton.disabled = true;
+        elems.stopSimButton.disabled = false;
+        elems.resetSimButton.disabled = true;
+        if (window.monacoEditor) {
+            window.monacoEditor.updateOptions({ readOnly: true });
+        }
+        elems.applySimParamsButton.disabled = true;
+
+        lastFrameTime = performance.now();
+        animationFrameId = requestAnimationFrame(simulationLoop);
     }
 
     // --- Event Listeners for UI ---
@@ -399,6 +621,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const simZoomOutBtn = document.getElementById('simZoomOutBtn');
     const simFitTrackBtn = document.getElementById('simFitTrackBtn');
     const simFollowRobotBtn = document.getElementById('simFollowRobotBtn');
+    const simFullscreenBtn = document.getElementById('simFullscreenBtn');
+    const simDemoBtn = document.getElementById('simDemoBtn');
+    const simulationLayout = document.querySelector('.simulation-layout');
+
+    if (simDemoBtn) {
+        simDemoBtn.addEventListener('click', startDemoSimulation);
+    }
 
     simZoomInBtn.addEventListener('click', () => {
         if (simulationInstance) {
@@ -433,6 +662,50 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    const resizeCanvasForSimulation = () => {
+        if (elems.simulationDisplayCanvas) {
+            const displayW = elems.simulationDisplayCanvas.offsetWidth || 700;
+            const displayH = elems.simulationDisplayCanvas.offsetHeight || 500;
+            elems.simulationDisplayCanvas.width = displayW;
+            elems.simulationDisplayCanvas.height = displayH;
+            if (simulationInstance) drawCurrentSimulationState();
+        }
+    };
+
+    if (simFullscreenBtn) {
+        simFullscreenBtn.addEventListener('click', () => {
+            if (!simulationLayout.classList.contains('is-fullscreen')) {
+                simulationLayout.classList.add('is-fullscreen');
+                if (simulationLayout.requestFullscreen) {
+                    simulationLayout.requestFullscreen().catch(err => console.error("Error intentando fullscreen:", err));
+                }
+            } else {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    simulationLayout.classList.remove('is-fullscreen');
+                    resizeCanvasForSimulation();
+                }
+            }
+            // Retraso para dejar que el layout cambie
+            setTimeout(resizeCanvasForSimulation, 50);
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                simulationLayout.classList.remove('is-fullscreen');
+            }
+            setTimeout(resizeCanvasForSimulation, 50);
+        });
+
+        // Also listen to window resize just in case
+        window.addEventListener('resize', () => {
+            if (simulationLayout.classList.contains('is-fullscreen')) {
+                resizeCanvasForSimulation();
+            }
+        });
+    }
 
     // Botón para ubicar línea de comienzo en simulación
     const placeStartLineSimButton = document.getElementById('placeStartLineSimButton');

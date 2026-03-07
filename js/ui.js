@@ -49,9 +49,11 @@ export function getDOMElements() {
         saveRobotButton: document.getElementById('saveRobotButton'),
         loadRobotInput: document.getElementById('loadRobotInput'),
         robotSelectionDropdown: document.getElementById('robotSelectionDropdown'),
-        zoomInBtn: document.getElementById('zoomInBtn'),
-        zoomOutBtn: document.getElementById('zoomOutBtn'),
-        zoomResetBtn: document.getElementById('zoomResetBtn'),
+        editorPanBtn: document.getElementById('editorPanBtn'),
+        zoomInBtn: document.getElementById('editorZoomInBtn'),
+        zoomOutBtn: document.getElementById('editorZoomOutBtn'),
+        zoomResetBtn: document.getElementById('editorZoomResetBtn'),
+        zoomExtentsBtn: document.getElementById('editorZoomExtentsBtn'),
 
         // Pin Connections UI
         sensorConnectionsContainer: document.getElementById('sensorConnectionsContainer'),
@@ -204,8 +206,48 @@ export function updateDynamicCodeHelp(geometry) {
     const sensorPins = c.sensorPins;
     const count = geometry.sensorCount;
 
+    // Helper to format pin
+    const fmtPin = (p) => (p && p.trim() !== '') ? p : null;
+
+    // Build quick reference list
+    let pinsHtml = `<div style="background: rgba(255,255,255,0.5); padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 0.9em;">
+<b>📌 Referencia Rápida de Pines (En Uso):</b><br>
+<ul style="margin: 5px 0 0 20px; padding: 0;">`;
+
+    // Sensors
+    if (count >= 5 && fmtPin(sensorPins.farLeft)) pinsHtml += `<li><b>${sensorPins.farLeft}</b>: Sensor Izquierdo (Externo)</li>`;
+    if (count >= 2 && fmtPin(sensorPins.left)) pinsHtml += `<li><b>${sensorPins.left}</b>: Sensor Izquierdo</li>`;
+    if ((count == 1 || count == 3 || count == 5) && fmtPin(sensorPins.center)) pinsHtml += `<li><b>${sensorPins.center}</b>: Sensor Central</li>`;
+    if (count >= 2 && fmtPin(sensorPins.right)) pinsHtml += `<li><b>${sensorPins.right}</b>: Sensor Derecho</li>`;
+    if (count >= 5 && fmtPin(sensorPins.farRight)) pinsHtml += `<li><b>${sensorPins.farRight}</b>: Sensor Derecho (Externo)</li>`;
+
+    // Motors
+    if (driverType === 'l298n') {
+        if (fmtPin(motorPins.leftEn)) pinsHtml += `<li><b>${motorPins.leftEn}</b>: Motor Izq. ENA (PWM)</li>`;
+        if (fmtPin(motorPins.leftIn1)) pinsHtml += `<li><b>${motorPins.leftIn1}</b>: Motor Izq. IN1 (Dir)</li>`;
+        if (fmtPin(motorPins.leftIn2)) pinsHtml += `<li><b>${motorPins.leftIn2}</b>: Motor Izq. IN2 (Dir)</li>`;
+        if (fmtPin(motorPins.rightIn3)) pinsHtml += `<li><b>${motorPins.rightIn3}</b>: Motor Der. IN3 (Dir)</li>`;
+        if (fmtPin(motorPins.rightIn4)) pinsHtml += `<li><b>${motorPins.rightIn4}</b>: Motor Der. IN4 (Dir)</li>`;
+        if (fmtPin(motorPins.rightEn)) pinsHtml += `<li><b>${motorPins.rightEn}</b>: Motor Der. ENB (PWM)</li>`;
+    } else if (driverType === 'mx1616') {
+        if (fmtPin(motorPins.leftIn1)) pinsHtml += `<li><b>${motorPins.leftIn1}</b>: Motor Izq. IN1 (PWM)</li>`;
+        if (fmtPin(motorPins.leftIn2)) pinsHtml += `<li><b>${motorPins.leftIn2}</b>: Motor Izq. IN2 (PWM)</li>`;
+        if (fmtPin(motorPins.rightIn3)) pinsHtml += `<li><b>${motorPins.rightIn3}</b>: Motor Der. IN3 (PWM)</li>`;
+        if (fmtPin(motorPins.rightIn4)) pinsHtml += `<li><b>${motorPins.rightIn4}</b>: Motor Der. IN4 (PWM)</li>`;
+    } else { // esc
+        if (fmtPin(motorPins.leftPWM)) pinsHtml += `<li><b>${motorPins.leftPWM}</b>: Motor Izq. (ESC PWM)</li>`;
+        if (fmtPin(motorPins.rightPWM)) pinsHtml += `<li><b>${motorPins.rightPWM}</b>: Motor Der. (ESC PWM)</li>`;
+    }
+
+    // Check if empty
+    if (pinsHtml.endsWith('<ul style="margin: 5px 0 0 20px; padding: 0;">')) {
+        pinsHtml += `<li><i>Ningún pin seleccionado.</i></li>`;
+    }
+    pinsHtml += `</ul></div>`;
+
     // --- 1. Guía del Código (code-explanation) ---
     let guideHtml = `<h3>Guía de Configuración</h3><div style='font-family:inherit; white-space:pre-wrap;'>`;
+    guideHtml += pinsHtml;
 
     // Instrucciones del Driver
     if (driverType === 'l298n') {

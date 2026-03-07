@@ -458,35 +458,45 @@ export class Robot {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        let leftMotorText = '(9)';
-        let rightMotorText = '(10)';
+        let leftMotorText = '';
+        let rightMotorText = '';
         if (this.connections && this.connections.motorPins) {
             const m = this.connections.motorPins;
+            const filterPins = (pins) => pins.filter(p => p && p.trim() !== '').join(', ');
+
             if (this.connections.driverType === 'l298n') {
-                leftMotorText = `(${m.leftEn}, ${m.leftIn1}, ${m.leftIn2})`;
-                rightMotorText = `(${m.rightEn}, ${m.rightIn3}, ${m.rightIn4})`;
+                const lp = filterPins([m.leftEn, m.leftIn1, m.leftIn2]);
+                const rp = filterPins([m.rightEn, m.rightIn3, m.rightIn4]);
+                leftMotorText = lp ? `(${lp})` : '';
+                rightMotorText = rp ? `(${rp})` : '';
             } else if (this.connections.driverType === 'mx1616') {
-                leftMotorText = `(${m.leftIn1}, ${m.leftIn2})`;
-                rightMotorText = `(${m.rightIn3}, ${m.rightIn4})`;
+                const lp = filterPins([m.leftIn1, m.leftIn2]);
+                const rp = filterPins([m.rightIn3, m.rightIn4]);
+                leftMotorText = lp ? `(${lp})` : '';
+                rightMotorText = rp ? `(${rp})` : '';
             } else {
-                leftMotorText = `(${m.leftPWM})`;
-                rightMotorText = `(${m.rightPWM})`;
+                leftMotorText = m.leftPWM ? `(${m.leftPWM})` : '';
+                rightMotorText = m.rightPWM ? `(${m.rightPWM})` : '';
             }
         }
 
         // Motor izquierdo 
-        ctx.save();
-        ctx.translate(-this.wheelbase_m / 2 * PIXELS_PER_METER - 22, 0);
-        ctx.rotate(0);
-        ctx.fillText(leftMotorText, 0, 0);
-        ctx.restore();
+        if (leftMotorText) {
+            ctx.save();
+            ctx.translate(-this.wheelbase_m / 2 * PIXELS_PER_METER - 22, 0);
+            ctx.rotate(0);
+            ctx.fillText(leftMotorText, 0, 0);
+            ctx.restore();
+        }
 
         // Motor derecho 
-        ctx.save();
-        ctx.translate(this.wheelbase_m / 2 * PIXELS_PER_METER + 22, 0);
-        ctx.rotate(0);
-        ctx.fillText(rightMotorText, 0, 0);
-        ctx.restore();
+        if (rightMotorText) {
+            ctx.save();
+            ctx.translate(this.wheelbase_m / 2 * PIXELS_PER_METER + 22, 0);
+            ctx.rotate(0);
+            ctx.fillText(rightMotorText, 0, 0);
+            ctx.restore();
+        }
         ctx.restore();
     }
 }

@@ -22,6 +22,10 @@ let placedParts = [];
 window.placedParts = placedParts;
 let selectedPart = null;
 let isDragging = false;
+let isPanning = false;
+let panModeEnabled = false;
+let panStartMouse = { x: 0, y: 0 };
+let panStartOffset = { x: 0, y: 0 };
 let wasDragging = false;
 let dragOffset = { x: 0, y: 0 };
 let eraseMode = false;
@@ -52,15 +56,16 @@ function screenToWorld(x, y) {
     const centerX = previewCanvas.width / 2;
     const centerY = previewCanvas.height / 2;
 
-    // 1. Center the coordinate (rel to canvas center)
-    // 2. Un-scale
-    // 3. Un-center
-    const relX = (x - centerX) / zoom;
-    const relY = (y - centerY) / zoom;
+    // Calcular el desplazamiento de centrado (en píxeles)
+    const offsetX = (window.previewCenterOffset ? window.previewCenterOffset.x * PIXELS_PER_METER : 0) * zoom;
+    const offsetY = (window.previewCenterOffset ? window.previewCenterOffset.y * PIXELS_PER_METER : 0) * zoom;
 
+    // 1. Deshacer el centrado del canvas
+    // 2. Deshacer el desplazamiento de centrado del robot
+    // 3. Deshacer el escalado (zoom)
     return {
-        x: centerX + relX,
-        y: centerY + relY
+        x: centerX + (x - (centerX - offsetX)) / zoom,
+        y: centerY + (y - (centerY - offsetY)) / zoom
     };
 }
 
@@ -98,6 +103,16 @@ export function initRobotParts() {
         helpDiv.parentNode.insertBefore(eraseBtn, helpDiv.nextSibling);
     } else {
         partsPalette.parentNode.appendChild(eraseBtn);
+    }
+
+    // Iniciar el botón Pan
+    const panBtn = elems.editorPanBtn;
+    if (panBtn) {
+        panBtn.addEventListener('click', () => {
+            panModeEnabled = !panModeEnabled;
+            panBtn.classList.toggle('active', panModeEnabled);
+            panBtn.style.background = panModeEnabled ? '#ffca28' : ''; // Color distintivo para Pan
+        });
     }
 
     console.log("Loading parts into palette...");
@@ -167,6 +182,14 @@ export function initRobotParts() {
 
     // Mouse interaction for moving parts
     previewCanvas.addEventListener('mousedown', (e) => {
+        // If pan mode is enabled, immediately start panning
+        if (panModeEnabled) {
+            isPanning = true;
+            panStartMouse = { x: e.clientX, y: e.clientY };
+            panStartOffset = { ...(window.previewCenterOffset || { x: 0, y: 0 }) };
+            return;
+        }
+
         const rect = previewCanvas.getBoundingClientRect();
         const screenX = e.clientX - rect.left;
         const screenY = e.clientY - rect.top;
@@ -188,7 +211,7 @@ export function initRobotParts() {
                     x: x - part.x,
                     y: y - part.y
                 };
-                break;
+                return;
             }
         }
     });
@@ -207,6 +230,18 @@ export function initRobotParts() {
             selectedPart.x = x - dragOffset.x;
             selectedPart.y = y - dragOffset.y;
             renderRobotPreview();
+        } else if (isPanning) {
+            wasDragging = true;
+            const deltaX = e.clientX - panStartMouse.x;
+            const deltaY = e.clientY - panStartMouse.y;
+            const zoom = window.getPreviewZoom ? window.getPreviewZoom() : 1.0;
+            window.previewCenterOffset = {
+                x: panStartOffset.x - (deltaX / PIXELS_PER_METER) / zoom,
+                y: panStartOffset.y - (deltaY / PIXELS_PER_METER) / zoom
+            };
+            if (window.renderRobotPreview) {
+                window.renderRobotPreview();
+            }
         }
     });
 
@@ -215,6 +250,19 @@ export function initRobotParts() {
             console.log(`Finished moving part: ${selectedPart?.name}`);
             isDragging = false;
             selectedPart = null;
+        }
+        if (isPanning) {
+            isPanning = false;
+        }
+    });
+
+    previewCanvas.addEventListener('mouseleave', () => {
+        if (isDragging) {
+            isDragging = false;
+            selectedPart = null;
+        }
+        if (isPanning) {
+            isPanning = false;
         }
     });
 
@@ -365,6 +413,17 @@ export function initRobotParts() {
     let touchMoveOffset = { x: 0, y: 0 };
     previewCanvas.addEventListener('touchstart', function (e) {
         if (e.touches.length > 1) return; // Ignore multi-touch
+
+        // If pan mode is enabled, immediately start panning
+        if (panModeEnabled) {
+            isPanning = true;
+            const targetTouch = e.touches[0] || e.changedTouches[0];
+            panStartMouse = { x: targetTouch.clientX, y: targetTouch.clientY };
+            panStartOffset = { ...(window.previewCenterOffset || { x: 0, y: 0 }) };
+            e.preventDefault();
+            return;
+        }
+
         const touchPos = getTouchPos(e, previewCanvas);
         const world = screenToWorld(touchPos.x, touchPos.y);
         const x = world.x;
@@ -396,27 +455,46 @@ export function initRobotParts() {
                     tapTimeout = setTimeout(() => { lastTapTime = 0; }, 400);
                 }
                 e.preventDefault();
-                break;
+                return;
             }
         }
     }, { passive: false });
 
     previewCanvas.addEventListener('touchmove', function (e) {
-        if (!touchMovePart) return;
-        e.preventDefault();
-        const touchPos = getTouchPos(e, previewCanvas);
-        const world = screenToWorld(touchPos.x, touchPos.y);
+        if (touchMovePart) {
+            e.preventDefault();
+            const touchPos = getTouchPos(e, previewCanvas);
+            const world = screenToWorld(touchPos.x, touchPos.y);
 
-        touchMovePart.x = world.x - touchMoveOffset.x;
-        touchMovePart.y = world.y - touchMoveOffset.y;
+            touchMovePart.x = world.x - touchMoveOffset.x;
+            touchMovePart.y = world.y - touchMoveOffset.y;
 
-        // Limpiar el canvas y forzar redibujo completo para evitar trails/glitches en mobile
-        if (window.renderRobotPreview) {
-            window.renderRobotPreview();
-        } else if (previewCtx && previewCanvas) {
-            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-            // Redibuja manualmente si no existe renderRobotPreview
-            if (typeof drawRobotPreview === 'function') drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
+            // Limpiar el canvas y forzar redibujo completo para evitar trails/glitches en mobile
+            if (window.renderRobotPreview) {
+                window.renderRobotPreview();
+            } else if (previewCtx && previewCanvas) {
+                previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                // Redibuja manualmente si no existe renderRobotPreview
+                if (typeof drawRobotPreview === 'function') drawRobotPreview(window.getPreviewZoom ? window.getPreviewZoom() : 1.0);
+            }
+        } else if (isPanning) {
+            e.preventDefault();
+            const targetTouch = e.touches[0] || e.changedTouches[0];
+            const deltaX = targetTouch.clientX - panStartMouse.x;
+            const deltaY = targetTouch.clientY - panStartMouse.y;
+
+            const zoom = window.getPreviewZoom ? window.getPreviewZoom() : 1.0;
+            window.previewCenterOffset = {
+                x: panStartOffset.x - (deltaX / PIXELS_PER_METER) / zoom,
+                y: panStartOffset.y - (deltaY / PIXELS_PER_METER) / zoom
+            };
+
+            if (window.renderRobotPreview) {
+                window.renderRobotPreview();
+            } else if (previewCtx && previewCanvas) {
+                previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+                if (typeof drawRobotPreview === 'function') drawRobotPreview(zoom);
+            }
         }
     }, { passive: false });
 
@@ -424,9 +502,17 @@ export function initRobotParts() {
         if (touchMovePart) {
             touchMovePart = null;
         }
+        if (isPanning) {
+            isPanning = false;
+        }
     });
     previewCanvas.addEventListener('touchcancel', function () {
-        touchMovePart = null;
+        if (touchMovePart) {
+            touchMovePart = null;
+        }
+        if (isPanning) {
+            isPanning = false;
+        }
     });
 }
 
@@ -437,23 +523,40 @@ export function drawRobotPreview(zoom = 1.0) {
     }
     // Do NOT clear the canvas here; it is cleared in renderRobotPreview
     console.log("Drawing robot preview with parts:", placedParts.length);
-    // Draw placed parts
-    placedParts.forEach(part => {
-        const sizeW = part.img.width;
-        const sizeH = part.img.height;
-        const rotation = part.rotation || 0;
 
-        // Calculate position relative to center, scaled by zoom
+    // El renderizado principal en robotEditor.js ya aplica el translate y scale general.
+    // Aquí solo dibujamos cada pieza en su posición relativa al origen (0,0) del robot.
+    // PERO las piezas en placedParts se guardan en coordenadas de CANVAS (píxeles)
+    // por lo que debemos convertirlas a relativas al centro original.
+
+    placedParts.forEach(part => {
+        previewCtx.save();
+
+        // Convertir coordenadas de canvas a relativas al centro del robot (en metros)
         const centerX = previewCanvas.width / 2;
         const centerY = previewCanvas.height / 2;
-        const relX = (part.x - centerX) * zoom;
-        const relY = (part.y - centerY) * zoom;
+        const relX_m = (part.x - centerX) / PIXELS_PER_METER;
+        const relY_m = (part.y - centerY) / PIXELS_PER_METER;
 
-        previewCtx.save();
-        previewCtx.translate(centerX + relX, centerY + relY);
-        previewCtx.scale(zoom, zoom);
-        previewCtx.rotate(rotation);
-        previewCtx.drawImage(part.img, -sizeW / 2, -sizeH / 2, sizeW, sizeH);
+        previewCtx.translate(relX_m * PIXELS_PER_METER, relY_m * PIXELS_PER_METER);
+        if (part.rotation) previewCtx.rotate(part.rotation);
+
+        if (part.img && part.img.complete) {
+            const w = part.img.width;
+            const h = part.img.height;
+            previewCtx.drawImage(part.img, -w / 2, -h / 2);
+        } else {
+            // Fallback square
+            previewCtx.fillStyle = part.color || 'rgba(0,0,0,0.5)';
+            previewCtx.fillRect(-15, -15, 30, 30);
+        }
+
+        if (part === selectedPart) {
+            previewCtx.strokeStyle = '#007bff';
+            previewCtx.lineWidth = 2 / zoom; // Ajustar grosor por zoom
+            previewCtx.strokeRect(-18, -18, 36, 36);
+        }
+
         previewCtx.restore();
     });
 }
@@ -503,6 +606,7 @@ export function restorePlacedPartsRaw(partsArr) {
             const partInfo = PARTS.find(pt => pt.id === p.id);
             if (partInfo) {
                 img = new window.Image();
+                img.onload = () => { if (window.renderRobotPreview) window.renderRobotPreview(); };
                 img.src = getAssetPath(partInfo.src);
             }
         }
