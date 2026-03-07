@@ -13,17 +13,15 @@ export const DEFAULT_ROBOT_GEOMETRY = {
     sensorOffset_m: 0.05, // Distancia desde el centro del robot al centro de la línea de sensores, hacia adelante
     sensorSpread_m: 0.03, // Distancia desde el sensor central a un sensor lateral
     sensorDiameter_m: 0.005, // Diámetro de cada punto sensor
+    sensorCount: 2,       // <--- Cambiado a 2 por defecto
     robotMass_kg: 0.25,
     comOffset_m: 0.0,
     tireGrip: 0.8,
     connections: {
         driverType: 'l298n',
         sensorPins: {
-            farLeft: 'A0',
             left: 'A2',
-            center: 'A4',
-            right: 'A3',
-            farRight: 'A5'
+            right: 'A3'
         },
         motorPins: {
             leftEn: '3',

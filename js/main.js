@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentSimParams = getSimulationParamsFromUI();
                 currentSimParams.robotGeometry = newGeometry;
                 simulationInstance.updateParameters(currentSimParams);
+                simulationInstance.robotVisible = true; // <--- Mostrar el robot cuando se aplica geometría
                 // Resetting simulation is often needed if robot size changes drastically
                 if (simulationInstance.track.imageData) {
                     const currentPose = { x: simulationInstance.robot.x_m, y: simulationInstance.robot.y_m, angle: simulationInstance.robot.angle_rad };
@@ -249,6 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (simulationRunning) return;
         if (!simulationInstance || !simulationInstance.track.imageData) {
             alert("No hay una pista cargada en la simulación. Carga una desde el Editor de Pista.");
+            return;
+        }
+
+        if (!simulationInstance.robotVisible) {
+            alert("No hay un robot cargado en la simulación. Configura uno en el Editor de Robot y haz clic en 'Aplicar Diseño'.");
             return;
         }
 

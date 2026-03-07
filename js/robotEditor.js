@@ -227,12 +227,12 @@ export function initRobotEditor(appInterface) {
         console.log("Robot assets loaded, setting images...");
         previewRobot.setImages(wheelImg);
         // Load default robot JSON only on first load
-        if (!window._defaultRobotLoaded) {
-            window._defaultRobotLoaded = true;
-            loadDefaultRobotJSON();
-        } else {
-            renderRobotPreview();
-        }
+        // if (!window._defaultRobotLoaded) {
+        //     window._defaultRobotLoaded = true;
+        //     loadDefaultRobotJSON();
+        // } else {
+        renderRobotPreview();
+        // }
     });
 
     // Setup tab change observer
@@ -808,6 +808,6 @@ async function initRobotSelectionDropdown() {
 
     // Selecciona y carga el robot por defecto al iniciar
     dropdown.value = robots[0].file;
-    const event = new Event('change');
-    dropdown.dispatchEvent(event);
+    // const event = new Event('change');
+    // dropdown.dispatchEvent(event);
 }

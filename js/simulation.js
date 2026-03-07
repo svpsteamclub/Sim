@@ -9,6 +9,7 @@ import { LapTimer } from './lapTimer.js';
 export class Simulation {
     constructor(robotImages, watermarkImage, initialGeometry = DEFAULT_ROBOT_GEOMETRY) {
         this.robot = new Robot(0, 0, 0, initialGeometry); // Initial position set by loadTrack
+        this.robotVisible = false; // <--- Robot oculto por defecto
         if (robotImages) this.robot.setImages(robotImages.wheel);
 
         // Ensure robot geometry is valid
@@ -389,7 +390,7 @@ export class Simulation {
         if (this.track) {
             this.track.draw(displayCtx, displayCanvasWidth, displayCanvasHeight); // Note: track drawer might ignore width/height if it draws its own bounds
         }
-        if (this.robot && this.track && this.track.imageData) {
+        if (this.robot && this.track && this.track.imageData && this.robotVisible) {
             // Pass all sensor states for display
             const displaySensorStates = {};
             for (const key in this.robot.sensors) {
