@@ -352,15 +352,11 @@ function traducirArduinoAJS(codigoArduino) {
     // 3. Prefixing calls to user functions with await
     const allAsyncFns = [...new Set([...userFunctions, 'setup', 'loop'])];
     allAsyncFns.forEach(fnName => {
-        // Buscamos el nombre de la función seguido de '(' que NO sea precedido por 'function ' o 'async function '
-        // Usamos una estrategia de reemplazo que verifique el contexto previo manualmente si es necesario, 
-        // pero para transpilación simple esto suele bastar:
-        const callRE = new RegExp(`(\\s|^|;|\\{)\\b${fnName}\\s*\\(`, 'g');
-        transpiled = transpiled.replace(callRE, (match, p1) => {
-            // Si el match completo empieza con 'function' o 'async function', no reemplazamos
-            // (Aunque el regex anterior intenta evitarlo con el inicio de palabra \b)
-            if (match.includes('function')) return match;
-            return `${p1}await ${fnName}(`;
+        // Buscamos el nombre de la función seguido de '('
+        // Evitamos que esté precedido por 'async function ' o 'function '
+        const callRE = new RegExp(`(?<!async\\s+function\\s+|function\\s+)\\b${fnName}\\s*\\(`, 'g');
+        transpiled = transpiled.replace(callRE, (match) => {
+            return `await ${fnName}(`;
         });
     });
 
