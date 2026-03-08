@@ -20,11 +20,11 @@
             <div class="header-title-nav">
                 <h1>Simulador de Seguidor de Lineas</h1>
                 <nav class="tabs">
-                    <button class="tab-button active" data-tab="introduccion">Introducción</button>
-                    <button class="tab-button" data-tab="simulation">Simulación</button>
-                    <button class="tab-button" data-tab="code-editor">Editor de Código</button>
+                    <button class="tab-button active" data-tab="introduccion">Tutorial</button>
                     <button class="tab-button" data-tab="robot-editor">Editor de Robot</button>
+                    <button class="tab-button" data-tab="code-editor">Editor de Código</button>
                     <button class="tab-button" data-tab="track-editor">Editor de Pista</button>
+                    <button class="tab-button" data-tab="simulation">Simulación</button>
                 </nav>
             </div>
             <div class="header-actions">
@@ -43,69 +43,76 @@
         <!-- Introducción Tab -->
         <div id="introduccion" class="tab-content active">
             <div style="max-width:900px;margin:2em auto 0 auto;text-align:justify;">
-                <h2>Introducción</h2>
-                <h1 style="text-align:center;">🤖 Simulador de Robots Seguidores de Líneas</h1>
-                <p>
-                    Bienvenido a nuestro simulador educativo de robots seguidores de líneas. Aquí aprenderás qué son
-                    estos robots, cómo funcionan, cómo se programan y cómo puedes experimentar con ellos de forma
-                    virtual antes de construirlos físicamente.
+                <h1 style="text-align:center; color: var(--primary-color);">🤖 Guía Rápida: ¿Cómo usar el simulador?</h1>
+                <p style="text-align:center; font-size: 1.1em;">
+                    Bienvenido al Simulador de Robots Seguidores de Línea. Sigue estos sencillos pasos para crear, programar y probar tu primer robot en nuestro entorno virtual.
                 </p>
                 <hr>
-                <h3>¿Qué es un Robot Seguidor de Líneas?</h3>
-                <p>
-                    Un <strong>robot seguidor de líneas</strong> es un vehículo autónomo que detecta y sigue una línea
-                    en el suelo, normalmente de color negro sobre fondo blanco. Son populares en educación y
-                    competencias de robótica porque enseñan conceptos de sensores, lógica de control y programación.
-                </p>
-                <ol>
-                    <li><b>Sensar:</b> Detectar la posición de la línea con sensores infrarrojos.</li>
-                    <li><b>Decidir:</b> Aplicar una lógica de control para corregir la trayectoria.</li>
-                    <li><b>Actuar:</b> Mover los motores para mantenerse sobre la línea.</li>
-                </ol>
+
+                <div style="margin-top: 2em;">
+                    <h3>🛠️ Paso 1: Crea tu Robot (Pestaña "Editor de Robot")</h3>
+                    <p>
+                        Aquí definirás las características físicas y electrónicas de tu vehículo:
+                    </p>
+                    <ul>
+                        <li>Atributos físicos: Ancho, agarre de llantas, y posición de los sensores.</li>
+                        <li>Configuración electrónica: Selecciona los pines de tu placa Arduino a los cuales conectarás tanto los motores como los sensores.</li>
+                        <li>Diseño visual: Arrastra componentes de la paleta lateral para construir tu chasis.</li>
+                        <li><b>Importante:</b> Recuerda darle al botón verde <b>"Cargar Diseño en Simulador"</b> al terminar para aplicar tus cambios.</li>
+                    </ul>
+                    <p style="background: #e3f2fd; padding: 10px; border-left: 4px solid #2196f3; border-radius: 4px;">
+                        <i>💡 <b>Shortcut:</b> Si quieres ver algo funcionando rápido, haz clic en el botón <b>"Cargar Ejemplo"</b> en esta pestaña para tener un robot de 2 sensores ensamblado de inmediato.</i>
+                    </p>
+                </div>
+
                 <hr>
-                <h3>Componentes Básicos de un Robot Físico</h3>
-                <ul>
-                    <li><b>Chasis:</b> Estructura que sostiene los componentes.</li>
-                    <li><b>Microcontrolador (Arduino):</b> El "cerebro" que procesa la información y controla los
-                        motores.</li>
-                    <li><b>Sensores IR:</b> Detectan la línea (negro/blanco).</li>
-                    <li><b>Motores y ruedas:</b> Permiten el movimiento y los giros.</li>
-                    <li><b>Controlador de motores:</b> Intermediario entre Arduino y motores.</li>
-                    <li><b>Fuente de alimentación:</b> Baterías o pilas.</li>
-                    <li><b>Rueda loca:</b> Tercer punto de apoyo para facilitar los giros.</li>
-                </ul>
+
+                <div style="margin-top: 2em;">
+                    <h3>💻 Paso 2: Programa tu Lógica (Pestaña "Editor de Código")</h3>
+                    <p>
+                        Escribe el código C++ (estilo Arduino) para darle un "cerebro" al robot. Deberás leer los sensores con <code>digitalRead()</code> y mover los motores con <code>digitalWrite()</code> o <code>analogWrite()</code>.
+                    </p>
+                    <ul>
+                        <li>Recuerda usar las variables y tipos de la sintaxis nativa (<code>int</code>, <code>if/else</code>, <code>void setup()</code>).</li>
+                        <li>Al terminar de escribir, haz clic siempre en el botón verde <b>"Cargar Código en Simulador"</b> para transpilar y cargar el código a la memoria del simulador.</li>
+                    </ul>
+                    <p style="background: #e3f2fd; padding: 10px; border-left: 4px solid #2196f3; border-radius: 4px;">
+                        <i>💡 <b>Shortcut:</b> Haz clic en el botón <b>"Cargar Ejemplo"</b> en la parte baja del editor para inyectar automáticamente un algoritmo básico compatible con el robot del Paso 1.</i>
+                    </p>
+                </div>
+
                 <hr>
-                <h3>¿Cómo se programa un robot seguidor de líneas?</h3>
-                <p>
-                    Se utiliza el entorno Arduino IDE y un lenguaje similar a C/C++. El ciclo básico es:
-                </p>
-                <ol>
-                    <li><b>Leer sensores:</b> Obtener valores de los sensores IR.</li>
-                    <li><b>Tomar decisiones:</b> Determinar la posición respecto a la línea y decidir el movimiento.
-                    </li>
-                    <li><b>Controlar motores:</b> Ajustar velocidad y dirección según la lógica de control.</li>
-                </ol>
+
+                <div style="margin-top: 2em;">
+                    <h3>🏁 Paso 3: Diseña tu Circuito (Pestaña "Editor de Pista")</h3>
+                    <p>
+                        Usa nuestra herramienta de dibujo en base a cuadrícula para crear cualquier diseño de pista:
+                    </p>
+                    <ul>
+                        <li>Selecciona curvas y trazos rectos del menú izquierdo y colócalos en el lienzo.</li>
+                        <li>O agrega el botón <b>"Pista Aleatoria"</b> para generar diferentes retos.</li>
+                        <li>No olvides definir tu <b>Línea de Salida/Meta</b> arrastrando sobre la pista al final.</li>
+                        <li>Al terminar, asegúrate de presionar el botón verde <b>"Cargar Pista en Simulador"</b> para enviar el circuito.</li>
+                    </ul>
+                </div>
+
                 <hr>
-                <h3>¿Qué puedes hacer en este simulador?</h3>
-                <ul>
-                    <li><b>Diseñar y cargar pistas</b> de diferentes dificultades.</li>
-                    <li><b>Configurar el robot virtual:</b> Ajustar número y posición de sensores, velocidad, etc.</li>
-                    <li><b>Programar el robot:</b> Escribir y probar tu código de control en tiempo real.</li>
-                    <li><b>Observar y depurar:</b> Ver el comportamiento del robot y los mensajes del monitor serial.
-                    </li>
-                    <li><b>Iterar y mejorar:</b> Modificar parámetros y código para optimizar el desempeño.</li>
-                </ul>
-                <hr>
-                <h3>¿Por qué usar un simulador?</h3>
-                <ul>
-                    <li>Experimenta y aprende sin riesgo ni costo de hardware.</li>
-                    <li>Prueba diferentes algoritmos y configuraciones rápidamente.</li>
-                    <li>Desarrolla habilidades de programación y robótica de forma práctica y divertida.</li>
-                </ul>
-                <p style="text-align:center; margin-top:2em;">
-                    <b>¡Explora, experimenta y conviértete en un experto en robots seguidores de líneas!</b><br>
-                    <a href="https://svpsteamclub.github.io/Sim/" target="_blank">Ir al simulador en línea</a>
-                </p>
+
+                <div style="margin-top: 2em;">
+                    <h3>🏎️ Paso 4: ¡A Correr! (Pestaña "Simulación")</h3>
+                    <p>
+                        Tu área de pruebas final. Una vez aplicados el diseño de la pista, la geometría del robot y el código:
+                    </p>
+                    <ul>
+                        <li>Presiona <b>"Iniciar Simulación"</b> para que comience la ejecución.</li>
+                        <li>Revisa el <b>Monitor Serial</b> para depurar errores si tu robot no hace lo que esperabas.</li>
+                        <li>Observa tus tiempos por vuelta en la ventana de cronometraje ⏱️.</li>
+                    </ul>
+                </div>
+
+                <div style="text-align:center; margin-top:3em; font-size:1.2em; border: 2px dashed var(--primary-color); padding: 1em; border-radius: 8px;">
+                    <b>¡Sigue el orden de estas pestañas, experimenta y conviértete en un experto en robótica!</b>
+                </div>
             </div>
         </div>
 
@@ -191,9 +198,9 @@
                         <button id="loadExampleCodeButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Cargar Ejemplo</button>
                     </div>
                     <div class="code-editor-actions" style="margin-top: 1em;">
-                        <button id="applyCodeButton" class="action-btn run-btn" title="Aplicar código">
+                        <button id="applyCodeButton" class="action-btn run-btn" title="Cargar Código en Simulador" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-transform: uppercase; font-weight: bold; border-radius: 4px; cursor: pointer;">
                             <span class="btn-icon">▶</span>
-                            Aplicar Código
+                            Cargar Código en Simulador
                         </button>
                     </div>
 
@@ -587,8 +594,8 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         <input type="number" id="tireGrip" value="0.8" step="0.1" min="0.1" max="5.0">
                     </label>
 
-                    <button id="applyRobotGeometryButton" style="margin-top: 1em;">Aplicar Diseño y Reiniciar
-                        Sim</button>
+                    <button id="applyRobotGeometryButton" style="margin-top: 1em; background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-transform: uppercase; font-weight: bold; border-radius: 4px; cursor: pointer;">Cargar Diseño en Simulador
+                    </button>
                     <div style="margin-top: 1em; display: flex; gap: 0.5em; align-items: stretch; justify-content: space-between;">
                         <button id="saveRobotButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Guardar Robot</button>
                         <label for="loadRobotInput" class="file-input-label" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em; text-align:center; cursor:pointer;">Cargar
@@ -636,7 +643,7 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                             <button id="generateRandomTrack"
                                 style="flex:1; padding: 0.4em 0.5em; min-height: 0; font-size: 0.8em;">Aleatoria</button>
                             <button id="exportTrackToSimulator"
-                                style="flex:1; padding: 0.4em 0.5em; min-height: 0; font-size: 0.8em;">Simular</button>
+                                style="flex:1; padding: 0.4em 0.5em; min-height: 0; font-size: 0.8em; background-color: #4CAF50; color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer;">Cargar Pista en Simulador</button>
                             <button id="clearTrackButton" class="danger"
                                 style="flex:1; padding: 0.4em 0.5em; min-height: 0; margin-top:0; font-size: 0.8em;">Limpiar</button>
                         </div>
