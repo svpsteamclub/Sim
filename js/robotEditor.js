@@ -290,7 +290,8 @@ export function initRobotEditor(appInterface) {
     }
 
     // --- Custom Sensors Logic ---
-    function renderCustomSensorsList() {
+    window.renderCustomSensorsList = function() {
+        const elems = getDOMElements();
         if (!elems.customSensorsList) return;
         elems.customSensorsList.innerHTML = '';
         if (!currentGeometry.customSensors) currentGeometry.customSensors = [];
@@ -338,12 +339,17 @@ export function initRobotEditor(appInterface) {
                     delete currentGeometry.connections.sensorPins[`custom_${currentGeometry.customSensors.length}`];
                 }
 
-                renderCustomSensorsList();
-                updateSensorConnectionsUI(currentGeometry.sensorCount);
+                window.renderCustomSensorsList();
+                if (typeof updateSensorConnectionsUI === 'function') {
+                    updateSensorConnectionsUI(currentGeometry.sensorCount);
+                } else if (window.updateSensorConnectionsUI) {
+                    window.updateSensorConnectionsUI(currentGeometry.sensorCount);
+                }
                 window.forceGeometrySync();
             });
         });
-    }
+    };
+    const renderCustomSensorsList = window.renderCustomSensorsList;
 
     if (elems.addCustomSensorBtn) {
         elems.addCustomSensorBtn.addEventListener('click', () => {
@@ -618,7 +624,9 @@ function setFormValues(geometry) {
     } else {
         currentGeometry.customSensors = [];
     }
-    renderCustomSensorsList();
+    if (window.renderCustomSensorsList) {
+        window.renderCustomSensorsList();
+    }
 
     // Set Connections
     if (geometry.connections) {

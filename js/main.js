@@ -300,7 +300,8 @@ void girar_der_fuerte() {
             updateLapTimerDisplay(simulationInstance.lapTimer.getDisplayData()); // Initial lap display
 
         } catch (err) {
-            alert("Error crítico durante la inicialización. Revisa la consola.");
+            console.error("Critical Start Error:", err);
+            alert("Error crítico durante la inicialización. Revisa la consola. " + err.message);
         }
     }
 
@@ -1003,6 +1004,7 @@ void girar_der_fuerte() {
     // --- Start Everything ---
     initializeSimulator().then(() => {
     }).catch(err => {
-        alert("Error crítico durante la inicialización. Revisa la consola.");
+        console.error("Critical Start Error:", err);
+        alert("Error crítico durante la inicialización. Revisa la consola. " + err.message);
     });
 });
