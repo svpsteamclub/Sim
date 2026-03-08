@@ -91,7 +91,6 @@
                     <ul>
                         <li>Selecciona curvas y trazos rectos del menú izquierdo y colócalos en el lienzo.</li>
                         <li>O agrega el botón <b>"Pista Aleatoria"</b> para generar diferentes retos.</li>
-                        <li>No olvides definir tu <b>Línea de Salida/Meta</b> arrastrando sobre la pista al final.</li>
                         <li>Al terminar, asegúrate de presionar el botón verde <b>"Cargar Pista en Simulador"</b> para enviar el circuito.</li>
                     </ul>
                 </div>
@@ -104,7 +103,8 @@
                         Tu área de pruebas final. Una vez aplicados el diseño de la pista, la geometría del robot y el código:
                     </p>
                     <ul>
-                        <li>Presiona <b>"Iniciar Simulación"</b> para que comience la ejecución.</li>
+                        <li>No olvides definir tu <b>Línea de Salida/Meta</b> haciendo clic en el botón de Ubicar Línea y haciendo clic sobre la pista.</li>
+                        <li>Presiona <b>"Iniciar"</b> para que comience la ejecución.</li>
                         <li>Revisa el <b>Monitor Serial</b> para depurar errores si tu robot no hace lo que esperabas.</li>
                         <li>Observa tus tiempos por vuelta en la ventana de cronometraje ⏱️.</li>
                     </ul>
@@ -301,7 +301,7 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                         </div>
                     </div>
                     <div class="preview-canvas-container">
-                        <canvas id="robotPreviewCanvas" width="500" height="300"></canvas>
+                        <canvas id="robotPreviewCanvas" width="500" height="450"></canvas>
                     </div>
                     <div class="robot-parts-palette">
                         <h4>Partes Decorativas</h4>
@@ -387,7 +387,7 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                     </label>
 
                     <label for="sensorDiameter">
-                        Diámetro Sensor (mm):
+                        Diámetro de Detección (mm):
                         <input type="number" id="sensorDiameter" value="5" step="0.5" min="1">
                     </label>
 

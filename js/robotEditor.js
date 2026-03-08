@@ -28,13 +28,13 @@ export function initRobotEditor(appInterface) {
     window.renderRobotPreview = renderRobotPreview;
     window.previewCenterOffset = { x: 0, y: 0 }; // Initialize for panning
 
-    // Set fixed canvas size to 500x300 pixels (50cm x 30cm)
+    // Set fixed canvas size to 500x450 pixels (50cm x 45cm)
     previewCanvas.width = 500;
-    previewCanvas.height = 300;
+    previewCanvas.height = 450;
 
     // Set display size to match canvas size exactly (1:1 pixel mapping)
-    previewCanvas.style.width = '500px';
-    previewCanvas.style.height = '300px';
+    previewCanvas.style.width = '100%';
+    previewCanvas.style.height = '100%';
 
     console.log("Canvas size set to:", { width: previewCanvas.width, height: previewCanvas.height });
 
@@ -50,6 +50,11 @@ export function initRobotEditor(appInterface) {
 
     // Initialize robot parts
     initRobotParts();
+
+    // Set default zoom to Extents after initial loading
+    setTimeout(() => {
+        zoomExtents();
+    }, 100);
 
     // Initialize robot selection dropdown
     initRobotSelectionDropdown();
@@ -632,7 +637,7 @@ function setFormValues(geometry) {
     elems.sensorSpreadInput.value = (geometry.sensorSpread_m * 1000).toFixed(1);
     elems.sensorSpreadInput.placeholder = 'Separación sensores (mm)';
     elems.sensorDiameterInput.value = (geometry.sensorDiameter_m * 1000).toFixed(1);
-    elems.sensorDiameterInput.placeholder = 'Diámetro sensor (mm)';
+    elems.sensorDiameterInput.placeholder = 'Diámetro de detección (mm)';
     if (elems.sensorCountSelect && geometry.sensorCount) {
         elems.sensorCountSelect.value = geometry.sensorCount;
     }
@@ -766,6 +771,18 @@ export function zoomExtents() {
     let minY = -previewRobot.sensorForwardProtrusion_m - 0.04; // +4cm margin forward for sensors
     let maxY = 0.04; // +4cm margin backward
 
+    // Incluir límites de las cotas/dimensiones en el cálculo de zoom
+    // Cota izquierda (Offset Sensor)
+    const wheelbaseOffset_m = (previewRobot.wheelbase_m / 2 + 0.03); 
+    minX = Math.min(minX, -wheelbaseOffset_m - 0.05); // Margen extra para el texto
+
+    // Cota superior (Separación Sensor)
+    const sensorSpreadYOffset_m = -previewRobot.sensorForwardProtrusion_m - 0.03;
+    minY = Math.min(minY, sensorSpreadYOffset_m - 0.05); // Margen extra para el texto
+
+    // Cota derecha (Punta de línea Separación Sensor)
+    maxX = Math.max(maxX, previewRobot.sensorSideSpread_m + 0.05);
+
     // Incluir piezas decorativas si existen
     if (window.placedParts && window.placedParts.length > 0) {
         window.placedParts.forEach(part => {
@@ -788,6 +805,10 @@ export function zoomExtents() {
             maxY = Math.max(maxY, py_m + hh);
         });
     }
+
+    // Cota inferior (Ancho Ruedas) - depende de la parte inferior máxima (maxY)
+    const wheelbaseYOffset_m = maxY + 0.03; 
+    maxY = Math.max(maxY, wheelbaseYOffset_m + 0.05); // Margen extra para el texto
 
     const width_m = maxX - minX;
     const height_m = maxY - minY;
@@ -846,7 +867,7 @@ export function renderRobotPreview() {
 
     // Draw center guides explicitly within the world coordinates
     previewCtx.save();
-    previewCtx.strokeStyle = 'rgba(187, 187, 187, 0.5)';
+    previewCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';  // Líneas más oscuras y notorias (negro semitransparente)
     previewCtx.lineWidth = 1;
     previewCtx.setLineDash([5, 5]); // Dashed line
     // Vertical center line
@@ -884,14 +905,28 @@ export function renderRobotPreview() {
     // Convert meters to pixels
     const wheelbaseOffset = (previewRobot.wheelbase_m / 2 + 0.03) * PIXELS_PER_METER; // 3cm extra outside robot
     const sensorSpreadYOffset = (-previewRobot.sensorForwardProtrusion_m - 0.03) * PIXELS_PER_METER; // 3cm above sensors
+    
+    // Calcular cota inferior (ancho) dinámicamente buscando la parte más larga del robot
+    let bottomMargin_m = 0.05; // 5cm por defecto para cubrir media rueda estándar
+    if (window.placedParts && window.placedParts.length > 0) {
+        window.placedParts.forEach(part => {
+            const py_m = (part.y - previewCanvas.height / 2) / PIXELS_PER_METER;
+            let hh = 0.025;
+            if (part.img && part.img.complete) {
+                hh = (part.img.height / 2) / PIXELS_PER_METER;
+            }
+            bottomMargin_m = Math.max(bottomMargin_m, py_m + hh);
+        });
+    }
+    const wheelbaseYOffset = (bottomMargin_m + 0.03) * PIXELS_PER_METER; // 3cm por debajo del máximo
 
     console.log("Drawing dimension lines...");
     // Robot width (wheelbase)
     const wheelbaseStartX = -previewRobot.wheelbase_m / 2 * PIXELS_PER_METER;
     const wheelbaseEndX = previewRobot.wheelbase_m / 2 * PIXELS_PER_METER;
     drawDimensionLine(previewCtx,
-        wheelbaseStartX, 20, // Horizontal line above
-        wheelbaseEndX, 20,
+        wheelbaseStartX, wheelbaseYOffset, // Horizontal line below robot
+        wheelbaseEndX, wheelbaseYOffset,
         20, `${(previewRobot.wheelbase_m * 1000).toFixed(1)} mm`);
 
     // Sensor offset (vertical dimension, offset to the left)
@@ -902,14 +937,13 @@ export function renderRobotPreview() {
         -wheelbaseOffset, sensorLineYEnd,
         20, `${(previewRobot.sensorForwardProtrusion_m * 1000).toFixed(1)} mm`);
 
-    // Sensor spread (horizontal dimension, above sensors)
-    const sensorSpreadStartX = -previewRobot.sensorSideSpread_m * PIXELS_PER_METER;
-    const sensorSpreadEndX = previewRobot.sensorSideSpread_m * PIXELS_PER_METER;
-    const sensorSpreadY = -previewRobot.sensorForwardProtrusion_m * PIXELS_PER_METER;
+    // Sensor spread (horizontal dimension, above sensors, showing just one side!)
+    const sensorSpreadStartX = 0; // Starts from center
+    const sensorSpreadEndX = previewRobot.sensorSideSpread_m * PIXELS_PER_METER; // To one side
     drawDimensionLine(previewCtx,
         sensorSpreadStartX, sensorSpreadYOffset,
         sensorSpreadEndX, sensorSpreadYOffset,
-        20, `${(previewRobot.sensorSideSpread_m * 2000).toFixed(1)} mm`);
+        20, `${(previewRobot.sensorSideSpread_m * 1000).toFixed(1)} mm`);
 
     // Restore robot's original position
     previewRobot.x_m = tempX;
