@@ -19,7 +19,7 @@ let currentSimToken = 0;
 // Serial object for user code
 const ArduinoSerial = {
     _buffer: "",
-    _outputElement: null, // Will be set to the serialMonitorOutput pre element
+    _outputElements: [], // Will be set to the serialMonitorOutput pre elements
     _maxLines: 10, // Maximum number of lines to keep
 
     begin: function (baudRate) {
@@ -28,19 +28,23 @@ const ArduinoSerial = {
     print: function (msg) {
         this._buffer += String(msg);
         this._trimBuffer();
-        if (this._outputElement) {
-            this._outputElement.textContent = this._buffer;
-            this._outputElement.scrollTop = this._outputElement.scrollHeight; // Auto-scroll
-        }
+        this._outputElements.forEach(el => {
+            if (el) {
+                el.textContent = this._buffer;
+                el.scrollTop = el.scrollHeight; // Auto-scroll
+            }
+        });
     },
     println: function (msg = "") {
         this.print(String(msg) + '\n');
     },
     clear: function () {
         this._buffer = "";
-        if (this._outputElement) {
-            this._outputElement.textContent = "";
-        }
+        this._outputElements.forEach(el => {
+            if (el) {
+                el.textContent = "";
+            }
+        });
     },
     getOutput: function () { // For external UI update if needed
         return this._buffer;
@@ -394,11 +398,17 @@ function traducirArduinoAJS(codigoArduino) {
 export function initCodeEditor(simulationState) {
     sharedSimulationState = simulationState; // Give API access to robot state
     const elems = getDOMElements();
-    ArduinoSerial._outputElement = elems.serialMonitorOutput;
+    ArduinoSerial._outputElements = [elems.serialMonitorOutput, elems.serialMonitorOutputCodeEditor];
 
     elems.clearSerialButton.addEventListener('click', () => {
         ArduinoSerial.clear();
     });
+    
+    if (elems.clearSerialButtonCodeEditor) {
+        elems.clearSerialButtonCodeEditor.addEventListener('click', () => {
+            ArduinoSerial.clear();
+        });
+    }
 
     // Load initial code
     if (!window.monacoEditor) {
@@ -416,6 +426,45 @@ export function loadUserCode(code) {
     _pinModes = {};
     _motorPWMValues = {}; // Reset fully
     _warnedPins = new Set(); // Reset warnings
+
+    // --- Nivel 1: Verificador de Código Básico ---
+    let basicErrors = false;
+
+    // Verificar si olvidaron void setup() o void loop()
+    if (!/\bvoid\s+setup\s*\(\s*\)/.test(code)) {
+        ArduinoSerial.println("❌ ERROR: Falta definir la función 'void setup()'.");
+        basicErrors = true;
+    }
+    if (!/\bvoid\s+loop\s*\(\s*\)/.test(code)) {
+        ArduinoSerial.println("❌ ERROR: Falta definir la función 'void loop()'.");
+        basicErrors = true;
+    }
+
+    // Chequear errores comunes de mayúsculas/minúsculas (C++ es case-sensitive)
+    const typos = [
+        { regex: /\bPinMode\b/g, correct: "pinMode" },
+        { regex: /\bdigitalwrite\b/g, correct: "digitalWrite" },
+        { regex: /\banalogwrite\b/g, correct: "analogWrite" },
+        { regex: /\bdigitalread\b/g, correct: "digitalRead" },
+        { regex: /\banalogread\b/g, correct: "analogRead" },
+        { regex: /\bserial\./g, correct: "Serial." }
+    ];
+
+    typos.forEach(typo => {
+        if (typo.regex.test(code)) {
+            ArduinoSerial.println(`❌ ERROR SINTAXIS: Se detectó una función mal escrita. Tal vez quisiste decir '${typo.correct}' (revisa mayúsculas/minúsculas).`);
+            basicErrors = true;
+        }
+    });
+
+    if (basicErrors) {
+        ArduinoSerial.println("⛔ Por favor, corrige los errores del código en el editor antes de continuar.");
+        alert("Se encontraron errores básicos en tu código. Revisa el Monitor Serial para más detalles.");
+        userSetupFunction = () => { };
+        userLoopFunction = async () => { await arduinoAPI.delay(100); };
+        return false;
+    }
+    // ----------------------------------------------
 
     // Detectar el tipo de código (opcional, solo mantendremos 'onoff')
     currentCodeType = 'onoff';
@@ -450,8 +499,8 @@ export function loadUserCode(code) {
             arduinoAPI.constrain = (value, minVal, maxVal) => Math.min(Math.max(value, minVal), maxVal);
         }
 
-        ArduinoSerial.println("Código de usuario cargado y parseado con éxito.");
-        ArduinoSerial.println(`Tipo de código: ${currentCodeType}`);
+        // Ya no mostramos el mensaje de éxito genérico por defecto para limpiar el inicio.
+
         return true;
     } catch (e) {
         console.error("Error procesando código de usuario:", e);

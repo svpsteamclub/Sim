@@ -179,15 +179,16 @@
             <div class="code-editor-layout">
                 <div class="code-editor-container">
                     <div style="margin-bottom: 0.5em;">
-                        <strong>Código Actual:</strong> <span id="currentCodeType">Código On/Off Simple</span>
+                        <strong style="font-size: 1.1em; color: var(--primary-color);">Código</strong>
                     </div>
                     <div id="monacoContainer" style="height: 600px; border: 1px solid #ccc;"></div>
-                    <div style="display:flex; gap:0.5em; margin:1em 0;">
-                        <button id="downloadCodeButton" style="flex:1;">Descargar Código</button>
+                    <div style="display:flex; gap:0.5em; margin:1em 0; align-items: stretch; justify-content: space-between;">
+                        <button id="downloadCodeButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Descargar Código</button>
                         <label for="uploadCodeInput" class="file-input-label"
-                            style="flex:1; text-align:center; cursor:pointer;">Cargar Código
-                            <input type="file" id="uploadCodeInput" accept=".txt,.js" style="display:none;">
+                            style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em; text-align:center; cursor:pointer;">Cargar Código
+                            <input type="file" id="uploadCodeInput" accept=".txt,.js,.ino,.cpp" style="display:none;">
                         </label>
+                        <button id="loadExampleCodeButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Cargar Ejemplo</button>
                     </div>
                     <div class="code-editor-actions" style="margin-top: 1em;">
                         <button id="applyCodeButton" class="action-btn run-btn" title="Aplicar código">
@@ -195,6 +196,14 @@
                             Aplicar Código
                         </button>
                     </div>
+
+                    <!-- Monitor Serial para el Editor de Código -->
+                    <div class="code-editor-serial" style="margin-top: 2em; background-color: #f8f9fa; padding: 1.5em; border-radius: 8px; border: 1px solid #e9ecef;">
+                        <h4>Monitor Serial</h4>
+                        <pre id="serialMonitorOutputCodeEditor" style="background-color: #ffffff; color: #333333; padding: 1em; border-radius: 4px; height: 150px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #ccc;"></pre>
+                        <button id="clearSerialButtonCodeEditor" type="button" style="margin-top: 0.5em;">Limpiar Serial</button>
+                    </div>
+
                     <div class="editor-help"
                         style="margin-top: 2em; background-color: #f8f9fa; padding: 1.5em; border-radius: 8px; border: 1px solid #e9ecef;">
                         <h2>Editor de Código</h2>
@@ -580,11 +589,12 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
 
                     <button id="applyRobotGeometryButton" style="margin-top: 1em;">Aplicar Diseño y Reiniciar
                         Sim</button>
-                    <div style="margin-top: 1em; display: flex; gap: 0.5em; align-items: center;">
-                        <button id="saveRobotButton" style="flex:1; text-align:center;">Guardar Robot</button>
-                        <label for="loadRobotInput" class="file-input-label" style="flex:1; text-align:center;">Cargar
+                    <div style="margin-top: 1em; display: flex; gap: 0.5em; align-items: stretch; justify-content: space-between;">
+                        <button id="saveRobotButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Guardar Robot</button>
+                        <label for="loadRobotInput" class="file-input-label" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em; text-align:center; cursor:pointer;">Cargar
                             Robot (.json)</label>
                         <input type="file" id="loadRobotInput" accept=".json" style="display:none;">
+                        <button id="loadExampleRobotButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Cargar Ejemplo</button>
                     </div>
                     <div style="margin-top: 1em;">
                         <label for="robotSelectionDropdown">Seleccionar Robot Predefinido:</label>

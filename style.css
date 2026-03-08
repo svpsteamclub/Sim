@@ -1001,20 +1001,13 @@ hr {
     background: var(--primary-hover);
 }
 
-.robot-parameters button {
-    margin-top: var(--spacing-md);
-}
-
 .robot-parameters .file-input-label,
 .robot-parameters button#saveRobotButton {
-    min-height: 2.5em;
-    height: auto;
+    min-height: initial;
     box-sizing: border-box;
 }
 
 .robot-parameters .file-input-label {
-    margin-top: var(--spacing-md);
-    height: 100%;
     color: white !important;
     display: flex;
     align-items: center;

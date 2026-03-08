@@ -24,7 +24,7 @@ let editor = null;
 require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('monacoContainer'), {
         value: codeTemplates.simpleOnOff, // Start with the single default template
-        language: 'javascript', // We keep javascript for syntax highlighting, codeEditor.js parses it anyway
+        language: 'cpp', // Use C++ for basic syntax highlighting and native brace matching
         theme: 'vs',
         minimap: {
             enabled: false
@@ -93,6 +93,23 @@ document.getElementById('uploadCodeInput').addEventListener('change', function (
         }, 100);
     };
     reader.readAsText(file);
+});
+
+// --- Cargar código de ejemplo ---
+document.getElementById('loadExampleCodeButton').addEventListener('click', async function () {
+    try {
+        const response = await fetch('assets/robots/Codigo_Ejemplo.txt');
+        if (!response.ok) throw new Error('No se pudo cargar Codigo_Ejemplo.txt');
+        const text = await response.text();
+        if (window.editor && typeof window.editor.setValue === 'function') {
+            window.editor.setValue(text);
+        } else if (typeof editor !== 'undefined' && typeof editor.setValue === 'function') {
+            editor.setValue(text);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error al cargar el código de ejemplo.');
+    }
 });
 
 // Handle window resize

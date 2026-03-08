@@ -361,9 +361,16 @@ void girar_der_fuerte() {
         updateLapTimerDisplay(simData.lapData);
 
         // El serial monitor se actualiza desde el loop asíncrono o aquí
-        elems.serialMonitorOutput.textContent = getSerialOutput();
+        const serialText = getSerialOutput();
+        elems.serialMonitorOutput.textContent = serialText;
         if (elems.serialMonitorOutput.textContent.length > 0) {
             elems.serialMonitorOutput.scrollTop = elems.serialMonitorOutput.scrollHeight;
+        }
+        if (elems.serialMonitorOutputCodeEditor) {
+            elems.serialMonitorOutputCodeEditor.textContent = serialText;
+            if (elems.serialMonitorOutputCodeEditor.textContent.length > 0) {
+                elems.serialMonitorOutputCodeEditor.scrollTop = elems.serialMonitorOutputCodeEditor.scrollHeight;
+            }
         }
 
         if (simData.outOfBounds) {
@@ -411,7 +418,7 @@ void girar_der_fuerte() {
             startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
             const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
             const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
-            startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+            startAngle = Math.atan2(dy, dx) - Math.PI / 2;
         }
         simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
 
@@ -485,7 +492,7 @@ void girar_der_fuerte() {
                     startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
                     const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
                     const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
-                    startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+                    startAngle = Math.atan2(dy, dx) - Math.PI / 2;
                 }
                 simulationInstance.resetSimulationState(startX, startY, startAngle, userGeo);
 
@@ -518,7 +525,7 @@ void girar_der_fuerte() {
                 startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
                 const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
                 const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
-                startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+                startAngle = Math.atan2(dy, dx) - Math.PI / 2;
             }
             simulationInstance.resetSimulationState(startX, startY, startAngle, currentGeo);
 
@@ -655,7 +662,7 @@ void girar_der_fuerte() {
             startY = (simulationInstance.lapTimer.startLine.y1 + simulationInstance.lapTimer.startLine.y2) / 2;
             const dx = simulationInstance.lapTimer.startLine.x2 - simulationInstance.lapTimer.startLine.x1;
             const dy = simulationInstance.lapTimer.startLine.y2 - simulationInstance.lapTimer.startLine.y1;
-            startAngle = Math.atan2(dy, dx) + Math.PI / 2;
+            startAngle = Math.atan2(dy, dx) - Math.PI / 2;
         }
         simulationInstance.resetSimulationState(startX, startY, startAngle, svpGeometry);
         simulationInstance.robotVisible = true;
@@ -973,7 +980,7 @@ void girar_der_fuerte() {
         // Calculate angle for robot orientation (perpendicular to line)
         const dx = x2_m - x1_m;
         const dy = y2_m - y1_m;
-        const angle_rad = Math.atan2(dy, dx) + Math.PI / 2; // Perpendicular to line
+        const angle_rad = Math.atan2(dy, dx) - Math.PI / 2; // Perpendicular to line
 
         // Calculate center point of line for robot position
         const center_x_m = (x1_m + x2_m) / 2;

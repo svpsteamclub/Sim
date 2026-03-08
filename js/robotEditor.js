@@ -489,6 +489,35 @@ export function initRobotEditor(appInterface) {
         reader.readAsText(file);
         event.target.value = null;
     });
+
+    if (elems.loadExampleRobotButton) {
+        elems.loadExampleRobotButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('assets/robots/Robot Ejemplo.json');
+                if (!response.ok) throw new Error('No se pudo cargar el Robot Ejemplo.json');
+                const robotData = await response.json();
+                
+                if (robotData.geometry) {
+                    setFormValues(robotData.geometry);
+                    currentGeometry = getFormValues();
+                    previewRobot.updateGeometry(currentGeometry);
+                }
+                if (robotData.parts && window.restorePlacedPartsRaw) {
+                    window.restorePlacedPartsRaw(robotData.parts);
+                }
+                renderRobotPreview();
+                
+                // Aplicar automáticamente
+                window.forceGeometrySync();
+                const decorativeParts = window.getPlacedParts ? window.getPlacedParts() : [];
+                mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
+                alert("✅ Robot de Ejemplo cargado y aplicado.");
+            } catch (err) {
+                console.error(err);
+                alert('💥 Error al cargar el robot de ejemplo.');
+            }
+        });
+    }
 }
 
 // Agrega partes decorativas 'sensor' en las posiciones de los sensores

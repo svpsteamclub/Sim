@@ -30,11 +30,14 @@ export function getDOMElements() {
         // Code Editor Tab
         codeEditorArea: document.getElementById('codeEditorArea'),
         applyCodeButton: document.getElementById('applyCodeButton'),
+        loadExampleCodeButton: document.getElementById('loadExampleCodeButton'),
         currentCodeType: document.getElementById('currentCodeType'),
         codeExplanation: document.querySelector('.code-explanation'),
         editorHelp: document.querySelector('.editor-help'),
         serialMonitorOutput: document.getElementById('serialMonitorOutput'),
         clearSerialButton: document.getElementById('clearSerialButton'),
+        serialMonitorOutputCodeEditor: document.getElementById('serialMonitorOutputCodeEditor'),
+        clearSerialButtonCodeEditor: document.getElementById('clearSerialButtonCodeEditor'),
 
         // Robot Editor Tab
         robotPreviewCanvas: document.getElementById('robotPreviewCanvas'),
@@ -50,6 +53,7 @@ export function getDOMElements() {
         robotPartsPalette: document.getElementById('robotPartsPalette'),
         saveRobotButton: document.getElementById('saveRobotButton'),
         loadRobotInput: document.getElementById('loadRobotInput'),
+        loadExampleRobotButton: document.getElementById('loadExampleRobotButton'),
         robotSelectionDropdown: document.getElementById('robotSelectionDropdown'),
         editorPanBtn: document.getElementById('editorPanBtn'),
         zoomInBtn: document.getElementById('editorZoomInBtn'),
@@ -330,35 +334,48 @@ Debes leer los 5 pines configurados (desde <b>${sensorPins.farLeft}</b> hasta <b
     elems.editorHelp.innerHTML = `
         <h2>Editor de Código</h2>
         <h3>¿Cómo usar este editor?</h3>
-        <p>Escribe tu código estilo Arduino y haz click en 'Aplicar Código'. Si te equivocas, puedes reiniciar la página.</p>
+        <p>Escribe tu código en lenguaje C++ (estilo Arduino) y haz click en <b>'Aplicar Código'</b> para compilarlo antes de iniciar la simulación. El Monitor Serial de arriba te avisará de errores básicos en la sintaxis. Si necesitas volver al estado inicial, puedes simplemente recargar la página.</p>
+
+        <h3>Estructura Básica de Arduino</h3>
+        <p>Tu código debe seguir la estructura clásica de un programa de Arduino:</p>
+        <ul>
+            <li><b>Sección Global:</b> Aquí defines tus variables (ej. <code>int velocidad = 150;</code>) al inicio de tu código. <br><span style="color: #d9534f; font-weight: bold;">⚠️ NOTA: El simulador NO soporta el uso de librerías externas (ej: <code>#include &lt;Servo.h&gt;</code>).</span></li>
+            <li><code>void setup() { ... }</code>: Se ejecuta <b>una sola vez</b> al iniciar. Úsalo para configurar tus pines usando <code>pinMode()</code> y para iniciar la comunicación con <code>Serial.begin()</code>.</li>
+            <li><code>void loop() { ... }</code>: Se ejecuta <b>repetidamente en un ciclo infinito</b>. Aquí va la lógica principal de lectura de sensores y control de motores.</li>
+            <li><b>Funciones Propias:</b> Puedes crear funciones adicionales libremente abajo del loop, por ejemplo <code>void avanzar()</code> o <code>int leerSensor()</code>.</li>
+        </ul>
+
+        <h3>Lógica de Control y Variables</h3>
+        <p>Están soportadas las estructuras nativas <code>if</code>, <code>else if</code>, <code>else</code>, <code>while</code>, y <code>for</code>. Puedes declarar variables como lo harías en C++ (<code>int</code>, <code>float</code>, <code>unsigned long</code>, <code>bool</code>). Ejemplo de uso:</p>
+        <pre style="background:#eee; padding:0.5em; border-radius:4px;">if (digitalRead(${sensorPinExample}) == HIGH) {
+  // El sensor detecta la línea, gira a un lado
+}</pre>
 
         <h3>¿Cómo referenciar componentes?</h3>
-        <p>Los <b>pines de los sensores</b> (usando <code>digitalRead(pin)</code>):</p>
+        <p>Los <b>pines de los sensores</b> (Debes leerlos usando siempre <code>digitalRead(pin)</code>, incluso si en el Robot Editor los conectaste a puertos analógicos como A0 o A1):</p>
         <ul>${sensorsText}</ul>
 
-        <p>Los <b>pines de los motores</b> (usando <code>analogWrite(pin, valor)</code>):</p>
+        <p>Los <b>pines de los motores</b> (Para controlarlos usa <code>analogWrite(pin, valor)</code> o <code>digitalWrite(pin, valor)</code> según la placa elegida en el editor):</p>
         <ul>${motorsText}</ul>
 
-        <h3>Funciones Soportadas (Translator Arduino C++):</h3>
-        <ul>
-            <li><code>setup()</code> y <code>loop()</code>: Funciones principales obligatorias.</li>
-            <li><code>pinMode(pin, mode)</code>: Configura como <code>INPUT</code> o <code>OUTPUT</code>.</li>
-            <li><code>digitalRead(pin)</code>: Retorna <b>1 (HIGH)</b> en línea negra, <b>0 (LOW)</b> fuera.</li>
-            <li><code>digitalWrite(pin, val)</code>: Para encender/apagar motores o LEDs.</li>
-            <li><code>analogWrite(pin, val)</code>: Control de velocidad PWM (0-255).</li>
-            <li><code>delay(ms)</code>: Pausa la ejecución (con <code>await</code> interno automático).</li>
-            <li><code>Serial.print()</code> / <code>println()</code>: Depuración en el Monitor Serial.</li>
-            <li><code>constrain(val, min, max)</code>: Limita un valor a un rango.</li>
-        </ul>
-        <p style="color: #d9534f; font-weight: bold; background: #fdf2f2; padding: 0.5em; border-radius: 4px;">
-            ⚠️ NOTA: analogRead(pin) NO está soportado en esta versión del simulador. Usa digitalRead() para sensores IR.
+        <p style="color: #d9534f; font-weight: bold; background: #fdf2f2; padding: 0.5em; border-radius: 4px; border-left: 4px solid #d9534f;">
+            ⚠️ IMPORTANTE: 'analogRead(pin)' NO está soportado en esta versión. Todos los sensores infrarrojos de las pistas son sensores binarios; leen blanco o negro. Usa 'digitalRead()' obligatoriamente para sensores de línea.
         </p>
 
-        <h3>Lógica de Control:</h3>
-        <p>Usa <code>if</code>, <code>else if</code>, <code>while</code>, <code>for</code>. Operadores: <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&amp;&amp;</code>, <code>||</code>. Ejemplo:</p>
-        <pre style="background:#eee; padding:0.5em; border-radius:4px;">if (digitalRead(${sensorPinExample}) == HIGH) {
-  // Gira a la izquierda
-}</pre>
-        <p>Declara variables con tipos de C++ (<code>int</code>, <code>float</code>, <code>unsigned long</code>).</p>
+        <h3>Funciones de Arduino Soportadas por el Simulador:</h3>
+        <ul>
+            <li><code>setup()</code> y <code>loop()</code>: Funciones principales y obligatorias de arduino.</li>
+            <li><code>pinMode(pin, mode)</code>: Configura el comportamiento de un pin (<code>INPUT</code> o <code>OUTPUT</code>).</li>
+            <li><code>digitalRead(pin)</code>: Retorna <b>1 (HIGH)</b> si el sensor detecta línea negra, o <b>0 (LOW)</b> si detecta fondo blanco.</li>
+            <li><code>digitalWrite(pin, val)</code>: Envía <b>HIGH</b> o <b>LOW</b>. Útil para habilitar pines de dirección en motores (IN1, IN2...).</li>
+            <li><code>analogWrite(pin, val)</code>: Envía una señal PWM (0-255) para controlar la velocidad de un motor.</li>
+            <li><code>delay(ms)</code>: Pausa la ejecución del código durante los milisegundos indicados.</li>
+            <li><code>millis()</code>: Retorna la cantidad de milisegundos desde que inició la simulación.</li>
+            <li><code>Serial.begin(baud)</code>, <code>Serial.print("texto")</code> y <code>Serial.println(var)</code>: Envía mensajes para depuración visual al Monitor Serial de esta pantalla.</li>
+            <li><code>constrain(val, min, max)</code>: Limita un número para que no se salga de un rango especificado.</li>
+            <li><code>abs(x)</code>: Devuelve el valor absoluto de un número.</li>
+            <li><code>min(x, y)</code>, <code>max(x, y)</code>: Devuelve el mínimo/máximo entre dos números.</li>
+            <li><code>map(val, fromLow, fromHigh, toLow, toHigh)</code>: Re-mapea un número de un rango a otro.</li>
+        </ul>
     `;
 }
