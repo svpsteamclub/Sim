@@ -402,10 +402,36 @@ function onGridSingleClick(event) {
     if (!editorCanvas) return;
 
     const rect = editorCanvas.getBoundingClientRect();
-    const scaleX = editorCanvas.width / rect.width;
-    const scaleY = editorCanvas.height / rect.height;
-    const x_canvas = (event.clientX - rect.left) * scaleX;
-    const y_canvas = (event.clientY - rect.top) * scaleY;
+
+    // Con object-fit: contain y un canvas siempre cuadrado (1200x1200 o similar),
+    // debemos encontrar el área real dibujada (el cuadrado central)
+    const renderWidth = rect.width;
+    const renderHeight = rect.height;
+    const canvasAspect = editorCanvas.width / editorCanvas.height; // Debería ser 1
+    const containerAspect = renderWidth / renderHeight;
+
+    let actualWidth, actualHeight, offsetX, offsetY;
+
+    if (containerAspect > canvasAspect) {
+        // El contenedor es más ancho que el canvas -> letterbox a los lados
+        actualHeight = renderHeight;
+        actualWidth = renderHeight * canvasAspect;
+        offsetX = (renderWidth - actualWidth) / 2;
+        offsetY = 0;
+    } else {
+        // El contenedor es más alto que el canvas -> letterbox arriba/abajo
+        actualWidth = renderWidth;
+        actualHeight = renderWidth / canvasAspect;
+        offsetX = 0;
+        offsetY = (renderHeight - actualHeight) / 2;
+    }
+
+    const x_relative = event.clientX - rect.left - offsetX;
+    const y_relative = event.clientY - rect.top - offsetY;
+
+    const scale = editorCanvas.width / actualWidth;
+    const x_canvas = x_relative * scale;
+    const y_canvas = y_relative * scale;
 
     // Calculate cell size dynamically
     const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
@@ -434,10 +460,33 @@ function onGridDoubleClick(event) {
     if (!editorCanvas) return;
 
     const rect = editorCanvas.getBoundingClientRect();
-    const scaleX = editorCanvas.width / rect.width;
-    const scaleY = editorCanvas.height / rect.height;
-    const x_canvas = (event.clientX - rect.left) * scaleX;
-    const y_canvas = (event.clientY - rect.top) * scaleY;
+
+    // Repetir la lógica de mapeo exacto para el doble clic
+    const renderWidth = rect.width;
+    const renderHeight = rect.height;
+    const canvasAspect = editorCanvas.width / editorCanvas.height;
+    const containerAspect = renderWidth / renderHeight;
+
+    let actualWidth, actualHeight, offsetX, offsetY;
+
+    if (containerAspect > canvasAspect) {
+        actualHeight = renderHeight;
+        actualWidth = renderHeight * canvasAspect;
+        offsetX = (renderWidth - actualWidth) / 2;
+        offsetY = 0;
+    } else {
+        actualWidth = renderWidth;
+        actualHeight = renderWidth / canvasAspect;
+        offsetX = 0;
+        offsetY = (renderHeight - actualHeight) / 2;
+    }
+
+    const x_relative = event.clientX - rect.left - offsetX;
+    const y_relative = event.clientY - rect.top - offsetY;
+
+    const scale = editorCanvas.width / actualWidth;
+    const x_canvas = x_relative * scale;
+    const y_canvas = y_relative * scale;
 
     // Calculate cell size dynamically
     const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
