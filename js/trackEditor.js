@@ -401,9 +401,11 @@ function renderEditor(cellSize) {
 function onGridSingleClick(event) {
     if (!editorCanvas) return;
 
-    const scale = editorCanvas.width / editorCanvas.clientWidth;
-    const x_canvas = event.offsetX * scale;
-    const y_canvas = event.offsetY * scale;
+    const rect = editorCanvas.getBoundingClientRect();
+    const scaleX = editorCanvas.width / rect.width;
+    const scaleY = editorCanvas.height / rect.height;
+    const x_canvas = (event.clientX - rect.left) * scaleX;
+    const y_canvas = (event.clientY - rect.top) * scaleY;
 
     // Calculate cell size dynamically
     const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
@@ -431,9 +433,11 @@ function onGridSingleClick(event) {
 function onGridDoubleClick(event) {
     if (!editorCanvas) return;
 
-    const scale = editorCanvas.width / editorCanvas.clientWidth;
-    const x_canvas = event.offsetX * scale;
-    const y_canvas = event.offsetY * scale;
+    const rect = editorCanvas.getBoundingClientRect();
+    const scaleX = editorCanvas.width / rect.width;
+    const scaleY = editorCanvas.height / rect.height;
+    const x_canvas = (event.clientX - rect.left) * scaleX;
+    const y_canvas = (event.clientY - rect.top) * scaleY;
 
     // Calculate cell size dynamically
     const cellSize = editorCanvas.width / Math.max(currentGridSize.rows, currentGridSize.cols);
