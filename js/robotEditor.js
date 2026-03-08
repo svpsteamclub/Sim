@@ -244,6 +244,36 @@ export function initRobotEditor(appInterface) {
         if (rowFarLeft) rowFarLeft.style.display = (count >= 4) ? 'flex' : 'none';
         if (rowCenter) rowCenter.style.display = (count % 2 !== 0) ? 'flex' : 'none'; // 3 or 5
         if (rowFarRight) rowFarRight.style.display = (count >= 4) ? 'flex' : 'none';
+
+        // Render Custom Sensors Pins
+        const container = document.getElementById('sensorConnectionsContainer');
+        if (container) {
+            // Remove existing custom pin rows first
+            const existingCustoms = container.querySelectorAll('.custom-sensor-pin');
+            existingCustoms.forEach(el => el.remove());
+
+            if (currentGeometry && currentGeometry.customSensors) {
+                currentGeometry.customSensors.forEach((sensor, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'pin-row sensor-pin-config custom-sensor-pin';
+                    row.innerHTML = `
+                        <span>Pin Sensor Custom ${idx + 1}:</span>
+                        ${pinSelect(`pinSensorCustom_${idx}`, '')}
+                    `;
+                    container.appendChild(row);
+
+                    // Rebind event
+                    const sel = row.querySelector('select');
+                    if (sel) {
+                        sel.addEventListener('change', () => { window.forceGeometrySync(); });
+                        // Set value if exists
+                        if (currentGeometry.connections && currentGeometry.connections.sensorPins && currentGeometry.connections.sensorPins[`custom_${idx}`]) {
+                            sel.value = currentGeometry.connections.sensorPins[`custom_${idx}`];
+                        }
+                    }
+                });
+            }
+        }
     }
 
     // --- Sensor count dropdown logic ---
@@ -257,6 +287,72 @@ export function initRobotEditor(appInterface) {
             renderRobotPreview();
         });
         updateSensorConnectionsUI(parseInt(elems.sensorCountSelect.value) || 3);
+    }
+
+    // --- Custom Sensors Logic ---
+    function renderCustomSensorsList() {
+        if (!elems.customSensorsList) return;
+        elems.customSensorsList.innerHTML = '';
+        if (!currentGeometry.customSensors) currentGeometry.customSensors = [];
+
+        currentGeometry.customSensors.forEach((sensor, idx) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.gap = '5px';
+            item.style.marginBottom = '5px';
+            item.style.alignItems = 'center';
+            item.innerHTML = `
+                <span style="font-size:0.8em; min-width:60px;">Custom ${idx + 1}:</span>
+                <input type="number" step="1" id="customSensorX_${idx}" value="${sensor.x_mm}" placeholder="X (mm)" style="width: 70px; font-size: 0.8em;">
+                <input type="number" step="1" id="customSensorY_${idx}" value="${sensor.y_mm}" placeholder="Y (mm)" style="width: 70px; font-size: 0.8em;">
+                <button type="button" class="delCustomSensorBtn" data-idx="${idx}" style="padding: 2px 5px; font-size: 0.8em; background-color: #dc3545;">X</button>
+            `;
+            elems.customSensorsList.appendChild(item);
+
+            // Bind events for live update
+            const inX = item.querySelector(`#customSensorX_${idx}`);
+            const inY = item.querySelector(`#customSensorY_${idx}`);
+            const updateVal = () => {
+                currentGeometry.customSensors[idx].x_mm = parseFloat(inX.value) || 0;
+                currentGeometry.customSensors[idx].y_mm = parseFloat(inY.value) || 0;
+                window.forceGeometrySync();
+            };
+            inX.addEventListener('input', updateVal);
+            inY.addEventListener('input', updateVal);
+        });
+
+        // Bind delete buttons
+        const delBtns = elems.customSensorsList.querySelectorAll('.delCustomSensorBtn');
+        delBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                currentGeometry.customSensors.splice(idx, 1);
+
+                // Cleanup pin config if needed
+                if (currentGeometry.connections && currentGeometry.connections.sensorPins) {
+                    delete currentGeometry.connections.sensorPins[`custom_${idx}`];
+                    // shift remaining pins
+                    for (let i = idx; i < currentGeometry.customSensors.length; i++) {
+                        currentGeometry.connections.sensorPins[`custom_${i}`] = currentGeometry.connections.sensorPins[`custom_${i + 1}`] || '';
+                    }
+                    delete currentGeometry.connections.sensorPins[`custom_${currentGeometry.customSensors.length}`];
+                }
+
+                renderCustomSensorsList();
+                updateSensorConnectionsUI(currentGeometry.sensorCount);
+                window.forceGeometrySync();
+            });
+        });
+    }
+
+    if (elems.addCustomSensorBtn) {
+        elems.addCustomSensorBtn.addEventListener('click', () => {
+            if (!currentGeometry.customSensors) currentGeometry.customSensors = [];
+            currentGeometry.customSensors.push({ x_mm: 50, y_mm: 0 }); // Default pos
+            renderCustomSensorsList();
+            updateSensorConnectionsUI(currentGeometry.sensorCount);
+            window.forceGeometrySync();
+        });
     }
 
     // Update preview dynamically as user types
@@ -466,6 +562,15 @@ function getFormValues() {
         motorPins: motorPins
     };
 
+    if (currentGeometry && currentGeometry.customSensors) {
+        currentGeometry.customSensors.forEach((s, idx) => {
+            const el = document.getElementById(`pinSensorCustom_${idx}`);
+            if (el && el.value) {
+                connections.sensorPins[`custom_${idx}`] = el.value;
+            }
+        });
+    }
+
     // Leer valores en milímetros y convertir a metros (o valores por default)
     return {
         width_m: parseFloat(elems.robotWidthInput.value) / 1000 || DEFAULT_ROBOT_GEOMETRY.width_m,
@@ -477,6 +582,7 @@ function getFormValues() {
         comOffset_m: elems.comOffsetInput ? (parseFloat(elems.comOffsetInput.value) / 1000) : DEFAULT_ROBOT_GEOMETRY.comOffset_m,
         tireGrip: elems.tireGripInput ? parseFloat(elems.tireGripInput.value) : DEFAULT_ROBOT_GEOMETRY.tireGrip,
         customWheels: currentGeometry ? currentGeometry.customWheels : null,
+        customSensors: currentGeometry ? currentGeometry.customSensors : null,
         connections: connections
     };
 }
@@ -506,6 +612,13 @@ function setFormValues(geometry) {
     } else {
         currentGeometry.customWheels = null;
     }
+
+    if (geometry.customSensors !== undefined) {
+        currentGeometry.customSensors = geometry.customSensors;
+    } else {
+        currentGeometry.customSensors = [];
+    }
+    renderCustomSensorsList();
 
     // Set Connections
     if (geometry.connections) {

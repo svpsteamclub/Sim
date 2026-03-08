@@ -43,6 +43,8 @@ export function getDOMElements() {
         sensorSpreadInput: document.getElementById('sensorSpread'),
         sensorDiameterInput: document.getElementById('sensorDiameter'),
         sensorCountSelect: document.getElementById('sensorCount'),
+        addCustomSensorBtn: document.getElementById('addCustomSensorBtn'),
+        customSensorsList: document.getElementById('customSensorsList'),
         applyRobotGeometryButton: document.getElementById('applyRobotGeometryButton'),
         resetRobotGeometryButton: document.getElementById('resetRobotGeometryButton'),
         robotPartsPalette: document.getElementById('robotPartsPalette'),
@@ -220,6 +222,16 @@ export function updateDynamicCodeHelp(geometry) {
     if ((count == 1 || count == 3 || count == 5) && fmtPin(sensorPins.center)) pinsHtml += `<li><b>${sensorPins.center}</b>: Sensor Central</li>`;
     if (count >= 2 && fmtPin(sensorPins.right)) pinsHtml += `<li><b>${sensorPins.right}</b>: Sensor Derecho</li>`;
     if (count >= 5 && fmtPin(sensorPins.farRight)) pinsHtml += `<li><b>${sensorPins.farRight}</b>: Sensor Derecho (Externo)</li>`;
+
+    // Custom Sensors
+    if (geometry.customSensors && geometry.customSensors.length > 0) {
+        geometry.customSensors.forEach((s, idx) => {
+            const pinId = `custom_${idx}`;
+            if (fmtPin(sensorPins[pinId])) {
+                pinsHtml += `<li><b>${sensorPins[pinId]}</b>: Sensor Custom ${idx + 1}</li>`;
+            }
+        });
+    }
 
     // Motors
     if (driverType === 'l298n') {

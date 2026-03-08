@@ -61,6 +61,12 @@ export class Robot {
             this.sensors.right = 0;
             this.sensors.farRight = 0;
         }
+
+        if (this.customSensors && this.customSensors.length > 0) {
+            this.customSensors.forEach((s, idx) => {
+                this.sensors[`custom_${idx}`] = 0;
+            });
+        }
     }
 
     setImages(wheelImg) {
@@ -88,6 +94,9 @@ export class Robot {
 
         // Asignar llantas paramétricas si existen
         this.customWheels = geometry.customWheels || null;
+
+        // Asignar sensores customizados
+        this.customSensors = geometry.customSensors || null;
 
         // Asignar conexiones de pines
         this.connections = geometry.connections || null;
@@ -297,6 +306,22 @@ export class Robot {
                 y_m: y + 2 * ySpread * cosA
             };
         }
+
+        if (this.customSensors && this.customSensors.length > 0) {
+            this.customSensors.forEach((s, idx) => {
+                // s.x_mm es avance (eje X local del robot)
+                // s.y_mm es lateral (eje Y local del robot - izquierda es negativo en el canvas?)
+                // En el canvas, +X es derecha, +Y es abajo. El robot mira -Y en el origen
+                // Pero wait! angle_rad=0 mira a +X.
+                // Posición (X_local=avance, Y_local=lateral donde negativo es izquierda, positivo es derecha)
+                const xLocal_m = s.x_mm / 1000.0;
+                const yLocal_m = s.y_mm / 1000.0;
+                const wx = this.x_m + xLocal_m * cosA - yLocal_m * sinA;
+                const wy = this.y_m + xLocal_m * sinA + yLocal_m * cosA;
+                positions[`custom_${idx}`] = { x_m: wx, y_m: wy };
+            });
+        }
+
         return positions;
     }
 
@@ -421,6 +446,7 @@ export class Robot {
                 else if (key === 'right') pinNumber = conns.right || '';
                 else if (key === 'farLeft') pinNumber = conns.farLeft || '';
                 else if (key === 'farRight') pinNumber = conns.farRight || '';
+                else if (key.startsWith('custom_')) pinNumber = conns[key] || '';
             } else {
                 if (this.sensorCount === 2) {
                     if (key === 'left') pinNumber = '2';
