@@ -12,6 +12,46 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="assets/Logo%20guaroduino.png">
+
+    <!-- Dependencias para la nueva pestaña Guía -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#2563EB',
+                            dark: '#1E293B',
+                            light: '#F8FAFC',
+                            accent: '#F59E0B'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos específicos para la pestaña Guía */
+        #guia { background-color: #F1F5F9; }
+        #guia .glass-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid #E2E8F0;
+        }
+        #guia .prose img { border-radius: 0.5rem; margin: 1.5rem auto; display: block; max-width: 100%; height: auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        #guia pre[class*="language-"] { border-radius: 0.5rem; margin-top: 0; }
+        #guia .copy-btn { transition: all 0.2s; }
+        #guia .copy-btn:hover { background-color: #3B82F6; color: white; }
+    </style>
 </head>
 
 <body>
@@ -21,6 +61,7 @@
                 <h1>Simulador de Seguidor de Lineas</h1>
                 <nav class="tabs">
                     <button class="tab-button active" data-tab="introduccion">Tutorial</button>
+                    <button class="tab-button" data-tab="guia">Guía</button>
                     <button class="tab-button" data-tab="robot-editor">Editor de Robot</button>
                     <button class="tab-button" data-tab="code-editor">Editor de Código</button>
                     <button class="tab-button" data-tab="track-editor">Editor de Pista</button>
@@ -283,6 +324,270 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                 </div>
             </div>
         </div>
+        </div>
+
+        <!-- Guia Tab -->
+        <div id="guia" class="tab-content font-sans text-gray-800 antialiased leading-relaxed">
+            <div class="h-full overflow-y-auto">
+                <header class="bg-brand-dark text-white py-12 px-4 text-center">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex justify-center mb-4">
+                            <i data-lucide="bot" class="w-16 h-16 text-brand-accent"></i>
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Guía de Programación</h1>
+                        <p class="text-xl md:text-2xl text-gray-300 font-light mb-2">De Principiante a Campeón en Seguidores de Línea</p>
+                        <p class="text-sm font-semibold text-brand-accent uppercase tracking-widest mt-6">SVP Steam Club • Laboratorio Padre Brilla Brilla</p>
+                    </div>
+                </header>
+
+                <main class="max-w-4xl mx-auto px-4 py-8 md:py-12 space-y-12">
+                    <section class="glass-card p-6 md:p-10 text-lg">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="zap" class="w-8 h-8 text-yellow-500"></i>
+                            <h2 class="text-2xl font-bold text-brand-dark">La Lógica del Robot</h2>
+                        </div>
+                        <p class="mb-4">Para que nuestro robot se mueva, necesitamos entender cómo hablarle a los motores y cómo usar los sensores para tomar decisiones. Todo se reduce a dos preguntas:</p>
+                        <ul class="list-disc pl-6 space-y-2 text-gray-700 font-medium">
+                            <li>¿Qué sensor ve la línea negra?</li>
+                            <li>¿Cómo conecto los motores a la batería para reaccionar?</li>
+                        </ul>
+                    </section>
+
+                    <section class="glass-card p-6 md:p-10">
+                        <h2 class="text-3xl font-bold text-brand-dark mb-6 flex items-center gap-3">
+                            <i data-lucide="battery-charging" class="w-8 h-8 text-green-500"></i>
+                            1. El Secreto de los Motores: La Analogía de la Batería
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8 items-center mb-6">
+                            <div>
+                                <p class="mb-4">Imagina que cada motor de tu robot es un motorcito normal con <strong>dos cables sueltos</strong>.</p>
+                                <ul class="space-y-3 mb-4 text-gray-700">
+                                    <li class="flex items-start gap-2">
+                                        <i data-lucide="arrow-right-circle" class="w-5 h-5 text-brand-blue flex-shrink-0 mt-0.5"></i>
+                                        <span>Si conectas un cable al <strong>Positivo (+)</strong> y otro al <strong>Negativo (-)</strong>, el motor gira hacia adelante.</span>
+                                    </li>
+                                    <li class="flex items-start gap-2">
+                                        <i data-lucide="refresh-cw" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+                                        <span>Si <strong>inviertes los cables</strong> en la batería, el motor gira hacia atrás.</span>
+                                    </li>
+                                </ul>
+                                <p class="font-semibold text-brand-dark bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                    En nuestro Arduino, los pines son como esos cables de la batería.
+                                </p>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded-xl text-center border-2 border-dashed border-gray-300">
+                                <p class="text-sm text-gray-500 italic mb-2"></p>
+                                <p class="font-bold text-gray-700">Motor Izquierdo: Pines 5 y 6</p>
+                                <p class="font-bold text-gray-700">Motor Derecho: Pines 9 y 10</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-800 text-gray-300 p-6 rounded-xl mt-6">
+                            <h3 class="text-white font-bold mb-3 flex items-center gap-2">
+                                <i data-lucide="code" class="w-5 h-5 text-brand-accent"></i> ¿Cómo le damos energía en código?
+                            </h3>
+                            <p class="mb-2">Usamos la instrucción <code class="bg-slate-700 text-yellow-300 px-2 py-1 rounded">analogWrite(pin, velocidad)</code>.</p>
+                            <ul class="list-disc pl-5 space-y-1 mb-4">
+                                <li><code class="text-white">0</code> significa conectarlo al <strong>Negativo (-)</strong>.</li>
+                                <li>Un número como <code class="text-white">180</code> significa conectarlo al <strong>Positivo (+)</strong>. (0 a 255 máximo).</li>
+                            </ul>
+                            <p class="text-sm bg-slate-700 p-3 rounded border-l-4 border-brand-accent">
+                                <strong>Ejemplo para avanzar (Motor Izquierdo):</strong> Le damos energía al pin 5 y conectamos el 6 a tierra.<br>
+                                <code class="text-green-400 block mt-2">analogWrite(5, 180); analogWrite(6, 0);</code>
+                            </p>
+                        </div>
+                    </section>
+
+                    <section class="glass-card p-6 md:p-10 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-gray-200 text-gray-600 font-bold py-1 px-4 rounded-bl-lg text-sm">NIVEL 1</div>
+                        <h2 class="text-3xl font-bold text-brand-dark mb-4 mt-2">El Robot Básico (2 Sensores)</h2>
+                        
+                        <p class="mb-4 text-gray-700">En este nivel, tenemos un sensor a la izquierda (Pin 2) y uno a la derecha (Pin 3). Es como un robot que camina a ciegas y solo reacciona cuando "tropieza" con la línea de un lado u otro.</p>
+                        
+                        <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+                            <p class="text-sm text-gray-500 italic"></p>
+                        </div>
+
+                        <h3 class="font-bold text-xl mb-2 text-brand-blue">La Lógica:</h3>
+                        <ul class="space-y-2 mb-6 text-gray-700">
+                            <li>🔴 <strong>Si el Izquierdo toca la línea:</strong> Apaga el motor izquierdo y enciende el derecho para regresar.</li>
+                            <li>🔴 <strong>Si el Derecho toca la línea:</strong> Apaga el derecho y enciende el izquierdo.</li>
+                        </ul>
+
+                        <div class="relative group">
+                            <div class="absolute top-2 right-2 flex gap-2 z-10">
+                                <button onclick="copyCode('code-nivel1', this)" class="copy-btn bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="copy" class="w-4 h-4"></i> Copiar
+                                </button>
+                            </div>
+            <pre><code id="code-nivel1" class="language-cpp">void setup() {
+            pinMode(2, INPUT); // Sensor Izq
+            pinMode(3, INPUT); // Sensor Der
+            
+            pinMode(5, OUTPUT); pinMode(6, OUTPUT); // Motor Izq
+            pinMode(9, OUTPUT); pinMode(10, OUTPUT); // Motor Der
+            }
+
+            void loop() {
+            if (digitalRead(2) == HIGH) { 
+                // Gira Izquierda
+                analogWrite(5, 0);   analogWrite(6, 0);
+                analogWrite(9, 180); analogWrite(10, 0);
+            }
+            else if (digitalRead(3) == HIGH) { 
+                // Gira Derecha
+                analogWrite(5, 180); analogWrite(6, 0);
+                analogWrite(9, 0);   analogWrite(10, 0);
+            }
+            }</code></pre>
+                        </div>
+                    </section>
+
+                    <section class="glass-card p-6 md:p-10 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-brand-blue text-white font-bold py-1 px-4 rounded-bl-lg text-sm">NIVEL 2</div>
+                        <h2 class="text-3xl font-bold text-brand-dark mb-4 mt-2">El Robot de 3 Sensores (Separados)</h2>
+                        
+                        <p class="mb-4 text-gray-700">Para que el robot deje de zigzaguear, agregamos un <strong>sensor central (Pin 4)</strong>. En este diseño, los tres sensores están bastante separados. La línea negra es delgada, así que <em>solo un sensor puede verla a la vez</em>.</p>
+
+                        <h3 class="font-bold text-xl mb-2 text-brand-blue">La Lógica:</h3>
+                        <ul class="space-y-2 mb-6 text-gray-700">
+                            <li>🟢 <strong>Centro ve la línea:</strong> ¡Avanza con ambos motores!</li>
+                            <li>🔴 <strong>Izquierdo ve la línea:</strong> Gira a la izquierda.</li>
+                            <li>🔴 <strong>Derecho ve la línea:</strong> Gira a la derecha.</li>
+                        </ul>
+
+                        <div class="relative group">
+                            <div class="absolute top-2 right-2 flex gap-2 z-10">
+                                <button onclick="copyCode('code-nivel2', this)" class="copy-btn bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="copy" class="w-4 h-4"></i> Copiar
+                                </button>
+                            </div>
+            <pre><code id="code-nivel2" class="language-cpp">void setup() {
+            pinMode(2, INPUT); // Sensor Izq
+            pinMode(3, INPUT); // Sensor Der
+            pinMode(4, INPUT); // Sensor Centro
+            
+            pinMode(5, OUTPUT); pinMode(6, OUTPUT); // Motor Izq
+            pinMode(9, OUTPUT); pinMode(10, OUTPUT); // Motor Der
+            }
+
+            void loop() {
+            // 1. Si el centro ve la línea, vamos bien
+            if (digitalRead(4) == HIGH) {
+                analogWrite(5, 180); analogWrite(6, 0); // Izq adelante
+                analogWrite(9, 180); analogWrite(10, 0); // Der adelante
+            }
+            
+            // 2. Si el izquierdo ve la línea, corregimos
+            else if (digitalRead(2) == HIGH) {
+                analogWrite(5, 0);   analogWrite(6, 0); // Izq apagado
+                analogWrite(9, 180); analogWrite(10, 0); // Der adelante
+            }
+
+            // 3. Si el derecho ve la línea, corregimos
+            else if (digitalRead(3) == HIGH) {
+                analogWrite(5, 180); analogWrite(6, 0); // Izq adelante
+                analogWrite(9, 0);   analogWrite(10, 0); // Der apagado
+            }
+            }</code></pre>
+                        </div>
+                    </section>
+
+                    <section class="glass-card p-6 md:p-10 relative overflow-hidden border-2 border-brand-accent">
+                        <div class="absolute top-0 right-0 bg-brand-accent text-brand-dark font-extrabold py-1 px-4 rounded-bl-lg text-sm flex items-center gap-1">
+                            <i data-lucide="trophy" class="w-4 h-4"></i> NIVEL 3 (COMPETENCIA)
+                        </div>
+                        <h2 class="text-3xl font-bold text-brand-dark mb-4 mt-2">Sensores Juntos y la magia del <code class="bg-gray-200 text-brand-blue px-2 py-1 rounded rounded">&amp;&amp;</code></h2>
+                        
+                        <p class="mb-4 text-gray-700">Para ir realmente rápido, juntamos físicamente los tres sensores. Ahora están tan pegaditos que <strong>dos sensores pueden ver la línea ancha al mismo tiempo</strong>.</p>
+                        
+                        <div class="mb-6 bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-center">
+                            <p class="text-sm text-yellow-700 italic"></p>
+                        </div>
+
+                        <div class="bg-blue-50 border-l-4 border-brand-blue p-4 mb-6 text-gray-700">
+                            <p>Para programar esto, necesitamos un truco nuevo: el símbolo <strong><code class="bg-white px-1 rounded text-brand-blue">&&</code></strong>. En programación significa <strong>"Y"</strong>. Nos sirve para exigir que dos cosas pasen al mismo tiempo.</p>
+                        </div>
+
+                        <h3 class="font-bold text-xl mb-3 text-brand-blue">Los Nuevos Súper Poderes:</h3>
+                        <ul class="space-y-4 mb-6 text-gray-700">
+                            <li class="bg-white p-4 rounded border border-gray-100 shadow-sm">
+                                <strong>🏎️ Curvas Suaves:</strong> Si el Centro <code>&&</code> el Izquierdo ven la línea, bajamos la velocidad del motor interno en vez de apagarlo (ej. a 80). El robot fluye sin frenarse.
+                            </li>
+                            <li class="bg-white p-4 rounded border border-gray-100 shadow-sm">
+                                <strong>🔄 Curvas Cerradas (Invertir Batería):</strong> Si solo el sensor lateral ve la línea (casi nos salimos), invertimos los cables. El Pin 5 en 0 y el Pin 6 en 150. ¡El robot va en reversa de ese lado y gira rapidísimo en su propio eje!
+                            </li>
+                        </ul>
+
+                        <div class="relative group">
+                            <div class="absolute top-2 right-2 flex gap-2 z-10">
+                                <button onclick="copyCode('code-nivel3', this)" class="copy-btn bg-gray-700 text-gray-300 hover:text-white px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1">
+                                    <i data-lucide="copy" class="w-4 h-4"></i> Copiar
+                                </button>
+                            </div>
+            <pre><code id="code-nivel3" class="language-cpp">void setup() {
+            pinMode(2, INPUT); // Sensor Izq
+            pinMode(3, INPUT); // Sensor Der
+            pinMode(4, INPUT); // Sensor Centro
+            
+            pinMode(5, OUTPUT); pinMode(6, OUTPUT); // Motor Izq
+            pinMode(9, OUTPUT); pinMode(10, OUTPUT); // Motor Der
+            }
+
+            void loop() {
+            // 1. PERFECTO: Solo el centro ve la línea. Acelerar a fondo.
+            if (digitalRead(4) == HIGH && digitalRead(2) == LOW && digitalRead(3) == LOW) {
+                analogWrite(5, 180); analogWrite(6, 0);
+                analogWrite(9, 180); analogWrite(10, 0);
+            }
+
+            // 2. CURVA SUAVE IZQUIERDA: Centro Y (&&) Izquierdo ven la línea
+            else if (digitalRead(4) == HIGH && digitalRead(2) == HIGH) {
+                // El motor izquierdo no se apaga, solo va más lento (80)
+                analogWrite(5, 80);  analogWrite(6, 0); 
+                analogWrite(9, 180); analogWrite(10, 0);
+            }
+
+            // 3. CURVA SUAVE DERECHA: Centro Y (&&) Derecho ven la línea
+            else if (digitalRead(4) == HIGH && digitalRead(3) == HIGH) {
+                // El motor derecho no se apaga, solo va más lento (80)
+                analogWrite(5, 180); analogWrite(6, 0);
+                analogWrite(9, 80);  analogWrite(10, 0);
+            }
+
+            // 4. CURVA CERRADA IZQUIERDA: Solo el izquierdo ve la línea (casi nos salimos)
+            else if (digitalRead(2) == HIGH && digitalRead(4) == LOW) {
+                // ¡Invertimos la batería del izquierdo! Pin 5 en 0, Pin 6 en 150 (REVERSA)
+                analogWrite(5, 0);   analogWrite(6, 150); 
+                analogWrite(9, 180); analogWrite(10, 0);  // Derecho adelante
+            }
+
+            // 5. CURVA CERRADA DERECHA: Solo el derecho ve la línea (casi nos salimos)
+            else if (digitalRead(3) == HIGH && digitalRead(4) == LOW) {
+                // ¡Invertimos la batería del derecho! Pin 9 en 0, Pin 10 en 150 (REVERSA)
+                analogWrite(5, 180); analogWrite(6, 0);   // Izquierdo adelante
+                analogWrite(9, 0);   analogWrite(10, 150);
+            }
+            }</code></pre>
+                        </div>
+                    </section>
+
+                    <section class="bg-gradient-to-br from-brand-dark to-slate-800 text-white p-8 rounded-2xl shadow-xl text-center">
+                        <i data-lucide="crosshair" class="w-12 h-12 text-brand-accent mx-auto mb-4"></i>
+                        <h2 class="text-3xl font-bold mb-4">El Reto del Laboratorio</h2>
+                        <p class="text-gray-300 max-w-2xl mx-auto mb-6">
+                            Copien el código del <strong>Nivel 3</strong> a sus placas de Arduino. Pongan el robot en la pista y observen cómo se mueve. 
+                            <br><br>
+                            ¿La batería está muy cargada y el robot se sale en las curvas? Su misión es <strong>ajustar los números</strong> en el código: bajen el `180` a `150`, o cambien la velocidad suave de `80` a `60`. ¡Encuentren el equilibrio perfecto para ser los más rápidos!
+                        </p>
+                    </section>
+
+                </main>
+                <footer class="text-center text-gray-500 py-8 text-sm">
+                    <p>Creado para el Club de Robótica SVP Steam Club</p>
+                </footer>
+            </div>
         </div>
 
         <!-- Robot Editor Tab -->
@@ -733,7 +1038,54 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                 updateZoom();
             }
         });
+
+        // Inicializar iconos de la Guía
+        lucide.createIcons();
+
+        // Función para copiar código de la Guía
+        function copyCode(elementId, button) {
+            const codeElement = document.getElementById(elementId);
+            const textToCopy = codeElement.innerText;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> ¡Copiado!';
+                lucide.createIcons();
+                button.classList.add('bg-green-600', 'text-white');
+                button.classList.remove('bg-gray-700', 'text-gray-300');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    lucide.createIcons();
+                    button.classList.remove('bg-green-600', 'text-white');
+                    button.classList.add('bg-gray-700', 'text-gray-300');
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> ¡Copiado!';
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        lucide.createIcons();
+                    }, 2000);
+                } catch (err) {
+                    console.error('Fallback falló: ', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        }
     </script>
+    <!-- Scripts de Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
 </body>
 
 </html>

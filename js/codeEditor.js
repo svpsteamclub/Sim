@@ -430,6 +430,18 @@ export function loadUserCode(code) {
     // --- Nivel 1: Verificador de Código Básico ---
     let basicErrors = false;
 
+    // Verificar errores de sintaxis usando Web Worker de Monaco (si está disponible)
+    if (typeof window !== 'undefined' && window.monacoEditor && window.monaco) {
+        const model = window.monacoEditor.getModel();
+        const markers = window.monaco.editor.getModelMarkers({ resource: model.uri });
+        const hasSyntaxErrors = markers.some(marker => marker.severity === window.monaco.MarkerSeverity.Error);
+        
+        if (hasSyntaxErrors) {
+            ArduinoSerial.println("❌ ERROR: El código contiene errores de sintaxis.");
+            basicErrors = true;
+        }
+    }
+
     // Verificar si olvidaron void setup() o void loop()
     if (!/\bvoid\s+setup\s*\(\s*\)/.test(code)) {
         ArduinoSerial.println("❌ ERROR: Falta definir la función 'void setup()'.");
@@ -457,9 +469,36 @@ export function loadUserCode(code) {
         }
     });
 
+    // Validar de forma sencilla que falten los punto y comas
+    const lineasSueltas = code.split('\n');
+    for (let i = 0; i < lineasSueltas.length; i++) {
+        // Remover \r y espacios, luego quitar comentarios y limpiar de nuevo
+        let originalLine = lineasSueltas[i].trim();
+        let l = originalLine.replace(/\/\/.*$/, '').trim();
+        
+        // Ignorar líneas vacías, comentarios de bloque, macros y pragmas
+        if (!l || l.startsWith('#') || l.startsWith('/*') || l.startsWith('*')) continue;
+        
+        // Si no termina en llaves, dos puntos (ej labels/switch), coma (argumentos multilínea), ni punto y coma
+        if (!l.endsWith(';') && !l.endsWith('{') && !l.endsWith('}') && !l.endsWith(':') && !l.endsWith(',')) {
+            // Ignorar directivas de control que pueden o no llevar llave en la misma línea
+            if (l.match(/^(?:}?\s*(?:else\s+)?if|while|for|else)\b/)) continue;
+            // Ignorar declaraciones de funciones (ej. void setup())
+            if (l.match(/^(?:void|int|float|bool|String|long|unsigned)\s+\w+\s*\(.*?\)/)) continue;
+            
+            // Si la línea pasa los filtros anteriores y contiene caracteres típicos de comandos, asumimos que falta un ';'
+            if (l.match(/[a-zA-Z0-9+\-*\/=]/)) {
+                ArduinoSerial.println(`❌ ERROR SINTAXIS: Falta ';' al final de la línea ${i+1}: "${originalLine}"`);
+                basicErrors = true;
+            }
+        }
+    }
+
     if (basicErrors) {
         ArduinoSerial.println("⛔ Por favor, corrige los errores del código en el editor antes de continuar.");
-        alert("Se encontraron errores básicos en tu código. Revisa el Monitor Serial para más detalles.");
+        if (typeof alert !== 'undefined') {
+            alert("Se encontraron errores básicos en tu código. Revisa el Monitor Serial para más detalles.");
+        }
         userSetupFunction = () => { };
         userLoopFunction = async () => { await arduinoAPI.delay(100); };
         return false;
@@ -475,9 +514,10 @@ export function loadUserCode(code) {
 
         // Create a function scope for the user's code, injecting the Arduino API
         // The user code should define setup() and loop()
+        // Agregamos "use strict" para evitar declaración implícita de variables y otros errores tolerados por JS
         const userScript = new Function(
             ...Object.keys(arduinoAPI), // Argument names for the API objects/functions
-            jsCode + `\nreturn { setup: typeof setup !== 'undefined' ? setup : undefined, loop: typeof loop !== 'undefined' ? loop : undefined, constrain: typeof constrain !== 'undefined' ? constrain : undefined };`
+            `"use strict";\n` + jsCode + `\nreturn { setup: typeof setup !== 'undefined' ? setup : undefined, loop: typeof loop !== 'undefined' ? loop : undefined, constrain: typeof constrain !== 'undefined' ? constrain : undefined };`
         );
 
         // Call the created function, passing the actual API implementations
@@ -562,6 +602,8 @@ export function getCurrentCodeType() {
 }
 
 // Cleanup unused event listener related to code template dropdown
-document.addEventListener('DOMContentLoaded', () => {
-    // Dropdown codeTemplate has been removed from index.html
-});
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        // Dropdown codeTemplate has been removed from index.html
+    });
+}
