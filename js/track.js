@@ -98,6 +98,45 @@ export class Track {
         });
     }
 
+    // Check if any pixel within a circular area around world coordinates is on the line
+    isAreaOnLine(x_track_px, y_track_px, radius_px) {
+        if (!this.imageData) return false;
+
+        const x_center = Math.round(x_track_px);
+        const y_center = Math.round(y_track_px);
+        const r_sq = radius_px * radius_px;
+        
+        // Define bounding box for the circle
+        const minX = Math.max(0, Math.floor(x_center - radius_px));
+        const maxX = Math.min(this.width_px - 1, Math.ceil(x_center + radius_px));
+        const minY = Math.max(0, Math.floor(y_center - radius_px));
+        const maxY = Math.min(this.height_px - 1, Math.ceil(y_center + radius_px));
+
+        for (let y = minY; y <= maxY; y++) {
+            const dy = y - y_center;
+            for (let x = minX; x <= maxX; x++) {
+                const dx = x - x_center;
+                if (dx * dx + dy * dy <= r_sq) {
+                    const idx = (y * this.width_px + x) * 4;
+                    const r = this.imageData.data[idx];
+                    const g = this.imageData.data[idx + 1];
+                    const b = this.imageData.data[idx + 2];
+                    const alpha = this.imageData.data[idx + 3];
+
+                    // Si es transparente, no es línea
+                    if (alpha < 128) continue;
+
+                    // Si la intensidad es menor al umbral de línea
+                    const brightness = (r + g + b) / 3;
+                    if (brightness < this.lineThreshold) {
+                        return true; // Se detectó un píxel de línea dentro del círculo
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     // Check if a pixel at world coordinates (in pixels of the track image) is on the line
     isPixelOnLine(x_track_px, y_track_px) {
         if (!this.imageData || x_track_px < 0 || x_track_px >= this.width_px || y_track_px < 0 || y_track_px >= this.height_px) {

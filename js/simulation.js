@@ -357,12 +357,15 @@ export class Simulation {
             return;
         }
         const sensorPositions_m = this.robot.getSensorPositions_world_m();
+        // Calculate sensor radius in pixels using robot's parameter
+        const sensorRadiusPx = Math.max(1, (this.robot.sensorDiameter_m / 2) * PIXELS_PER_METER);
+        
         // For each sensor, compute state
         for (const key in sensorPositions_m) {
             const pos = sensorPositions_m[key];
             const px = pos.x_m * PIXELS_PER_METER;
             const py = pos.y_m * PIXELS_PER_METER;
-            let onLine = this.track.isPixelOnLine(px, py);
+            let onLine = this.track.isAreaOnLine(px, py, sensorRadiusPx);
             // Apply sensor noise if enabled
             if (this.params.sensorNoiseProb > 0 && Math.random() < this.params.sensorNoiseProb) {
                 onLine = !onLine;
