@@ -1012,14 +1012,6 @@ void girar_der_fuerte() {
 
         // Redraw final state
         drawCurrentSimulationState();
-    });
-        placeStartLineSimButton.textContent = 'Ubicar Línea de Comienzo';
-        placeStartLineSimButton.style.backgroundColor = '';
-        elems.simulationDisplayCanvas.style.cursor = 'default';
-        startLineStartPoint = null;
-
-        // Redraw final state
-        drawCurrentSimulationState();
         event.preventDefault();
     }, { passive: false });
 
