@@ -625,7 +625,13 @@ h2 {
 }
 
 /* Common button styles */
-button {
+body button,
+body button[type="button"],
+body button[type="submit"],
+body button[type="reset"],
+body input[type="button"],
+body input[type="submit"],
+body input[type="reset"] {
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -637,11 +643,23 @@ button {
     transition: all 0.2s ease;
 }
 
-button:hover:not(:disabled) {
+body button:hover:not(:disabled),
+body button[type="button"]:hover:not(:disabled),
+body button[type="submit"]:hover:not(:disabled),
+body button[type="reset"]:hover:not(:disabled),
+body input[type="button"]:hover:not(:disabled),
+body input[type="submit"]:hover:not(:disabled),
+body input[type="reset"]:hover:not(:disabled) {
     background-color: var(--primary-hover);
 }
 
-button:disabled {
+body button:disabled,
+body button[type="button"]:disabled,
+body button[type="submit"]:disabled,
+body button[type="reset"]:disabled,
+body input[type="button"]:disabled,
+body input[type="submit"]:disabled,
+body input[type="reset"]:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -667,7 +685,10 @@ button:disabled {
         flex-direction: column;
     }
 
-    button {
+    body button,
+    body button[type="button"],
+    body button[type="submit"],
+    body button[type="reset"] {
         width: 100%;
     }
 }
