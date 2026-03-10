@@ -829,9 +829,20 @@ void girar_der_fuerte() {
     // --- Mouse Events ---
     // Helper: usa la inversa de la matriz de cámara exacta capturada en draw() para máxima precisión
     function screenToWorld(event) {
+        let clientX = event.clientX;
+        let clientY = event.clientY;
+        
+        if (event.touches && event.touches.length > 0) {
+            clientX = event.touches[0].clientX;
+            clientY = event.touches[0].clientY;
+        } else if (event.changedTouches && event.changedTouches.length > 0) {
+            clientX = event.changedTouches[0].clientX;
+            clientY = event.changedTouches[0].clientY;
+        }
+
         const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const cx = event.clientX - rect.left;
-        const cy = event.clientY - rect.top;
+        const cx = clientX - rect.left;
+        const cy = clientY - rect.top;
         return simulationInstance.screenToWorld(cx, cy, elems.simulationDisplayCanvas);
     }
 
@@ -918,13 +929,7 @@ void girar_der_fuerte() {
         if (!isPlacingStartLineSim || !simulationInstance || !simulationInstance.track.imageData) return;
         if (event.touches.length !== 1) return;
 
-        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const scale = elems.simulationDisplayCanvas.width / rect.width;
-        const touch = event.touches[0];
-        const x = (touch.clientX - rect.left) * scale;
-        const y = (touch.clientY - rect.top) * scale;
-
-        startLineStartPoint = { x, y };
+        startLineStartPoint = screenToWorld(event);
         event.preventDefault();
     }, { passive: false });
 
@@ -932,15 +937,25 @@ void girar_der_fuerte() {
         if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
         if (event.touches.length !== 1) return;
 
-        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const scale = elems.simulationDisplayCanvas.width / rect.width;
-        const touch = event.touches[0];
-        const x = (touch.clientX - rect.left) * scale;
-        const y = (touch.clientY - rect.top) * scale;
+        const world = screenToWorld(event);
+
+        // Draw preview line using world->canvas transform to keep it aligned con track
+        const canvasW = elems.simulationDisplayCanvas.width;
+        const canvasH = elems.simulationDisplayCanvas.height;
+        const zoom = simulationInstance.cameraZoom;
+        const camX = simulationInstance.cameraX;
+        const camY = simulationInstance.cameraY;
+        const toCanvas = (wx, wy) => ({
+            x: (wx - camX) * zoom + canvasW / 2,
+            y: (wy - camY) * zoom + canvasH / 2,
+        });
+
+        const startCanvas = toCanvas(startLineStartPoint.x, startLineStartPoint.y);
+        const endCanvas = toCanvas(world.x, world.y);
 
         // Draw current track state
         const ctx = elems.simulationDisplayCanvas.getContext('2d');
-        simulationInstance.draw(ctx, elems.simulationDisplayCanvas.width, elems.simulationDisplayCanvas.height);
+        simulationInstance.draw(ctx, canvasW, canvasH);
 
         // Draw preview line
         ctx.save();
@@ -948,8 +963,8 @@ void girar_der_fuerte() {
         ctx.strokeStyle = "#FF00FF";
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(startLineStartPoint.x, startLineStartPoint.y);
-        ctx.lineTo(x, y);
+        ctx.moveTo(startCanvas.x, startCanvas.y);
+        ctx.lineTo(endCanvas.x, endCanvas.y);
         ctx.stroke();
         ctx.restore();
         event.preventDefault();
@@ -958,33 +973,24 @@ void girar_der_fuerte() {
     elems.simulationDisplayCanvas.addEventListener('touchend', (event) => {
         if (!isPlacingStartLineSim || !startLineStartPoint || !simulationInstance || !simulationInstance.track.imageData) return;
 
-        // Use changedTouches if available, otherwise use last known position
-        let x, y;
-        const rect = elems.simulationDisplayCanvas.getBoundingClientRect();
-        const scale = elems.simulationDisplayCanvas.width / rect.width;
-        if (event.changedTouches && event.changedTouches.length > 0) {
-            const touch = event.changedTouches[0];
-            x = (touch.clientX - rect.left) * scale;
-            y = (touch.clientY - rect.top) * scale;
-        } else {
-            x = startLineStartPoint.x;
-            y = startLineStartPoint.y;
-        }
+        const world = screenToWorld(event);
 
         // Convert to meters for simulation
-        const x1_m = startLineStartPoint.x / PIXELS_PER_METER;
-        const y1_m = startLineStartPoint.y / PIXELS_PER_METER;
-        const x2_m = x / PIXELS_PER_METER;
-        const y2_m = y / PIXELS_PER_METER;
+        const line = {
+            x1: startLineStartPoint.x / PIXELS_PER_METER,
+            y1: startLineStartPoint.y / PIXELS_PER_METER,
+            x2: world.x / PIXELS_PER_METER,
+            y2: world.y / PIXELS_PER_METER
+        };
 
         // Calculate angle for robot orientation (perpendicular to line)
-        const dx = x2_m - x1_m;
-        const dy = y2_m - y1_m;
+        const dx = line.x2 - line.x1;
+        const dy = line.y2 - line.y1;
         const angle_rad = Math.atan2(dy, dx) - Math.PI / 2; // Perpendicular to line
 
         // Calculate center point of line for robot position
-        const center_x_m = (x1_m + x2_m) / 2;
-        const center_y_m = (y1_m + y2_m) / 2;
+        const center_x_m = (line.x1 + line.x2) / 2;
+        const center_y_m = (line.y1 + line.y2) / 2;
 
         // Reset simulation with new start position
         simulationInstance.resetSimulationState(center_x_m, center_y_m, angle_rad);
@@ -993,11 +999,20 @@ void girar_der_fuerte() {
         simulationInstance.lapTimer.initialize(
             { x_m: center_x_m, y_m: center_y_m, angle_rad: angle_rad },
             simulationInstance.totalSimTime_s,
-            { x1: x1_m, y1: y1_m, x2: x2_m, y2: y2_m }
+            line
         );
 
         // Exit placement mode
         isPlacingStartLineSim = false;
+        elems.simulationDisplayCanvas.classList.remove('placing-line');
+        if (elems.simPlaceStartLineBtn) {
+            elems.simPlaceStartLineBtn.classList.remove('active');
+        }
+        startLineStartPoint = null;
+
+        // Redraw final state
+        drawCurrentSimulationState();
+    });
         placeStartLineSimButton.textContent = 'Ubicar Línea de Comienzo';
         placeStartLineSimButton.style.backgroundColor = '';
         elems.simulationDisplayCanvas.style.cursor = 'default';

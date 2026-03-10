@@ -447,18 +447,39 @@ export class Simulation {
      */
     screenToWorld(cssPx_x, cssPx_y, canvas) {
         const rect = canvas.getBoundingClientRect();
-        // Convertir CSS px → canvas internal px (el canvas puede estar escalado por CSS)
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const internalX = cssPx_x * scaleX;
-        const internalY = cssPx_y * scaleY;
+        
+        // Manejar object-fit: contain
+        const renderWidth = rect.width;
+        const renderHeight = rect.height;
+        const canvasAspect = canvas.width / canvas.height;
+        const containerAspect = renderWidth / renderHeight;
+
+        let actualWidth, actualHeight, offsetX, offsetY;
+
+        if (containerAspect > canvasAspect) {
+            actualHeight = renderHeight;
+            actualWidth = renderHeight * canvasAspect;
+            offsetX = (renderWidth - actualWidth) / 2;
+            offsetY = 0;
+        } else {
+            actualWidth = renderWidth;
+            actualHeight = renderWidth / canvasAspect;
+            offsetX = 0;
+            offsetY = (renderHeight - actualHeight) / 2;
+        }
+
+        // Si el click fue en el letterbox (fuera del area dibujada), podemos ajustarlo a los bordes
+        let adjustedPx_x = cssPx_x - offsetX;
+        let adjustedPx_y = cssPx_y - offsetY;
+
+        // Convertir al internal pixel de canvas (0..canvas.width, 0..canvas.height)
+        const internalX = adjustedPx_x * (canvas.width / actualWidth);
+        const internalY = adjustedPx_y * (canvas.height / actualHeight);
 
         if (!this._cameraMatrix) {
-            // Fallback si draw() nunca fue llamado
             return { x: internalX, y: internalY };
         }
 
-        // Invertir la matriz de cámara exacta
         const inv = this._cameraMatrix.inverse();
         return {
             x: inv.a * internalX + inv.c * internalY + inv.e,
