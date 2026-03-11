@@ -99,10 +99,68 @@ export function initRobotParts() {
     };
     // Insertar después del texto de ayuda si existe
     const helpDiv = partsPalette.parentNode.querySelector('.robot-editor-help');
+
+    // Create container for buttons
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.id = 'editor-controls-extra';
+    buttonsContainer.style.marginTop = '1em';
+    buttonsContainer.style.display = 'flex';
+    buttonsContainer.style.flexDirection = 'column';
+    buttonsContainer.style.gap = '0.5em';
+
+    // Add erase btn to container
+    buttonsContainer.appendChild(eraseBtn);
+
+    // Create inner row for the 3 main buttons
+    const mainBtnsRow = document.createElement('div');
+    mainBtnsRow.style.display = 'flex';
+    mainBtnsRow.style.gap = '0.5em';
+    mainBtnsRow.style.width = '100%';
+
+    const saveBtn = document.createElement('button');
+    saveBtn.id = 'saveRobotButton';
+    saveBtn.textContent = 'Guardar Robot';
+    saveBtn.style.flex = '1';
+    saveBtn.style.padding = '0.8em';
+
+    const loadLabel = document.createElement('label');
+    loadLabel.setAttribute('for', 'loadRobotInput');
+    loadLabel.className = 'file-input-label';
+    loadLabel.textContent = 'Cargar Robot';
+    loadLabel.style.cssText = 'flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height:2.8em; text-align:center; cursor:pointer; background:var(--primary-color); color:white; border-radius:4px; font-size: 0.9em;';
+
+    const loadInput = document.createElement('input');
+    loadInput.type = 'file';
+    loadInput.id = 'loadRobotInput';
+    loadInput.accept = '.json';
+    loadInput.style.display = 'none';
+
+    const exampleBtn = document.createElement('button');
+    exampleBtn.id = 'loadExampleRobotButton';
+    exampleBtn.textContent = 'Cargar Ejemplo';
+    exampleBtn.style.flex = '1';
+    exampleBtn.style.padding = '0.8em';
+
+    mainBtnsRow.appendChild(saveBtn);
+    mainBtnsRow.appendChild(loadLabel);
+    mainBtnsRow.appendChild(loadInput);
+    mainBtnsRow.appendChild(exampleBtn);
+
+    buttonsContainer.appendChild(mainBtnsRow);
+
+    // Predefined robots
+    const predefDiv = document.createElement('div');
+    predefDiv.style.marginTop = '0.5em';
+    predefDiv.innerHTML = `
+        <label for="robotSelectionDropdown" style="font-size:0.9em; display:block; margin-bottom:0.3em;">Seleccionar Robot Predefinido:</label>
+        <select id="robotSelectionDropdown" style="width:100%; padding:0.4em; border-radius:4px; border:1px solid var(--border-color);"></select>
+    `;
+    buttonsContainer.appendChild(predefDiv);
+
     if (helpDiv) {
-        helpDiv.parentNode.insertBefore(eraseBtn, helpDiv.nextSibling);
+        helpDiv.parentNode.insertBefore(buttonsContainer, helpDiv.nextSibling);
     } else {
-        partsPalette.parentNode.appendChild(eraseBtn);
+        partsPalette.parentNode.appendChild(buttonsContainer);
     }
 
     // Iniciar el botón Pan

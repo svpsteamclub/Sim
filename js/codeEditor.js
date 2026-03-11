@@ -125,6 +125,10 @@ const arduinoAPI = {
         else if (pin === resolveUIPin(conns.right)) val = sharedSimulationState.robot.sensors.right;
         else if (pin === resolveUIPin(conns.farLeft)) val = sharedSimulationState.robot.sensors.farLeft;
         else if (pin === resolveUIPin(conns.farRight)) val = sharedSimulationState.robot.sensors.farRight;
+        else if (pin === resolveUIPin(conns.fullFarLeft)) val = sharedSimulationState.robot.sensors.fullFarLeft;
+        else if (pin === resolveUIPin(conns.fullFarRight)) val = sharedSimulationState.robot.sensors.fullFarRight;
+        else if (pin === resolveUIPin(conns.centerLeft)) val = sharedSimulationState.robot.sensors.centerLeft;
+        else if (pin === resolveUIPin(conns.centerRight)) val = sharedSimulationState.robot.sensors.centerRight;
 
         // Debug
         // ArduinoSerial.println(`digitalRead(${pin}) -> ${val} (left: ${resolveUIPin(conns.left)}, center: ${resolveUIPin(conns.center)}, right: ${resolveUIPin(conns.right)})`);

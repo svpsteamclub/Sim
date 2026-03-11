@@ -17,7 +17,10 @@ const MAX_ZOOM = 4.0;
 export function initRobotEditor(appInterface) {
     console.log("Initializing robot editor...");
     mainAppInterface = appInterface;
+    
+    // We need to re-fetch elements after they might have been injected/moved
     const elems = getDOMElements();
+
     previewCanvas = elems.robotPreviewCanvas;
     if (!previewCanvas) {
         console.error("Robot Preview Canvas not found!");
@@ -246,14 +249,55 @@ export function initRobotEditor(appInterface) {
         const rowFarLeft = document.getElementById('rowSensorFarLeft');
         const rowCenter = document.getElementById('rowSensorCenter');
         const rowFarRight = document.getElementById('rowSensorFarRight');
+        const rowFullFarLeft = document.getElementById('rowSensorFullFarLeft');
+        const rowFullFarRight = document.getElementById('rowSensorFullFarRight');
+
         if (rowFarLeft) rowFarLeft.style.display = (count >= 4) ? 'flex' : 'none';
-        if (rowCenter) rowCenter.style.display = (count % 2 !== 0) ? 'flex' : 'none'; // 3 or 5
+        if (rowCenter) rowCenter.style.display = (count % 2 !== 0 && count !== 8) ? 'flex' : 'none'; 
         if (rowFarRight) rowFarRight.style.display = (count >= 4) ? 'flex' : 'none';
+        if (rowFullFarLeft) rowFullFarLeft.style.display = (count >= 6) ? 'flex' : 'none';
+        if (rowFullFarRight) rowFullFarRight.style.display = (count >= 6) ? 'flex' : 'none';
 
         // Render Custom Sensors Pins
         const container = document.getElementById('sensorConnectionsContainer');
         if (container) {
-            // Remove existing custom pin rows first
+            // Remove existing static/dynamic sensor pin rows for special sensors if not in HTML
+            // Note: Since we only have static rows in HTML for 5+2=7 sensors, 
+            // for the 8th sensor (center split), we might need to inject rows if we don't want to over-complicate HTML.
+            // But let's see if 8 sensors is okay with current names. 
+            // 8 sensors use: fullFarLeft, farLeft, left, centerLeft, centerRight, right, farRight, fullFarRight.
+            // We need 2 more rows for centerLeft/centerRight when count == 8.
+            const existingSpecial = container.querySelectorAll('.special-sensor-pin');
+            existingSpecial.forEach(el => el.remove());
+
+            if (count === 8) {
+                // Find where to insert (between pinSensorLeft and pinSensorRight)
+                const rowLeft = document.getElementById('pinSensorLeft').parentNode;
+                const rowRight = document.getElementById('pinSensorRight').parentNode;
+
+                const rowCL = document.createElement('div');
+                rowCL.className = 'pin-row sensor-pin-config special-sensor-pin';
+                rowCL.innerHTML = `<span>Pin Sensor Centro Izq.:</span>${pinSelect('pinSensorCenterLeft', '')}`;
+                
+                const rowCR = document.createElement('div');
+                rowCR.className = 'pin-row sensor-pin-config special-sensor-pin';
+                rowCR.innerHTML = `<span>Pin Sensor Centro Der.:</span>${pinSelect('pinSensorCenterRight', '')}`;
+
+                // Insert into the ordered sequence
+                container.insertBefore(rowCL, rowRight);
+                container.insertBefore(rowCR, rowRight);
+
+                // Set values if they exist in currentGeometry
+                const selCL = rowCL.querySelector('select');
+                const selCR = rowCR.querySelector('select');
+                if (currentGeometry?.connections?.sensorPins) {
+                    if (selCL) selCL.value = currentGeometry.connections.sensorPins.centerLeft || '';
+                    if (selCR) selCR.value = currentGeometry.connections.sensorPins.centerRight || '';
+                }
+                [selCL, selCR].forEach(s => s?.addEventListener('change', () => window.forceGeometrySync()));
+            }
+
+            // existing custom sensor logic...
             const existingCustoms = container.querySelectorAll('.custom-sensor-pin');
             existingCustoms.forEach(el => el.remove());
 
@@ -454,46 +498,50 @@ export function initRobotEditor(appInterface) {
     }
 
     // Guardar y cargar robot
-    elems.saveRobotButton.addEventListener('click', () => {
-        const geometry = getFormValues();
-        const parts = window.getPlacedPartsRaw ? window.getPlacedPartsRaw() : getPlacedPartsRaw();
-        const robotData = {
-            geometry,
-            parts
-        };
-        const jsonData = JSON.stringify(robotData, null, 2);
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'robot.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
+    if (elems.saveRobotButton) {
+        elems.saveRobotButton.addEventListener('click', () => {
+            const geometry = getFormValues();
+            const parts = window.getPlacedPartsRaw ? window.getPlacedPartsRaw() : getPlacedPartsRaw();
+            const robotData = {
+                geometry,
+                parts
+            };
+            const jsonData = JSON.stringify(robotData, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'robot.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    }
 
-    elems.loadRobotInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const robotData = JSON.parse(e.target.result);
-                if (robotData.geometry) {
-                    setFormValues(robotData.geometry);
-                    currentGeometry = getFormValues();
-                    previewRobot.updateGeometry(currentGeometry);
-                }
-                if (robotData.parts && window.restorePlacedPartsRaw) {
-                    window.restorePlacedPartsRaw(robotData.parts);
-                }
-                renderRobotPreview();
-            } catch (err) { }
-        };
-        reader.readAsText(file);
-        event.target.value = null;
-    });
+    if (elems.loadRobotInput) {
+        elems.loadRobotInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const robotData = JSON.parse(e.target.result);
+                    if (robotData.geometry) {
+                        setFormValues(robotData.geometry);
+                        currentGeometry = getFormValues();
+                        previewRobot.updateGeometry(currentGeometry);
+                    }
+                    if (robotData.parts && window.restorePlacedPartsRaw) {
+                        window.restorePlacedPartsRaw(robotData.parts);
+                    }
+                    renderRobotPreview();
+                } catch (err) { }
+            };
+            reader.readAsText(file);
+            event.target.value = null;
+        });
+    }
 
     if (elems.loadExampleRobotButton) {
         elems.loadExampleRobotButton.addEventListener('click', async () => {
@@ -592,11 +640,15 @@ function getFormValues() {
 
     const connections = {
         sensorPins: {
+            fullFarLeft: document.getElementById('pinSensorFullFarLeft')?.value || '',
             farLeft: elems.pinSensorFarLeftInput?.value || '',
             left: elems.pinSensorLeftInput?.value || '',
             center: elems.pinSensorCenterInput?.value || '',
+            centerLeft: document.getElementById('pinSensorCenterLeft')?.value || '',
+            centerRight: document.getElementById('pinSensorCenterRight')?.value || '',
             right: elems.pinSensorRightInput?.value || '',
             farRight: elems.pinSensorFarRightInput?.value || '',
+            fullFarRight: document.getElementById('pinSensorFullFarRight')?.value || '',
         },
         driverType: driverType,
         motorPins: motorPins
@@ -1056,6 +1108,7 @@ export async function loadDefaultRobotJSON() {
 async function initRobotSelectionDropdown() {
     const elems = getDOMElements();
     const dropdown = elems.robotSelectionDropdown;
+    if (!dropdown) return;
 
     // Add default option
     const defaultOption = document.createElement('option');

@@ -699,10 +699,14 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                     <label for="sensorCount">
                         Número de Sensores IR:
                         <select id="sensorCount">
+                            <option value="1">1</option>
                             <option value="2" selected>2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
                         </select>
                     </label>
 
@@ -715,6 +719,37 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                     <h3 style="margin-top: 1em; border-top: 1px solid var(--border-color); padding-top: 10px;">
                         Conexiones (Pines Arduino)</h3>
                     <div id="sensorConnectionsContainer">
+                        <!-- Sensors ordered from Left to Right -->
+                        <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFullFarLeft">
+                            <span>Pin Sensor Muy Ext. Izq.:</span>
+                            <select id="pinSensorFullFarLeft">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
                         <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFarLeft">
                             <span>Pin Sensor Extremo Izq.:</span>
                             <select id="pinSensorFarLeft">
@@ -865,54 +900,99 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
                                 </optgroup>
                             </select>
                         </div>
-                    </div>
+                        <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFullFarRight">
+                            <span>Pin Sensor Muy Ext. Der.:</span>
+                            <select id="pinSensorFullFarRight">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        </div>
+                        <div class="pin-row sensor-pin-config" style="display:none;" id="rowSensorFullFarRight">
+                            <span>Pin Sensor Muy Ext. Der.:</span>
+                            <select id="pinSensorFullFarRight">
+                                <option value="" disabled selected>(sin seleccionar)</option>
+                                <option value="VCC">Puente a Positivo (VCC)</option>
+                                <option value="GND">Puente a Negativo (GND)</option>
+                                <optgroup label="⚡ Analógicos (A0–A5)">
+                                    <option value="A0">A0 — Analógico</option>
+                                    <option value="A1">A1 — Analógico</option>
+                                    <option value="A2">A2 — Analógico</option>
+                                    <option value="A3">A3 — Analógico</option>
+                                    <option value="A4">A4 — Analógico / I2C SDA</option>
+                                    <option value="A5">A5 — Analógico / I2C SCL</option>
+                                </optgroup>
+                                <optgroup label="🔵 Digitales (D2–D13)">
+                                    <option value="2">2 — Digital</option>
+                                    <option value="3">3 — Digital / PWM~</option>
+                                    <option value="4">4 — Digital</option>
+                                    <option value="5">5 — Digital / PWM~</option>
+                                    <option value="6">6 — Digital / PWM~</option>
+                                    <option value="7">7 — Digital</option>
+                                    <option value="8">8 — Digital</option>
+                                    <option value="9">9 — Digital / PWM~</option>
+                                    <option value="10">10 — Digital / PWM~ / SS</option>
+                                    <option value="11">11 — Digital / PWM~ / MOSI</option>
+                                    <option value="12">12 — Digital / MISO</option>
+                                    <option value="13">13 — Digital / LED / SCK</option>
+                                </optgroup>
+                            </select>
+                        </div>
 
-                    <label for="motorDriverType" style="margin-top:0.5em;">
-                        Tipo de Controlador de Motores:
-                        <select id="motorDriverType">
-                            <option value="l298n" selected>L298N / L293D (6 pines: ENA, IN1, IN2, IN3, IN4, ENB)
-                            </option>
-                            <option value="mx1616">MX1616 / TB6612 (4 pines: IN1, IN2, IN3, IN4)</option>
-                            <option value="single">ESCs (2 pines: 1 PWM por motor)</option>
-                        </select>
-                    </label>
+                        <label for="motorDriverType" style="margin-top:0.8em; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                            Tipo de Controlador de Motores:
+                            <select id="motorDriverType">
+                                <option value="l298n" selected>L298N / L293D (6 pines: ENA, IN1, IN2, IN3, IN4, ENB)</option>
+                                <option value="mx1616">MX1616 / TB6612 (4 pines: IN1, IN2, IN3, IN4)</option>
+                                <option value="single">ESCs (2 pines: 1 PWM por motor)</option>
+                            </select>
+                        </label>
 
-                    <div id="motorConnectionsContainer"
-                        style="margin-top:0.5em; padding-left:1em; border-left: 2px solid var(--primary-color);">
-                        <!-- Generado dinámicamente según motorDriverType -->
-                    </div>
+                        <div id="motorConnectionsContainer" style="padding-left:1em; border-left: 2px solid var(--primary-color);">
+                            <!-- Generado dinámicamente según motorDriverType -->
+                        </div>
 
-                    <h3 style="margin-top: 1em; border-top: 1px solid var(--border-color); padding-top: 10px;">Físicas
-                        del Robot</h3>
-                    <label for="robotMass" title="Masa del robot en kilogramos. Afecta inercia.">
-                        Masa (kg):
-                        <input type="number" id="robotMass" value="0.25" step="0.01" min="0.05" max="5.0">
-                    </label>
+                        <h3 style="margin-top: 1em; border-top: 1px solid var(--border-color); padding-top: 10px;">Físicas del Robot</h3>
+                        <label for="robotMass" title="Masa del robot en kilogramos. Afecta inercia.">
+                            Masa (kg):
+                            <input type="number" id="robotMass" value="0.25" step="0.01" min="0.05" max="5.0">
+                        </label>
 
-                    <label for="comOffset" title="Centro de Gravedad. Negativo = peso atrás.">
-                        Desplazamiento CG (mm):
-                        <input type="number" id="comOffset" value="0.0" step="1" min="-100" max="100">
-                    </label>
+                        <label for="comOffset" title="Centro de Gravedad. Negativo = peso atrás.">
+                            Desplazamiento CG (mm):
+                            <input type="number" id="comOffset" value="0.0" step="1" min="-100" max="100">
+                        </label>
 
-                    <label for="tireGrip" title="Coeficiente de Fricción. Mínimo = Derrapa mucho.">
-                        Adherencia Llanta (μ):
-                        <input type="number" id="tireGrip" value="0.8" step="0.1" min="0.1" max="5.0">
-                    </label>
+                        <label for="tireGrip" title="Coeficiente de Fricción. Mínimo = Derrapa mucho.">
+                            Adherencia Llanta (μ):
+                            <input type="number" id="tireGrip" value="0.8" step="0.1" min="0.1" max="5.0">
+                        </label>
 
-                    <button id="applyRobotGeometryButton" style="margin-top: 1em; background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-transform: uppercase; font-weight: bold; border-radius: 4px; cursor: pointer;">Cargar Diseño en Simulador
-                    </button>
-                    <div style="margin-top: 1em; display: flex; gap: 0.5em; align-items: stretch; justify-content: space-between;">
-                        <button id="saveRobotButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Guardar Robot</button>
-                        <label for="loadRobotInput" class="file-input-label" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em; text-align:center; cursor:pointer;">Cargar
-                            Robot (.json)</label>
-                        <input type="file" id="loadRobotInput" accept=".json" style="display:none;">
-                        <button id="loadExampleRobotButton" style="flex:1; margin:0; padding:0.8em; display:flex; align-items:center; justify-content:center; box-sizing:border-box; height:auto; min-height: 2.8em;">Cargar Ejemplo</button>
-                    </div>
-                    <div style="margin-top: 1em;">
-                        <label for="robotSelectionDropdown">Seleccionar Robot Predefinido:</label>
-                        <select id="robotSelectionDropdown" style="width: 100%; margin-top: 0.5em;">
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
+                        <button id="applyRobotGeometryButton" style="margin-top: 1em; background-color: #4CAF50; color: white; border: none; padding: 10px 20px; text-transform: uppercase; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%;">Cargar Diseño en Simulador
+                        </button>
                     </div>
                 </div>
             </div>

@@ -824,6 +824,7 @@ hr {
     display: grid;
     gap: var(--spacing-lg);
     grid-template-columns: 1fr 1fr;
+    align-items: start;
 }
 
 .preview-header {
@@ -954,7 +955,11 @@ hr {
     cursor: pointer;
 }
 
-.robot-parameters label.sensor-pin-config {
+.robot-parameters label.sensor-pin-config,
+.robot-parameters label[for="motorDriverType"],
+.robot-parameters label[for="robotMass"],
+.robot-parameters label[for="comOffset"],
+.robot-parameters label[for="tireGrip"] {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -962,7 +967,11 @@ hr {
     gap: 0.5em;
 }
 
-.robot-parameters label.sensor-pin-config select {
+.robot-parameters label.sensor-pin-config select,
+.robot-parameters label[for="motorDriverType"] select,
+.robot-parameters label[for="robotMass"] input,
+.robot-parameters label[for="comOffset"] input,
+.robot-parameters label[for="tireGrip"] input {
     width: 180px;
     margin-top: 0;
 }

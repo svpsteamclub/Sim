@@ -64,10 +64,12 @@ export function getDOMElements() {
         // Pin Connections UI
         sensorConnectionsContainer: document.getElementById('sensorConnectionsContainer'),
         pinSensorFarLeftInput: document.getElementById('pinSensorFarLeft'),
+        pinSensorFullFarLeftInput: document.getElementById('pinSensorFullFarLeft'),
         pinSensorLeftInput: document.getElementById('pinSensorLeft'),
         pinSensorCenterInput: document.getElementById('pinSensorCenter'),
         pinSensorRightInput: document.getElementById('pinSensorRight'),
         pinSensorFarRightInput: document.getElementById('pinSensorFarRight'),
+        pinSensorFullFarRightInput: document.getElementById('pinSensorFullFarRight'),
         motorDriverTypeSelect: document.getElementById('motorDriverType'),
         motorConnectionsContainer: document.getElementById('motorConnectionsContainer'),
 

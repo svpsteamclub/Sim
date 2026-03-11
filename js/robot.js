@@ -60,6 +60,30 @@ export class Robot {
             this.sensors.center = 0;
             this.sensors.right = 0;
             this.sensors.farRight = 0;
+        } else if (this.sensorCount === 6) {
+            this.sensors.fullFarLeft = 0;
+            this.sensors.farLeft = 0;
+            this.sensors.left = 0;
+            this.sensors.right = 0;
+            this.sensors.farRight = 0;
+            this.sensors.fullFarRight = 0;
+        } else if (this.sensorCount === 7) {
+            this.sensors.fullFarLeft = 0;
+            this.sensors.farLeft = 0;
+            this.sensors.left = 0;
+            this.sensors.center = 0;
+            this.sensors.right = 0;
+            this.sensors.farRight = 0;
+            this.sensors.fullFarRight = 0;
+        } else if (this.sensorCount === 8) {
+            this.sensors.fullFarLeft = 0;
+            this.sensors.farLeft = 0;
+            this.sensors.left = 0;
+            this.sensors.centerLeft = 0; // Addition for 8 sensors to keep symmetry
+            this.sensors.centerRight = 0;
+            this.sensors.right = 0;
+            this.sensors.farRight = 0;
+            this.sensors.fullFarRight = 0;
         }
 
         if (this.customSensors && this.customSensors.length > 0) {
@@ -305,6 +329,42 @@ export class Robot {
                 x_m: x - 2 * ySpread * sinA,
                 y_m: y + 2 * ySpread * cosA
             };
+        } else if (count === 6) {
+            // fullFarLeft, farLeft, left, right, farRight, fullFarRight
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.fullFarLeft = { x_m: x + 2.5 * ySpread * sinA, y_m: y - 2.5 * ySpread * cosA };
+            positions.farLeft = { x_m: x + 1.5 * ySpread * sinA, y_m: y - 1.5 * ySpread * cosA };
+            positions.left = { x_m: x + 0.5 * ySpread * sinA, y_m: y - 0.5 * ySpread * cosA };
+            positions.right = { x_m: x - 0.5 * ySpread * sinA, y_m: y + 0.5 * ySpread * cosA };
+            positions.farRight = { x_m: x - 1.5 * ySpread * sinA, y_m: y + 1.5 * ySpread * cosA };
+            positions.fullFarRight = { x_m: x - 2.5 * ySpread * sinA, y_m: y + 2.5 * ySpread * cosA };
+        } else if (count === 7) {
+            // fullFarLeft, farLeft, left, center, right, farRight, fullFarRight
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.fullFarLeft = { x_m: x + 3 * ySpread * sinA, y_m: y - 3 * ySpread * cosA };
+            positions.farLeft = { x_m: x + 2 * ySpread * sinA, y_m: y - 2 * ySpread * cosA };
+            positions.left = { x_m: x + ySpread * sinA, y_m: y - ySpread * cosA };
+            positions.center = { x_m: x, y_m: y };
+            positions.right = { x_m: x - ySpread * sinA, y_m: y + ySpread * cosA };
+            positions.farRight = { x_m: x - 2 * ySpread * sinA, y_m: y + 2 * ySpread * cosA };
+            positions.fullFarRight = { x_m: x - 3 * ySpread * sinA, y_m: y + 3 * ySpread * cosA };
+        } else if (count === 8) {
+            // same as 7 but with center split
+            const ySpread = spread;
+            const x = this.x_m + offset * cosA;
+            const y = this.y_m + offset * sinA;
+            positions.fullFarLeft = { x_m: x + 3.5 * ySpread * sinA, y_m: y - 3.5 * ySpread * cosA };
+            positions.farLeft = { x_m: x + 2.5 * ySpread * sinA, y_m: y - 2.5 * ySpread * cosA };
+            positions.left = { x_m: x + 1.5 * ySpread * sinA, y_m: y - 1.5 * ySpread * cosA };
+            positions.centerLeft = { x_m: x + 0.5 * ySpread * sinA, y_m: y - 0.5 * ySpread * cosA };
+            positions.centerRight = { x_m: x - 0.5 * ySpread * sinA, y_m: y + 0.5 * ySpread * cosA };
+            positions.right = { x_m: x - 1.5 * ySpread * sinA, y_m: y + 1.5 * ySpread * cosA };
+            positions.farRight = { x_m: x - 2.5 * ySpread * sinA, y_m: y + 2.5 * ySpread * cosA };
+            positions.fullFarRight = { x_m: x - 3.5 * ySpread * sinA, y_m: y + 3.5 * ySpread * cosA };
         }
 
         if (this.customSensors && this.customSensors.length > 0) {
@@ -446,6 +506,10 @@ export class Robot {
                 else if (key === 'right') pinNumber = conns.right || '';
                 else if (key === 'farLeft') pinNumber = conns.farLeft || '';
                 else if (key === 'farRight') pinNumber = conns.farRight || '';
+                else if (key === 'fullFarLeft') pinNumber = conns.fullFarLeft || '';
+                else if (key === 'fullFarRight') pinNumber = conns.fullFarRight || '';
+                else if (key === 'centerLeft') pinNumber = conns.centerLeft || '';
+                else if (key === 'centerRight') pinNumber = conns.centerRight || '';
                 else if (key.startsWith('custom_')) pinNumber = conns[key] || '';
             } else {
                 if (this.sensorCount === 2) {
@@ -466,6 +530,30 @@ export class Robot {
                     else if (key === 'center') pinNumber = '4';
                     else if (key === 'right') pinNumber = '5';
                     else if (key === 'farRight') pinNumber = '6';
+                } else if (this.sensorCount === 6) {
+                    if (key === 'fullFarLeft') pinNumber = '2';
+                    else if (key === 'farLeft') pinNumber = '3';
+                    else if (key === 'left') pinNumber = '4';
+                    else if (key === 'right') pinNumber = '5';
+                    else if (key === 'farRight') pinNumber = '6';
+                    else if (key === 'fullFarRight') pinNumber = '7';
+                } else if (this.sensorCount === 7) {
+                    if (key === 'fullFarLeft') pinNumber = '2';
+                    else if (key === 'farLeft') pinNumber = '3';
+                    else if (key === 'left') pinNumber = '4';
+                    else if (key === 'center') pinNumber = '5';
+                    else if (key === 'right') pinNumber = '6';
+                    else if (key === 'farRight') pinNumber = '7';
+                    else if (key === 'fullFarRight') pinNumber = '8';
+                } else if (this.sensorCount === 8) {
+                    if (key === 'fullFarLeft') pinNumber = '2';
+                    else if (key === 'farLeft') pinNumber = '3';
+                    else if (key === 'left') pinNumber = '4';
+                    else if (key === 'centerLeft') pinNumber = '5';
+                    else if (key === 'centerRight') pinNumber = '6';
+                    else if (key === 'right') pinNumber = '7';
+                    else if (key === 'farRight') pinNumber = '8';
+                    else if (key === 'fullFarRight') pinNumber = '9';
                 }
             }
 
