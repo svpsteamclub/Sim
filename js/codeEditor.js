@@ -186,11 +186,12 @@ const arduinoAPI = {
                 const vIn4 = getPinEffectiveValue(conns.motorPins.rightIn4);
                 const vEnB = getPinEffectiveValue(conns.motorPins.rightEn);
 
-                const dirL = ((vIn1 > 0) ? 1 : 0) - ((vIn2 > 0) ? 1 : 0);
-                const dirR = ((vIn3 > 0) ? 1 : 0) - ((vIn4 > 0) ? 1 : 0);
+                const diffL = vIn1 - vIn2;
+                const diffR = vIn3 - vIn4;
 
-                finalLeftPWM = vEn * dirL;
-                finalRightPWM = vEnB * dirR;
+                // Soporte para PWM tradicional en EN, o PWM inyectado en pines IN (ej. cuando EN está en VCC)
+                finalLeftPWM = Math.round((vEn / 255) * diffL);
+                finalRightPWM = Math.round((vEnB / 255) * diffR);
 
                 // Debug logging to serial monitor
                 // ArduinoSerial.println(`L298N Update | pin: ${pin} | vEn: ${vEn}, vIn1: ${vIn1}, vIn2: ${vIn2} | dirL: ${dirL} | finalLeft: ${finalLeftPWM}`);
