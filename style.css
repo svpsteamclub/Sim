@@ -318,11 +318,10 @@ h2 {
 
 .simulation-double-column {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 2fr 1fr;
     grid-template-areas:
-        "view"
-        "monitor"
-        "params";
+        "view params"
+        "view monitor";
     gap: 2rem;
     align-items: flex-start;
 }
@@ -347,7 +346,7 @@ h2 {
     z-index: 9999;
     background-color: var(--surface-color);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     margin: 0;
     padding: 0;
     gap: 0;
@@ -358,7 +357,6 @@ h2 {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    width: calc(100vw - 320px);
     grid-area: auto;
     /* Reset grid area in fullscreen */
 }
@@ -393,10 +391,6 @@ h2 {
 }
 
 .simulation-layout.is-fullscreen .sim-right-panel {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
     width: 320px;
     background: rgba(255, 255, 255, 0.97);
     border-left: 1px solid var(--border-color);
