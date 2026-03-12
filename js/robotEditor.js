@@ -498,8 +498,8 @@ export function initRobotEditor(appInterface) {
     }
 
     // Guardar y cargar robot
-    if (elems.saveRobotButton) {
-        elems.saveRobotButton.addEventListener('click', () => {
+    document.querySelectorAll('#saveRobotButton').forEach(btn => {
+        btn.addEventListener('click', () => {
             const geometry = getFormValues();
             const parts = window.getPlacedPartsRaw ? window.getPlacedPartsRaw() : getPlacedPartsRaw();
             const robotData = {
@@ -517,10 +517,10 @@ export function initRobotEditor(appInterface) {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         });
-    }
+    });
 
-    if (elems.loadRobotInput) {
-        elems.loadRobotInput.addEventListener('change', (event) => {
+    document.querySelectorAll('#loadRobotInput').forEach(input => {
+        input.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -541,10 +541,10 @@ export function initRobotEditor(appInterface) {
             reader.readAsText(file);
             event.target.value = null;
         });
-    }
+    });
 
-    if (elems.loadExampleRobotButton) {
-        elems.loadExampleRobotButton.addEventListener('click', async () => {
+    document.querySelectorAll('#loadExampleRobotButton').forEach(btn => {
+        btn.addEventListener('click', async () => {
             try {
                 const response = await fetch('assets/robots/Robot Ejemplo.json');
                 if (!response.ok) throw new Error('No se pudo cargar el Robot Ejemplo.json');
@@ -571,6 +571,7 @@ export function initRobotEditor(appInterface) {
             }
         });
     }
+    );
 }
 
 // Agrega partes decorativas 'sensor' en las posiciones de los sensores
@@ -1106,17 +1107,8 @@ export async function loadDefaultRobotJSON() {
 }
 
 async function initRobotSelectionDropdown() {
-    const elems = getDOMElements();
-    const dropdown = elems.robotSelectionDropdown;
-    if (!dropdown) return;
-
-    // Add default option
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Seleccionar robot...';
-    defaultOption.selected = true; // <--- Seleccionado por defecto para forzar cambio al elegir uno
-    dropdown.appendChild(defaultOption);
-
+    const dropdowns = document.querySelectorAll('#robotSelectionDropdown');
+    
     // Add predefined robots
     const robots = [
         { name: 'Robot Genérico OnOff', file: 'Robot Generico OnOff.json' },
@@ -1124,49 +1116,59 @@ async function initRobotSelectionDropdown() {
         { name: 'SLC SVP 2025', file: 'SLC_SVP_2025.json' }
     ];
 
-    robots.forEach((robot, idx) => {
-        const option = document.createElement('option');
-        option.value = robot.file;
-        option.textContent = robot.name;
-        dropdown.appendChild(option);
-    });
+    dropdowns.forEach(dropdown => {
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Seleccionar robot...';
+        defaultOption.selected = true; // <--- Seleccionado por defecto para forzar cambio al elegir uno
+        dropdown.appendChild(defaultOption);
 
-    // Add change event listener
-    dropdown.addEventListener('change', async (event) => {
-        const selectedFile = event.target.value;
-        if (!selectedFile) return;
+        robots.forEach((robot) => {
+            const option = document.createElement('option');
+            option.value = robot.file;
+            option.textContent = robot.name;
+            dropdown.appendChild(option);
+        });
 
-        try {
-            const response = await fetch(`assets/robots/${selectedFile}`);
-            if (!response.ok) throw new Error(`No se pudo cargar ${selectedFile}`);
-            const robotData = await response.json();
+        // Add change event listener
+        dropdown.addEventListener('change', async (event) => {
+            const selectedFile = event.target.value;
+            if (!selectedFile) return;
 
-            if (robotData.geometry) {
-                setFormValues(robotData.geometry);
-                currentGeometry = getFormValues();
-                previewRobot.updateGeometry(currentGeometry);
-            }
+            try {
+                const response = await fetch(`assets/robots/${selectedFile}`);
+                if (!response.ok) throw new Error(`No se pudo cargar ${selectedFile}`);
+                const robotData = await response.json();
 
-            if (robotData.parts && window.restorePlacedPartsRaw) {
-                window.restorePlacedPartsRaw(robotData.parts);
-                // Asegurarse de que las partes decorativas se dibujen
+                if (robotData.geometry) {
+                    setFormValues(robotData.geometry);
+                    currentGeometry = getFormValues();
+                    previewRobot.updateGeometry(currentGeometry);
+                }
+
+                if (robotData.parts && window.restorePlacedPartsRaw) {
+                    window.restorePlacedPartsRaw(robotData.parts);
+                }
+
                 renderRobotPreview();
-            }
 
-            // Notificar a la simulación
-            if (mainAppInterface && typeof mainAppInterface.updateRobotGeometry === 'function') {
+                // Aplicar automáticamente
+                window.forceGeometrySync();
                 const decorativeParts = window.getPlacedParts ? window.getPlacedParts() : [];
                 zoomExtents();
                 mainAppInterface.updateRobotGeometry(currentGeometry, decorativeParts);
-            }
-        } catch (err) {
-            console.error('Error al cargar el robot:', err);
-            alert('Error al cargar el robot seleccionado');
-        }
-    });
+                console.log("✅ Robot de Dropdown cargado y aplicado.");
 
-    // Selecciona y carga el robot por defecto al iniciar
-    // dropdown.value = robots[0].file;
-    // const event = new Event('change');
-    // dropdown.dispatchEvent(event);
+            } catch (err) {
+                console.warn('No se pudo cargar el robot predefinido:', err);
+                alert('No se pudo cargar el robot predefinido.');
+            }
+            
+            // Sync all dropdowns
+            dropdowns.forEach(dd => {
+                if(dd !== dropdown) dd.value = selectedFile;
+            });
+        });
+    });
 }
