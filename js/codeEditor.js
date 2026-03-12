@@ -373,6 +373,10 @@ function traducirArduinoAJS(codigoArduino) {
             const argsLimpios = args.replace(FN_ARG_RE, '$1');
             return `async function ${nombre}(${argsLimpios})`;
         })
+        // Convertir arrays C++ a JS: int arr[3] = {1, 2, 3}; -> let arr = [1, 2, 3];
+        .replace(new RegExp(`(?:\\bconst\\s+)?\\b(?:${TYPES})\\s+(\\w+)\\s*\\[([^\\]]*)\\]\\s*=\\s*\\{([\\s\\S]*?)\\}\\s*;`, 'g'), "let $1 = [$3];")
+        // Array sin inicializar: int arr[10]; -> let arr = new Array($2);
+        .replace(new RegExp(`(?:\\bconst\\s+)?\\b(?:${TYPES})\\s+(\\w+)\\s*\\[([^\\]]*)\\]\\s*;`, 'g'), "let $1 = new Array($2);")
         // "const int" -> "const"
         .replace(CONST_RE, 'const')
         // "int" -> "let"

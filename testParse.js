@@ -5,6 +5,11 @@ let DEMO_CODE = `
 int vel = 100;
 int velinv = 20;
 
+const int NUM_PARADAS = 3;
+unsigned long tiemposParada[NUM_PARADAS] = {5000, 15000, 25000};
+int dirGiros[NUM_GIROS] = {3, 1, 3};
+int emptyArr[10];
+
 void setup() {
   pinMode(5, 1); // OUTPUT is 1 usually or whatever, let's just make sure it parses
 }
@@ -50,6 +55,8 @@ function test() {
             const argsLimpios = args.replace(FN_ARG_RE, '$1');
             return `async function ${nombre}(${argsLimpios})`;
         })
+        .replace(new RegExp(`(?:\\bconst\\s+)?\\b(?:${TYPES})\\s+(\\w+)\\s*\\[([^\\]]*)\\]\\s*=\\s*\\{([^}]*)\\}\\s*;`, 'g'), "let $1 = [$3];")
+        .replace(new RegExp(`(?:\\bconst\\s+)?\\b(?:${TYPES})\\s+(\\w+)\\s*\\[([^\\]]*)\\]\\s*;`, 'g'), "let $1 = new Array($2);")
         .replace(CONST_RE, 'const')
         .replace(TYPE_RE, 'let')
         .replace(/\bdelay\s*\(/g, 'await delay(')
