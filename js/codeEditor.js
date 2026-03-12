@@ -12,6 +12,7 @@ let sharedSimulationState = null; // To access robot sensors and track
 let _pinModes = {};
 let _motorPWMValues = {}; // Will store whatever pins the user writes to
 let _warnedPins = new Set(); // Track pins used without pinMode to warn once
+let _simStartTime = 0; // Track simulation start time so millis() starts at 0
 
 // NUEVO: Token para cancelar ejecuciones asíncronas flotantes al reiniciar
 let currentSimToken = 0;
@@ -249,8 +250,8 @@ const arduinoAPI = {
     log: (x) => Math.log(x),
     constrain: (val, a, b) => Math.min(Math.max(val, a), b),
     map: (val, inMin, inMax, outMin, outMax) => (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin,
-    millis: () => performance.now(),
-    micros: () => performance.now() * 1000,
+    millis: () => Math.floor(performance.now() - _simStartTime),
+    micros: () => Math.floor((performance.now() - _simStartTime) * 1000),
     random: (minOrMax, max) => {
         if (max === undefined) return Math.floor(Math.random() * minOrMax);
         return Math.floor(Math.random() * (max - minOrMax)) + minOrMax;
@@ -431,6 +432,8 @@ export function initCodeEditor(simulationState) {
 export function loadUserCode(code) {
     currentSimToken++; // CLAVE: cancela cualquier delay() flotante de la ejecución anterior
 
+    _simStartTime = performance.now(); // Reset millis() start time
+    
     ArduinoSerial.clear(); // Clear serial on new code load
     _pinModes = {};
     _motorPWMValues = {}; // Reset fully
