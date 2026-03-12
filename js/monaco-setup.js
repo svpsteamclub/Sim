@@ -51,10 +51,10 @@ require(['vs/editor/editor.main'], function () {
 // --- Descargar y cargar código desde archivo ---
 document.getElementById('downloadCodeButton').addEventListener('click', function () {
     let code = '';
-    if (window.editor && typeof window.editor.getValue === 'function') {
+    if (window.monacoEditor && typeof window.monacoEditor.getValue === 'function') {
+        code = window.monacoEditor.getValue();
+    } else if (window.editor && typeof window.editor.getValue === 'function') {
         code = window.editor.getValue();
-    } else if (typeof editor !== 'undefined' && typeof editor.getValue === 'function') {
-        code = editor.getValue();
     }
     if (!code) return;
     const blob = new Blob([code], { type: 'text/plain' });
