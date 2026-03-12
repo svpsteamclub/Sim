@@ -318,7 +318,7 @@ h2 {
 
 .simulation-double-column {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 320px;
     grid-template-areas:
         "view params"
         "view monitor";
