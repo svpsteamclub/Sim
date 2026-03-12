@@ -63,7 +63,6 @@ header {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: 1400px;
 }
 
 .header-title-nav {
@@ -157,7 +156,6 @@ header {
 }
 
 header>div {
-    max-width: 1400px;
     width: 100%;
 }
 
@@ -209,23 +207,25 @@ header h1 {
 
 main {
     flex-grow: 1;
-    padding: var(--spacing-md);
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: var(--spacing-xs) var(--spacing-md);
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .tab-content {
     display: none;
     background-color: var(--surface-color);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-lg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
     margin-top: 0;
+    flex-grow: 1;
 }
 
 .tab-content.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 h2 {
