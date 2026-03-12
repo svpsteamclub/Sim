@@ -116,6 +116,7 @@
                 </nav>
             </div>
             <div class="header-actions">
+                <button class="icon-btn" id="fullScreenBtn" title="Pantalla Completa" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; margin-right:10px;">⛶</button>
                 <div class="global-scale-control">
                     <label>Zoom:</label>
                     <button class="zoom-btn" id="zoomOutBtn" title="Alejar">-</button>
@@ -1361,6 +1362,25 @@ delay(5);
             const percentage = Math.round(currentZoom * 100);
             scaleValue.textContent = percentage + '%';
             document.body.style.zoom = currentZoom;
+        }
+
+        const fullScreenBtn = document.getElementById('fullScreenBtn');
+        if (fullScreenBtn) {
+            fullScreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            });
+            document.addEventListener('fullscreenchange', () => {
+                fullScreenBtn.textContent = document.fullscreenElement ? '╬' : '⛶';
+                fullScreenBtn.title = document.fullscreenElement ? 'Salir de Pantalla Completa' : 'Pantalla Completa';
+            });
         }
 
         zoomOutBtn.addEventListener('click', () => {
