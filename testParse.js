@@ -60,8 +60,8 @@ function test() {
         .replace(CONST_RE, 'const')
         .replace(TYPE_RE, 'let')
         .replace(/\bdelay\s*\(/g, 'await delay(')
-        .replace(/\b(while|for)\s*\(([^)]+)\)\s*;/g, '$1 ($2) { await delay(1); }')
-        .replace(/\b(while|for)\s*\(([^)]+)\)\s*\{/g, '$1 ($2) { await delay(1); ')
+        .replace(/\b(while|for)\s*\(([\s\S]+?)\)\s*;/g, '$1 ($2) { await delay(1); }')
+        .replace(/\b(while|for)\s*\(([\s\S]+?)\)\s*\{/g, '$1 ($2) { await delay(1); ')
         .replace(/\b(async\s+function\s+loop\s*\([^)]*\)\s*\{)/g, '$1\n    await delay(1);\n');
 
     const allAsyncFns = [...new Set([...userFunctions, 'setup', 'loop'])];
