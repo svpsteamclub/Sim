@@ -180,10 +180,14 @@ export class Robot {
 
         // --- 2. Perturbaciones Aleatorias ---
         if (movementPerturbationFactor > 0) {
-            const perturbR = (Math.random() * 2 - 1) * movementPerturbationFactor;
-            const perturbL = (Math.random() * 2 - 1) * movementPerturbationFactor;
-            linear_displacement_m *= (1 + perturbR);
-            d_theta_rad *= (1 + perturbL);
+            // El ruido lineal afecta ligeramente el avance
+            const perturbLinear = (Math.random() * 2 - 1) * movementPerturbationFactor * 0.1; 
+            // El ruido angular se AGREGA en base a qué tanto avanzó el robot (baches en la pista)
+            // Se multiplica por la distancia para que no vibre cuando el robot está totalmente detenido
+            const perturbAngular = (Math.random() * 2 - 1) * movementPerturbationFactor * 5.0 * Math.abs(linear_displacement_m);
+
+            linear_displacement_m *= (1 + perturbLinear);
+            d_theta_rad += perturbAngular; 
         }
 
         // --- 3. Posicionamiento Teórico ---
