@@ -530,6 +530,177 @@ analogWrite(10, 100); // Avanza motor Derecho (10)
         <!-- Guia Tab -->
         <div id="guia" class="tab-content font-sans text-gray-800 antialiased leading-relaxed">
             <details>
+                <summary>Conexiones Físicas: Robot 3 Sensores + L298N</summary>
+                <div class="details-content space-y-12 bg-[#fcfdfe] p-0">
+                    <!-- Header Section -->
+                    <header class="bg-white border-b border-slate-200 py-16 px-6">
+                        <div class="w-full mx-auto">
+                            <div class="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
+                                <span class="w-8 h-[2px] bg-blue-600"></span>
+                                GUÍA DE HARDWARE
+                            </div>
+                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
+                                    Conexiones Físicas
+                                </span>
+                            </h1>
+                            <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
+                                En esta guía aprenderás a conectar correctamente los componentes electrónicos de tu robot seguidor de línea SLC (3 sensores), utilizando un controlador L298N y un Arduino UNO.
+                            </p>
+                        </div>
+                    </header>
+            
+                    <!-- General Diagram -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2">
+                            <div class="flex items-center gap-3 mb-5">
+                                <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                    <i data-lucide="cpu" size="22"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Esquema General</h2>
+                            </div>
+                            <p class="text-slate-600 mb-6">Este es el mapa general de todas las conexiones. Asegúrate de seguir los colores de los cables para evitar cortocircuitos.</p>
+                            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-slate-50 border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-bold text-slate-700">Componente</th>
+                                            <th class="px-4 py-3 text-left font-bold text-slate-700">Pin Arduino</th>
+                                            <th class="px-4 py-3 text-left font-bold text-slate-700">Función</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <tr><td class="px-4 py-3 font-medium">Sensor Izqu.</td><td class="px-4 py-3">Digital 2</td><td class="px-4 py-3">Entrada</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Sensor Centro</td><td class="px-4 py-3">Digital 3</td><td class="px-4 py-3">Entrada</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Sensor Der.</td><td class="px-4 py-3">Digital 4</td><td class="px-4 py-3">Entrada</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">L298N ENA</td><td class="px-4 py-3">Digital 9 (PWM)</td><td class="px-4 py-3">Velocidad A</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">L298N ENB</td><td class="px-4 py-3">Digital 10 (PWM)</td><td class="px-4 py-3">Velocidad B</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">L298N IN1/2</td><td class="px-4 py-3">Digital 5, 6</td><td class="px-4 py-3">Dirección A</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">L298N IN3/4</td><td class="px-4 py-3">Digital 7, 8</td><td class="px-4 py-3">Dirección B</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2">
+                            <img src="assets/esquema_general_1773426776175.png" alt="Esquema General" class="rounded-2xl border border-slate-200 shadow-sm w-full">
+                        </div>
+                    </div>
+            
+                    <!-- Sensors Section -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                         <div class="lg:w-1/2 lg:order-2">
+                            <div class="flex items-center gap-3 mb-5">
+                                <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                    <i data-lucide="eye" size="22"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Sensores TCRT5000</h2>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="text-slate-600">Conecta los pines de señal de cada sensor a las entradas digitales del Arduino. No olvides alimentar todos los sensores con 5V y GND.</p>
+                                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-4">
+                                    <i data-lucide="alert-triangle" class="text-amber-600 shrink-0"></i>
+                                    <p class="text-amber-800 text-sm italic">Verifica que los sensores estén alineados y a una distancia de 3-5mm del suelo para una lectura óptima.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 lg:order-1">
+                            <img src="assets/sensores_tcrt5000_1773426789134.png" alt="Sensores TCRT5000" class="rounded-2xl border border-slate-200 shadow-sm w-full">
+                        </div>
+                    </div>
+            
+                    <!-- L298N Logic Section -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2">
+                            <div class="flex items-center gap-3 mb-5">
+                                <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                    <i data-lucide="zap" size="22"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Control L298N</h2>
+                            </div>
+                            <p class="text-slate-600 mb-6">El puente H L298N recibe órdenes del Arduino para controlar la dirección y velocidad de los motores.</p>
+                             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-slate-50 border-b border-slate-200">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-bold text-slate-700">Driver L298N</th>
+                                            <th class="px-4 py-3 text-left font-bold text-slate-700">Pin Arduino</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        <tr><td class="px-4 py-3 font-medium">ENA (Motor A)</td><td class="px-4 py-3">Pin 9</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">IN1</td><td class="px-4 py-3">Pin 5</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">IN2</td><td class="px-4 py-3">Pin 6</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">IN3</td><td class="px-4 py-3">Pin 7</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">IN4</td><td class="px-4 py-3">Pin 8</td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">ENB (Motor B)</td><td class="px-4 py-3">Pin 10</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2">
+                            <img src="assets/l298n_logic_1773426805137.png" alt="L298N Logic" class="rounded-2xl border border-slate-200 shadow-sm w-full">
+                        </div>
+                    </div>
+            
+                    <!-- Power Section -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2 lg:order-2">
+                            <div class="flex items-center gap-3 mb-5">
+                                <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                    <i data-lucide="battery" size="22"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Sistema de Energía</h2>
+                            </div>
+                            <div class="space-y-4 text-slate-600">
+                                <p>Es vital que el Arduino y el L298N compartan una conexión común de <strong>GND (Tierra)</strong>.</p>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Batería (+) a 12V del L298N.</li>
+                                    <li>Batería (-) a GND del L298N.</li>
+                                    <li>GND del L298N a GND del Arduino.</li>
+                                    <li>5V del L298N a 5V del Arduino (opcional si usas USB).</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 lg:order-1">
+                            <img src="assets/alimentacion_sistema_1773426838712.png" alt="Alimentación" class="rounded-2xl border border-slate-200 shadow-sm w-full">
+                        </div>
+                    </div>
+            
+                    <!-- Motors Section -->
+                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2">
+                            <div class="flex items-center gap-3 mb-5">
+                                <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                    <i data-lucide="move" size="22"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Motores</h2>
+                            </div>
+                            <p class="text-slate-600 mb-6">Conecta los cables de los motores a las borneras de salida del L298N. Si el motor gira en sentido contrario, simplemente invierte sus dos cables.</p>
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4">
+                                <i data-lucide="info" class="text-blue-600 shrink-0"></i>
+                                <p class="text-blue-800 text-sm">Recuerda que el <b>Motor A</b> suele ser el izquierdo y el <b>Motor B</b> el derecho.</p>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2">
+                            <img src="assets/cableado_motores_1773426853745.png" alt="Motores" class="rounded-2xl border border-slate-200 shadow-sm w-full">
+                        </div>
+                    </div>
+            
+                    <!-- Final Check Section -->
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 mb-20 mx-6 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <i data-lucide="check-circle" size="120" class="text-emerald-600"></i>
+                        </div>
+                        <div class="relative z-10 text-center max-w-2xl mx-auto">
+                            <h3 class="text-3xl font-black text-emerald-900 mb-4">¡Todo Listo!</h3>
+                            <p class="text-emerald-800 mb-8">Si has seguido todos los pasos, tu robot ya tiene su sistema nervioso y muscular conectado. Ahora es momento de cargar el código y verlo cobrar vida.</p>
+                            <img src="assets/robot_finalizado_slc_1773426868247.png" alt="Robot Finalizado" class="rounded-2xl border border-emerald-200 shadow-md mx-auto max-w-md">
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <details>
                 <summary>Programación y Lógica: SLC 3 sensores</summary>
                 <div class="details-content space-y-12 bg-[#fcfdfe] p-0">
                     <!-- Header Section -->
