@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -52,9 +52,10 @@
             cursor: zoom-in;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
         .img-zoomable:hover {
             transform: scale(1.02);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         #lightbox-modal {
@@ -102,7 +103,7 @@
             transition: color 0.2s ease;
             z-index: 100000;
         }
-        
+
         #lightbox-close:hover {
             color: #ef4444;
         }
@@ -309,7 +310,8 @@
                     <button class="zoom-btn" id="fullScreenBtn" title="Pantalla Completa">⛶</button>
                 </div>
                 <a href="http://guaroduino.com/" target="_blank" title="Visitar Guaroduino">
-                    <img src="assets/Logo%20guaroduino.png" alt="Logo Guaroduino" class="header-logo hover:opacity-80 transition-opacity">
+                    <img src="assets/Logo%20guaroduino.png" alt="Logo Guaroduino"
+                        class="header-logo hover:opacity-80 transition-opacity">
                 </a>
             </div>
         </div>
@@ -327,13 +329,17 @@
                 </p>
                 <hr>
 
-                <div style="margin-top: 2em; background: #fff8e1; border: 1px solid #ffe082; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <h3 style="margin-top: 0; color: #f57f17; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <div
+                    style="margin-top: 2em; background: #fff8e1; border: 1px solid #ffe082; padding: 1.5em; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <h3
+                        style="margin-top: 0; color: #f57f17; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <i data-lucide="book-open" size="24"></i> Antes de empezar
                     </h3>
                     <p style="text-align: center; margin-bottom: 0;">
-                        Si eres nuevo en la robótica, te recomendamos encarecidamente visitar primero la pestaña de <b>"Guías"</b> en el menú superior. 
-                        Ahí encontrarás teoría esencial sobre educación STEAM, componentes electrónicos y las bases lógicas de programación necesarias para tener éxito con el simulador.
+                        Si eres nuevo en la robótica, te recomendamos encarecidamente visitar primero la pestaña de
+                        <b>"Guías"</b> en el menú superior.
+                        Ahí encontrarás teoría esencial sobre educación STEAM, componentes electrónicos y las bases
+                        lógicas de programación necesarias para tener éxito con el simulador.
                     </p>
                 </div>
 
@@ -605,26 +611,33 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <!-- Header Section -->
                     <header class="bg-white border-b border-slate-200 py-16 px-6">
                         <div class="w-full mx-auto">
-                            <div class="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
+                            <div
+                                class="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
                                 <span class="w-8 h-[2px] bg-indigo-600"></span>
                                 EDUCACIÓN STEAM
                             </div>
-                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">
+                            <h1
+                                class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
+                                <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">
                                     STEAM y Robótica
                                 </span>
                             </h1>
                             <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
-                                Descubre cómo la Ciencia, Tecnología, Ingeniería, Artes y Matemáticas se unen en la robótica para desarrollar habilidades esenciales del siglo XXI y resolver problemas del mundo real.
+                                Descubre cómo la Ciencia, Tecnología, Ingeniería, Artes y Matemáticas se unen en la
+                                robótica para desarrollar habilidades esenciales del siglo XXI y resolver problemas del
+                                mundo real.
                             </p>
                         </div>
                     </header>
-            
+
                     <!-- STEAM Disciplines (4 columns) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 border-b border-slate-100 bg-slate-50/50">
-                        
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 border-b border-slate-100 bg-slate-50/50">
+
                         <!-- Ciencia -->
-                        <div class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
+                        <div
+                            class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-200">
                                     <i data-lucide="flask-conical" size="20"></i>
@@ -632,14 +645,19 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-xl font-black text-slate-800 leading-tight">Ciencia</h2>
                             </div>
                             <div class="text-sm text-slate-600 mb-5 flex-grow space-y-3">
-                                <p>Metodología rigurosa para la indagación que nos permite observar, experimentar y formular explicaciones sobre el mundo.</p>
-                                <p>En STEAM, enseña a preguntar, investigar, recolectar evidencia y construir una mentalidad de exploración.</p>
+                                <p>Metodología rigurosa para la indagación que nos permite observar, experimentar y
+                                    formular explicaciones sobre el mundo.</p>
+                                <p>En STEAM, enseña a preguntar, investigar, recolectar evidencia y construir una
+                                    mentalidad de exploración.</p>
                             </div>
-                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=400" alt="Ciencia" class="rounded-xl border border-slate-200 object-cover mt-auto w-full" style="aspect-ratio: 16/9;">
+                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=400"
+                                alt="Ciencia" class="rounded-xl border border-slate-200 object-cover mt-auto w-full"
+                                style="aspect-ratio: 16/9;">
                         </div>
 
                         <!-- Ingeniería -->
-                        <div class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
+                        <div
+                            class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="bg-purple-600 p-2 rounded-xl text-white shadow-md shadow-purple-200">
                                     <i data-lucide="wrench" size="20"></i>
@@ -647,14 +665,19 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-xl font-black text-slate-800 leading-tight">Ingeniería</h2>
                             </div>
                             <div class="text-sm text-slate-600 mb-5 flex-grow space-y-3">
-                                <p>Aplica el conocimiento sistemáticamente para <strong>resolver problemas del mundo real</strong> y hacer la vida más fácil y productiva.</p>
-                                <p>Los estudiantes aprenden a identificar necesidades, idear, crear prototipos y probar sus soluciones.</p>
+                                <p>Aplica el conocimiento sistemáticamente para <strong>resolver problemas del mundo
+                                        real</strong> y hacer la vida más fácil y productiva.</p>
+                                <p>Los estudiantes aprenden a identificar necesidades, idear, crear prototipos y probar
+                                    sus soluciones.</p>
                             </div>
-                            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=400" alt="Ingeniería" class="rounded-xl border border-slate-200 object-cover mt-auto w-full" style="aspect-ratio: 16/9;">
+                            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=400"
+                                alt="Ingeniería" class="rounded-xl border border-slate-200 object-cover mt-auto w-full"
+                                style="aspect-ratio: 16/9;">
                         </div>
 
                         <!-- Tecnología -->
-                        <div class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
+                        <div
+                            class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-md shadow-indigo-200">
                                     <i data-lucide="cpu" size="20"></i>
@@ -662,14 +685,19 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-xl font-black text-slate-800 leading-tight">Tecnología</h2>
                             </div>
                             <div class="text-sm text-slate-600 mb-5 flex-grow space-y-3">
-                                <p>Es el resultado de la Ingeniería: herramientas, sistemas y productos diseñados para satisfacer necesidades humanas.</p>
-                                <p>Se estudia no solo como usuario, sino comprendiendo cómo funciona para poder crearla o innovarla.</p>
+                                <p>Es el resultado de la Ingeniería: herramientas, sistemas y productos diseñados para
+                                    satisfacer necesidades humanas.</p>
+                                <p>Se estudia no solo como usuario, sino comprendiendo cómo funciona para poder crearla
+                                    o innovarla.</p>
                             </div>
-                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=400" alt="Tecnología" class="rounded-xl border border-slate-200 object-cover mt-auto w-full" style="aspect-ratio: 16/9;">
+                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=400"
+                                alt="Tecnología" class="rounded-xl border border-slate-200 object-cover mt-auto w-full"
+                                style="aspect-ratio: 16/9;">
                         </div>
 
                         <!-- Artes y Matemáticas -->
-                        <div class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
+                        <div
+                            class="flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm p-5 transition-shadow hover:shadow-md">
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="bg-purple-600 p-2 rounded-xl text-white shadow-md shadow-purple-200">
                                     <i data-lucide="palette" size="20"></i>
@@ -677,10 +705,15 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-xl font-black text-slate-800 leading-tight">Arte y Mate.</h2>
                             </div>
                             <div class="text-sm text-slate-600 mb-5 flex-grow space-y-3">
-                                <p>Herramientas y lenguajes fundamentales que permiten abstraer y manipular la realidad.</p>
-                                <p><strong>Matemáticas:</strong> Lógica y precisión.<br><strong>Artes:</strong> Diseño, estética y comunicación efectiva de la tecnología.</p>
+                                <p>Herramientas y lenguajes fundamentales que permiten abstraer y manipular la realidad.
+                                </p>
+                                <p><strong>Matemáticas:</strong> Lógica y precisión.<br><strong>Artes:</strong> Diseño,
+                                    estética y comunicación efectiva de la tecnología.</p>
                             </div>
-                            <img src="https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?auto=format&fit=crop&q=80&w=400" alt="Artes y Matemáticas" class="rounded-xl border border-slate-200 object-cover mt-auto w-full" style="aspect-ratio: 16/9;">
+                            <img src="https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?auto=format&fit=crop&q=80&w=400"
+                                alt="Artes y Matemáticas"
+                                class="rounded-xl border border-slate-200 object-cover mt-auto w-full"
+                                style="aspect-ratio: 16/9;">
                         </div>
 
                     </div>
@@ -689,10 +722,13 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <div class="flex flex-col gap-6 p-6 border-b border-slate-100">
                         <div class="w-full text-center mb-4">
                             <h2 class="text-3xl font-black text-slate-800 leading-tight">Ecosistema STEAM</h2>
-                            <p class="text-slate-500 mt-2 text-lg">La integración de cada disciplina construye el futuro de la Robótica.</p>
+                            <p class="text-slate-500 mt-2 text-lg">La integración de cada disciplina construye el futuro
+                                de la Robótica.</p>
                         </div>
                         <div class="w-full flex justify-center">
-                            <img src="assets/images/STEAMresumen.jpg" alt="Ecosistema STEAM" class="rounded-2xl border border-slate-200 shadow-md object-contain" style="max-height: 500px; max-width: 100%;">
+                            <img src="assets/images/STEAMresumen.jpg" alt="Ecosistema STEAM"
+                                class="rounded-2xl border border-slate-200 shadow-md object-contain"
+                                style="max-height: 500px; max-width: 100%;">
                         </div>
                     </div>
                 </div>
@@ -704,17 +740,21 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <!-- Header Section para Robótica Básica -->
                     <header class="bg-white border-b border-slate-200 py-16 px-6">
                         <div class="w-full mx-auto">
-                            <div class="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
+                            <div
+                                class="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
                                 <span class="w-8 h-[2px] bg-emerald-600"></span>
                                 ROBÓTICA BÁSICA
                             </div>
-                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
+                            <h1
+                                class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
+                                <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
                                     Fundamentos
                                 </span>
                             </h1>
                             <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
-                                Descubre los componentes esenciales y la lógica detrás de los robots autónomos, desde la lectura de sensores hasta la actuación en el mundo físico.
+                                Descubre los componentes esenciales y la lógica detrás de los robots autónomos, desde la
+                                lectura de sensores hasta la actuación en el mundo físico.
                             </p>
                         </div>
                     </header>
@@ -726,27 +766,38 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <div class="bg-emerald-600 p-2.5 rounded-xl text-white shadow-lg shadow-emerald-100">
                                     <i data-lucide="zap" size="22"></i>
                                 </div>
-                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Sistema Electrónico General</h2>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Sistema Electrónico General
+                                </h2>
                             </div>
                             <div class="space-y-4 text-slate-600">
                                 <p>Todo robot o sistema automatizado funciona en un ciclo continuo:</p>
                                 <ul class="list-disc pl-5">
-                                    <li>Capta información del mundo a través de <strong>Entradas</strong> (Sensores, Botones).</li>
-                                    <li>Las analiza y toma decisiones en la unidad de <strong>Control/Procesamiento</strong> (Microcontrolador).</li>
-                                    <li>Actúa sobre su entorno utilizando sus <strong>Salidas</strong> (Motores, LEDs).</li>
+                                    <li>Capta información del mundo a través de <strong>Entradas</strong> (Sensores,
+                                        Botones).</li>
+                                    <li>Las analiza y toma decisiones en la unidad de
+                                        <strong>Control/Procesamiento</strong> (Microcontrolador).
+                                    </li>
+                                    <li>Actúa sobre su entorno utilizando sus <strong>Salidas</strong> (Motores, LEDs).
+                                    </li>
                                 </ul>
-                                <p>Todo este proceso se encuentra alimentado por una <strong>Fuente de Energía Eléctrica</strong> constante.</p>
+                                <p>Todo este proceso se encuentra alimentado por una <strong>Fuente de Energía
+                                        Eléctrica</strong> constante.</p>
                             </div>
                         </div>
                         <div class="lg:w-2/3 flex justify-center">
-                            <img src="assets/images/sistemaElectronicoGeneral.jpg" alt="Sistema Electrónico General" class="rounded-2xl border border-slate-200 shadow-md object-contain shadow-sm" style="max-height: 400px; max-width: 100%;">
+                            <img src="assets/images/sistemaElectronicoGeneral.jpg" alt="Sistema Electrónico General"
+                                class="rounded-2xl border border-slate-200 shadow-md object-contain shadow-sm"
+                                style="max-height: 400px; max-width: 100%;">
                         </div>
                     </div>
 
                     <!-- Sistema de Robot Autónomo -->
-                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 items-center bg-slate-50">
+                    <div
+                        class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 items-center bg-slate-50">
                         <div class="lg:w-2/3 flex justify-center order-2 lg:order-1">
-                            <img src="assets/images/SistemaDeRobotAutonomo.jpg" alt="Sistema de Robot Autónomo" class="rounded-2xl border border-slate-200 shadow-md object-contain shadow-sm" style="max-height: 450px; max-width: 100%;">
+                            <img src="assets/images/SistemaDeRobotAutonomo.jpg" alt="Sistema de Robot Autónomo"
+                                class="rounded-2xl border border-slate-200 shadow-md object-contain shadow-sm"
+                                style="max-height: 450px; max-width: 100%;">
                         </div>
                         <div class="lg:w-1/3 order-1 lg:order-2">
                             <div class="flex items-center gap-3 mb-5">
@@ -756,13 +807,18 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Robot Autónomo Básico</h2>
                             </div>
                             <div class="space-y-4 text-slate-600">
-                                <p>Un robot autónomo aplica el sistema electrónico general para interactuar libremente con el mundo físico:</p>
+                                <p>Un robot autónomo aplica el sistema electrónico general para interactuar libremente
+                                    con el mundo físico:</p>
                                 <ul class="list-disc pl-5 space-y-2">
-                                    <li><strong>Sensores:</strong> Capturan datos del entorno como la distancia, luz, líneas en una pista u obstáculos.</li>
-                                    <li><strong>Placa y Driver:</strong> El "cerebro" (Microcontrolador) procesa la información y el "músculo" (Driver) administra la potencia necesaria.</li>
-                                    <li><strong>Actuadores:</strong> Motores o servos que generan acciones, modificando la perspectiva del robot.</li>
+                                    <li><strong>Sensores:</strong> Capturan datos del entorno como la distancia, luz,
+                                        líneas en una pista u obstáculos.</li>
+                                    <li><strong>Placa y Driver:</strong> El "cerebro" (Microcontrolador) procesa la
+                                        información y el "músculo" (Driver) administra la potencia necesaria.</li>
+                                    <li><strong>Actuadores:</strong> Motores o servos que generan acciones, modificando
+                                        la perspectiva del robot.</li>
                                 </ul>
-                                <p>Todo soportado por una <strong>Fuente de Energía</strong> portátil y de alta descarga, como baterías LiPo o 18650.</p>
+                                <p>Todo soportado por una <strong>Fuente de Energía</strong> portátil y de alta
+                                    descarga, como baterías LiPo o 18650.</p>
                             </div>
                         </div>
                     </div>
@@ -771,30 +827,37 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <div class="flex flex-col p-6 rounded-b-xl bg-white mb-2">
                         <div class="w-full text-center mb-8">
                             <h2 class="text-3xl font-black text-slate-800 leading-tight">De la Realidad al Código</h2>
-                            <p class="text-slate-500 mt-2 text-lg">El código es una forma de abstraer de manera simple la realidad para luego manipularla usando lógica y matemáticas que la computadora entiende.</p>
+                            <p class="text-slate-500 mt-2 text-lg">El código es una forma de abstraer de manera simple
+                                la realidad para luego manipularla usando lógica y matemáticas que la computadora
+                                entiende.</p>
                         </div>
-                        
+
                         <div class="flex flex-col lg:flex-row gap-6 w-full items-stretch">
-                            
+
                             <!-- Columna 1: Entradas -->
-                            <div class="lg:w-1/3 border border-amber-200 bg-amber-50 rounded-2xl p-6 shadow-sm flex flex-col">
+                            <div
+                                class="lg:w-1/3 border border-amber-200 bg-amber-50 rounded-2xl p-6 shadow-sm flex flex-col">
                                 <div class="flex items-center gap-3 mb-5">
                                     <div class="bg-amber-500 p-2.5 rounded-xl text-white shadow-md shadow-amber-200">
                                         <i data-lucide="log-in" size="22"></i>
                                     </div>
                                     <h3 class="text-xl font-bold text-amber-900">Entradas</h3>
                                 </div>
-                                
+
                                 <div class="space-y-4 flex-grow">
                                     <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm">
                                         <h4 class="font-bold text-amber-800 mb-1">Sensores Digitales</h4>
-                                        <p class="text-sm text-slate-600 mb-2">Se conectan en Pines Digitales. Solo leen Estados (0 o 1).</p>
-                                        <code class="block bg-slate-800 text-amber-400 text-sm p-3 rounded-lg border-l-4 border-amber-500 font-mono">digitalRead(pin);</code>
+                                        <p class="text-sm text-slate-600 mb-2">Se conectan en Pines Digitales. Solo leen
+                                            Estados (0 o 1).</p>
+                                        <code
+                                            class="block bg-slate-800 text-amber-400 text-sm p-3 rounded-lg border-l-4 border-amber-500 font-mono">digitalRead(pin);</code>
                                     </div>
                                     <div class="bg-white p-4 rounded-xl border border-amber-100 shadow-sm">
                                         <h4 class="font-bold text-amber-800 mb-1">Sensores Analógicos</h4>
-                                        <p class="text-sm text-slate-600 mb-2">Se conectan en Pines Analógicos (A0...). Leen un rango de voltaje continuo.</p>
-                                        <code class="block bg-slate-800 text-amber-400 text-sm p-3 rounded-lg border-l-4 border-amber-500 font-mono">analogRead(pin);</code>
+                                        <p class="text-sm text-slate-600 mb-2">Se conectan en Pines Analógicos (A0...).
+                                            Leen un rango de voltaje continuo.</p>
+                                        <code
+                                            class="block bg-slate-800 text-amber-400 text-sm p-3 rounded-lg border-l-4 border-amber-500 font-mono">analogRead(pin);</code>
                                     </div>
                                 </div>
                             </div>
@@ -805,63 +868,99 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             </div>
 
                             <!-- Columna 2: Procesamiento -->
-                            <div class="lg:w-1/3 border border-rose-200 bg-rose-50 rounded-2xl p-6 shadow-sm flex flex-col">
+                            <div
+                                class="lg:w-1/3 border border-rose-200 bg-rose-50 rounded-2xl p-6 shadow-sm flex flex-col">
                                 <div class="flex items-center gap-3 mb-5">
                                     <div class="bg-rose-500 p-2.5 rounded-xl text-white shadow-md shadow-rose-200">
                                         <i data-lucide="cpu" size="22"></i>
                                     </div>
                                     <h3 class="text-xl font-bold text-rose-900">Lógica en Placa</h3>
                                 </div>
-                                
-                                <div class="bg-white p-5 rounded-xl border border-rose-100 shadow-sm flex-grow flex flex-col">
-                                    <p class="text-sm text-slate-600 mb-4 text-center">Aquí se toman las decisiones usando lenguaje C++:</p>
-                                    
+
+                                <div
+                                    class="bg-white p-5 rounded-xl border border-rose-100 shadow-sm flex-grow flex flex-col">
+                                    <p class="text-sm text-slate-600 mb-4 text-center">Aquí se toman las decisiones
+                                        usando lenguaje C++:</p>
+
                                     <div class="space-y-4">
                                         <!-- Estructuras de Control -->
                                         <div>
-                                            <span class="text-[11px] font-bold text-rose-800 uppercase tracking-widest block mb-2 border-b border-rose-100 pb-1">Estructuras de Control</span>
+                                            <span
+                                                class="text-[11px] font-bold text-rose-800 uppercase tracking-widest block mb-2 border-b border-rose-100 pb-1">Estructuras
+                                                de Control</span>
                                             <div class="space-y-2 mt-2">
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">if / else</span>
-                                                    <p class="text-xs text-slate-600 leading-tight">Evalúa situaciones: <i>"Si pasa esto, decide este camino; de lo contrario, haz esto otro"</i>.</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">if
+                                                        / else</span>
+                                                    <p class="text-xs text-slate-600 leading-tight">Evalúa situaciones:
+                                                        <i>"Si pasa esto, decide este camino; de lo contrario, haz esto
+                                                            otro"</i>.
+                                                    </p>
                                                 </div>
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">while / for</span>
-                                                    <p class="text-xs text-slate-600 leading-tight">Bucles de repetición: <i>"Mientras una condición se siga cumpliendo, repite la acción sin parar"</i>.</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">while
+                                                        / for</span>
+                                                    <p class="text-xs text-slate-600 leading-tight">Bucles de
+                                                        repetición: <i>"Mientras una condición se siga cumpliendo,
+                                                            repite la acción sin parar"</i>.</p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Operadores Lógicos -->
                                         <div>
-                                            <span class="text-[11px] font-bold text-rose-800 uppercase tracking-widest block mb-2 border-b border-rose-100 pb-1 mt-3">Operadores Lógicos</span>
+                                            <span
+                                                class="text-[11px] font-bold text-rose-800 uppercase tracking-widest block mb-2 border-b border-rose-100 pb-1 mt-3">Operadores
+                                                Lógicos</span>
                                             <div class="space-y-2 mt-2">
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">&& (AND)</span>
-                                                    <p class="text-xs text-slate-600 leading-tight"><b>Y:</b> Exige que <em>todas</em> las condiciones se cumplan al mismo tiempo para accionar algo.</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">&&
+                                                        (AND)</span>
+                                                    <p class="text-xs text-slate-600 leading-tight"><b>Y:</b> Exige que
+                                                        <em>todas</em> las condiciones se cumplan al mismo tiempo para
+                                                        accionar algo.
+                                                    </p>
                                                 </div>
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">|| (OR)</span>
-                                                    <p class="text-xs text-slate-600 leading-tight"><b>O:</b> Basta con que <em>al menos una</em> de las condiciones sea verdadera para accionar.</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">||
+                                                        (OR)</span>
+                                                    <p class="text-xs text-slate-600 leading-tight"><b>O:</b> Basta con
+                                                        que <em>al menos una</em> de las condiciones sea verdadera para
+                                                        accionar.</p>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Matemáticas y Comparación -->
                                         <div>
-                                            <span class="text-[11px] font-bold text-rose-800 uppercase tracking-widest block mb-2 border-b border-rose-100 pb-1 mt-3">Matemáticas y Comparativa</span>
+                                            <span
+                                                class="text-[11px] font-bold text-rose-800 uppercase tracking-widest block mb-2 border-b border-rose-100 pb-1 mt-3">Matemáticas
+                                                y Comparativa</span>
                                             <div class="space-y-2 mt-2">
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">== (Igual)</span>
-                                                    <p class="text-xs text-slate-600 leading-tight">Comprueba si un valor es idéntico a otro (ej: ¿Sensor == 1?).</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">==
+                                                        (Igual)</span>
+                                                    <p class="text-xs text-slate-600 leading-tight">Comprueba si un
+                                                        valor es idéntico a otro (ej: ¿Sensor == 1?).</p>
                                                 </div>
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">> <</span>
-                                                    <p class="text-xs text-slate-600 leading-tight">Compara valores <i>(mayor que, menor que)</i>.</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">>
+                                                        << /span>
+                                                            <p class="text-xs text-slate-600 leading-tight">Compara
+                                                                valores <i>(mayor que, menor que)</i>.</p>
                                                 </div>
                                                 <div class="flex gap-2">
-                                                    <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">+ - * /</span>
-                                                    <p class="text-xs text-slate-600 leading-tight">Realiza cálculos lógicos o matemáticos.</p>
+                                                    <span
+                                                        class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-xs font-mono border border-rose-200 shadow-sm shrink-0 h-fit">+
+                                                        - * /</span>
+                                                    <p class="text-xs text-slate-600 leading-tight">Realiza cálculos
+                                                        lógicos o matemáticos.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -875,24 +974,30 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             </div>
 
                             <!-- Columna 3: Salidas -->
-                            <div class="lg:w-1/3 border border-emerald-200 bg-emerald-50 rounded-2xl p-6 shadow-sm flex flex-col">
+                            <div
+                                class="lg:w-1/3 border border-emerald-200 bg-emerald-50 rounded-2xl p-6 shadow-sm flex flex-col">
                                 <div class="flex items-center gap-3 mb-5">
-                                    <div class="bg-emerald-500 p-2.5 rounded-xl text-white shadow-md shadow-emerald-200">
+                                    <div
+                                        class="bg-emerald-500 p-2.5 rounded-xl text-white shadow-md shadow-emerald-200">
                                         <i data-lucide="log-out" size="22"></i>
                                     </div>
                                     <h3 class="text-xl font-bold text-emerald-900">Salidas</h3>
                                 </div>
-                                
+
                                 <div class="space-y-4 flex-grow">
                                     <div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm">
                                         <h4 class="font-bold text-emerald-800 mb-1">Salidas Digitales (On/Off)</h4>
-                                        <p class="text-sm text-slate-600 mb-2">Se activa o desactiva la corriente en los Pines Digitales.</p>
-                                        <code class="block bg-slate-800 text-emerald-400 text-sm p-3 rounded-lg border-l-4 border-emerald-500 font-mono">digitalWrite(pin, HIGH);</code>
+                                        <p class="text-sm text-slate-600 mb-2">Se activa o desactiva la corriente en los
+                                            Pines Digitales.</p>
+                                        <code
+                                            class="block bg-slate-800 text-emerald-400 text-sm p-3 rounded-lg border-l-4 border-emerald-500 font-mono">digitalWrite(pin, HIGH);</code>
                                     </div>
                                     <div class="bg-white p-4 rounded-xl border border-emerald-100 shadow-sm">
                                         <h4 class="font-bold text-emerald-800 mb-1">Salidas Analógicas (PWM)</h4>
-                                        <p class="text-sm text-slate-600 mb-2">En Pines Digitales marcados con (~). Ideales para controlar la velocidad del motor.</p>
-                                        <code class="block bg-slate-800 text-emerald-400 text-sm p-3 rounded-lg border-l-4 border-emerald-500 font-mono">analogWrite(pin, 255);</code>
+                                        <p class="text-sm text-slate-600 mb-2">En Pines Digitales marcados con (~).
+                                            Ideales para controlar la velocidad del motor.</p>
+                                        <code
+                                            class="block bg-slate-800 text-emerald-400 text-sm p-3 rounded-lg border-l-4 border-emerald-500 font-mono">analogWrite(pin, 255);</code>
                                     </div>
                                 </div>
                             </div>
@@ -908,21 +1013,26 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <!-- Header Section -->
                     <header class="bg-white border-b border-slate-200 py-16 px-6">
                         <div class="w-full mx-auto">
-                            <div class="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
+                            <div
+                                class="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
                                 <span class="w-8 h-[2px] bg-blue-600"></span>
                                 GUÍA DE HARDWARE
                             </div>
-                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
+                            <h1
+                                class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
+                                <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
                                     Conexiones Físicas
                                 </span>
                             </h1>
                             <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
-                                En esta guía aprenderás a conectar correctamente los componentes electrónicos de tu robot seguidor de línea SLC (2 sensores), utilizando un controlador L298N con lógica de 4 pines (con puentes ENA/ENB activados) y un Arduino.
+                                En esta guía aprenderás a conectar correctamente los componentes electrónicos de tu
+                                robot seguidor de línea SLC (2 sensores), utilizando un controlador L298N con lógica de
+                                4 pines (con puentes ENA/ENB activados) y un Arduino.
                             </p>
                         </div>
                     </header>
-            
+
                     <!-- General Diagram -->
                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
                         <div class="lg:w-1/2">
@@ -932,7 +1042,8 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Esquema General</h2>
                             </div>
-                            <p class="text-slate-600 mb-6">Este es el mapa general de todas las conexiones. Asegúrate de seguir los colores de los cables para evitar cortocircuitos.</p>
+                            <p class="text-slate-600 mb-6">Este es el mapa general de todas las conexiones. Asegúrate de
+                                seguir los colores de los cables para evitar cortocircuitos.</p>
                             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                                 <table class="w-full text-sm">
                                     <thead class="bg-slate-50 border-b border-slate-200">
@@ -943,24 +1054,51 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        <tr><td class="px-4 py-3 font-medium">Sensor Izqu.</td><td class="px-4 py-3">Digital 2</td><td class="px-4 py-3">Entrada</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">Sensor Der.</td><td class="px-4 py-3">Digital 3</td><td class="px-4 py-3">Entrada</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">L298N IN1</td><td class="px-4 py-3">Digital 5 (PWM)</td><td class="px-4 py-3">Motor A Adelante</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">L298N IN2</td><td class="px-4 py-3">Digital 6 (PWM)</td><td class="px-4 py-3">Motor A Atrás</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">L298N IN3</td><td class="px-4 py-3">Digital 9 (PWM)</td><td class="px-4 py-3">Motor B Adelante</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">L298N IN4</td><td class="px-4 py-3">Digital 10 (PWM)</td><td class="px-4 py-3">Motor B Atrás</td></tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">Sensor Izqu.</td>
+                                            <td class="px-4 py-3">Digital 2</td>
+                                            <td class="px-4 py-3">Entrada</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">Sensor Der.</td>
+                                            <td class="px-4 py-3">Digital 3</td>
+                                            <td class="px-4 py-3">Entrada</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">L298N IN1</td>
+                                            <td class="px-4 py-3">Digital 5 (PWM)</td>
+                                            <td class="px-4 py-3">Motor A Adelante</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">L298N IN2</td>
+                                            <td class="px-4 py-3">Digital 6 (PWM)</td>
+                                            <td class="px-4 py-3">Motor A Atrás</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">L298N IN3</td>
+                                            <td class="px-4 py-3">Digital 9 (PWM)</td>
+                                            <td class="px-4 py-3">Motor B Adelante</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">L298N IN4</td>
+                                            <td class="px-4 py-3">Digital 10 (PWM)</td>
+                                            <td class="px-4 py-3">Motor B Atrás</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         <div class="lg:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1608564697071-ddf911d81370?auto=format&fit=crop&q=80&w=800" alt="Esquema General (Placeholder)" class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover" style="aspect-ratio: 4/3;">
+                            <img src="https://images.unsplash.com/photo-1608564697071-ddf911d81370?auto=format&fit=crop&q=80&w=800"
+                                alt="Esquema General (Placeholder)"
+                                class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover"
+                                style="aspect-ratio: 4/3;">
                         </div>
                     </div>
-            
+
                     <!-- Sensors Section -->
                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
-                         <div class="lg:w-1/2 lg:order-2">
+                        <div class="lg:w-1/2 lg:order-2">
                             <div class="flex items-center gap-3 mb-5">
                                 <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
                                     <i data-lucide="eye" size="22"></i>
@@ -968,18 +1106,23 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Sensores TCRT5000</h2>
                             </div>
                             <div class="space-y-4">
-                                <p class="text-slate-600">Conecta los pines de señal de cada sensor a las entradas digitales del Arduino. No olvides alimentar todos los sensores con 5V y GND.</p>
+                                <p class="text-slate-600">Conecta los pines de señal de cada sensor a las entradas
+                                    digitales del Arduino. No olvides alimentar todos los sensores con 5V y GND.</p>
                                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-4">
                                     <i data-lucide="alert-triangle" class="text-amber-600 shrink-0"></i>
-                                    <p class="text-amber-800 text-sm italic">Verifica que los sensores estén alineados y a una distancia de 3-5mm del suelo para una lectura óptima.</p>
+                                    <p class="text-amber-800 text-sm italic">Verifica que los sensores estén alineados y
+                                        a una distancia de 3-5mm del suelo para una lectura óptima.</p>
                                 </div>
                             </div>
                         </div>
                         <div class="lg:w-1/2 lg:order-1">
-                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800" alt="Sensores TCRT5000 (Placeholder)" class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover" style="aspect-ratio: 4/3;">
+                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800"
+                                alt="Sensores TCRT5000 (Placeholder)"
+                                class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover"
+                                style="aspect-ratio: 4/3;">
                         </div>
                     </div>
-            
+
                     <!-- L298N Logic Section -->
                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
                         <div class="lg:w-1/2">
@@ -989,8 +1132,9 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Control L298N</h2>
                             </div>
-                            <p class="text-slate-600 mb-6">El puente H L298N recibe órdenes del Arduino para controlar la dirección y velocidad de los motores.</p>
-                             <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                            <p class="text-slate-600 mb-6">El puente H L298N recibe órdenes del Arduino para controlar
+                                la dirección y velocidad de los motores.</p>
+                            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                                 <table class="w-full text-sm">
                                     <thead class="bg-slate-50 border-b border-slate-200">
                                         <tr>
@@ -999,19 +1143,34 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        <tr><td class="px-4 py-3 font-medium">IN1 (PWM)</td><td class="px-4 py-3">Pin 5</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">IN2 (PWM)</td><td class="px-4 py-3">Pin 6</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">IN3 (PWM)</td><td class="px-4 py-3">Pin 9</td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">IN4 (PWM)</td><td class="px-4 py-3">Pin 10</td></tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">IN1 (PWM)</td>
+                                            <td class="px-4 py-3">Pin 5</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">IN2 (PWM)</td>
+                                            <td class="px-4 py-3">Pin 6</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">IN3 (PWM)</td>
+                                            <td class="px-4 py-3">Pin 9</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">IN4 (PWM)</td>
+                                            <td class="px-4 py-3">Pin 10</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         <div class="lg:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&q=80&w=800" alt="L298N Logic (Placeholder)" class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover" style="aspect-ratio: 4/3;">
+                            <img src="https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&q=80&w=800"
+                                alt="L298N Logic (Placeholder)"
+                                class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover"
+                                style="aspect-ratio: 4/3;">
                         </div>
                     </div>
-            
+
                     <!-- Power Section -->
                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
                         <div class="lg:w-1/2 lg:order-2">
@@ -1022,7 +1181,8 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Sistema de Energía</h2>
                             </div>
                             <div class="space-y-4 text-slate-600">
-                                <p>Es vital que el Arduino y el L298N compartan una conexión común de <strong>GND (Tierra)</strong>.</p>
+                                <p>Es vital que el Arduino y el L298N compartan una conexión común de <strong>GND
+                                        (Tierra)</strong>.</p>
                                 <ul class="list-disc pl-6 space-y-2">
                                     <li>Batería (+) a 12V del L298N.</li>
                                     <li>Batería (-) a GND del L298N.</li>
@@ -1032,12 +1192,15 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             </div>
                         </div>
                         <div class="lg:w-1/2 lg:order-1">
-                            <img src="https://images.unsplash.com/photo-1580835239846-5bf9ea4733eb?auto=format&fit=crop&q=80&w=800" alt="Alimentación (Placeholder)" class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover" style="aspect-ratio: 4/3;">
+                            <img src="https://images.unsplash.com/photo-1580835239846-5bf9ea4733eb?auto=format&fit=crop&q=80&w=800"
+                                alt="Alimentación (Placeholder)"
+                                class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover"
+                                style="aspect-ratio: 4/3;">
                         </div>
                     </div>
-            
+
                     <!-- Motors Section -->
-                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
                         <div class="lg:w-1/2">
                             <div class="flex items-center gap-3 mb-5">
                                 <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
@@ -1045,26 +1208,38 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Motores</h2>
                             </div>
-                            <p class="text-slate-600 mb-6">Conecta los cables de los motores a las borneras de salida del L298N. Si el motor gira en sentido contrario, simplemente invierte sus dos cables.</p>
+                            <p class="text-slate-600 mb-6">Conecta los cables de los motores a las borneras de salida
+                                del L298N. Si el motor gira en sentido contrario, simplemente invierte sus dos cables.
+                            </p>
                             <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4">
                                 <i data-lucide="info" class="text-blue-600 shrink-0"></i>
-                                <p class="text-blue-800 text-sm">Recuerda que el <b>Motor A</b> suele ser el izquierdo y el <b>Motor B</b> el derecho.</p>
+                                <p class="text-blue-800 text-sm">Recuerda que el <b>Motor A</b> suele ser el izquierdo y
+                                    el <b>Motor B</b> el derecho.</p>
                             </div>
                         </div>
                         <div class="lg:w-1/2">
-                            <img src="https://images.unsplash.com/photo-1527443195645-1133f7f28990?auto=format&fit=crop&q=80&w=800" alt="Motores (Placeholder)" class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover" style="aspect-ratio: 4/3;">
+                            <img src="https://images.unsplash.com/photo-1527443195645-1133f7f28990?auto=format&fit=crop&q=80&w=800"
+                                alt="Motores (Placeholder)"
+                                class="rounded-2xl border border-slate-200 shadow-sm w-full object-cover"
+                                style="aspect-ratio: 4/3;">
                         </div>
                     </div>
-            
+
                     <!-- Final Check Section -->
-                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 mb-20 mx-6 shadow-sm relative overflow-hidden">
+                    <div
+                        class="bg-emerald-50 border border-emerald-200 rounded-2xl p-8 mb-20 mx-6 shadow-sm relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-4 opacity-10">
                             <i data-lucide="check-circle" size="120" class="text-emerald-600"></i>
                         </div>
                         <div class="relative z-10 text-center max-w-2xl mx-auto">
                             <h3 class="text-3xl font-black text-emerald-900 mb-4">¡Todo Listo!</h3>
-                            <p class="text-emerald-800 mb-8">Si has seguido todos los pasos, tu robot ya tiene su sistema nervioso y muscular conectado. Ahora es momento de cargar el código y verlo cobrar vida.</p>
-                            <img src="https://images.unsplash.com/photo-1589254065878-42c9da997008?auto=format&fit=crop&q=80&w=800" alt="Robot Finalizado (Placeholder)" class="rounded-2xl border border-emerald-200 shadow-md mx-auto max-w-md object-cover" style="aspect-ratio: 4/3;">
+                            <p class="text-emerald-800 mb-8">Si has seguido todos los pasos, tu robot ya tiene su
+                                sistema nervioso y muscular conectado. Ahora es momento de cargar el código y verlo
+                                cobrar vida.</p>
+                            <img src="https://images.unsplash.com/photo-1589254065878-42c9da997008?auto=format&fit=crop&q=80&w=800"
+                                alt="Robot Finalizado (Placeholder)"
+                                class="rounded-2xl border border-emerald-200 shadow-md mx-auto max-w-md object-cover"
+                                style="aspect-ratio: 4/3;">
                         </div>
                     </div>
                 </div>
@@ -1091,7 +1266,7 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 w-full">
                                 <p class="text-blue-800 text-sm leading-relaxed">
                                     <strong>Nota importante:</strong> Esta guía está configurada para un robot de 2
-                                    sensores y controlador L298N operando con 4 pines (5, 6, 9 y 10). La lógica base 
+                                    sensores y controlador L298N operando con 4 pines (5, 6, 9 y 10). La lógica base
                                     funciona igual para otros sensores solo ajustando los casos y pines.
                                 </p>
                             </div>
@@ -1389,8 +1564,10 @@ void loop() {
                                     </div>
                                 </div>
                                 <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                    <p>Unimos movimiento y lectura con la condición <code>if</code> ("Si pasa esto...").</p>
-                                    <p>Hagamos que si el sensor derecho (3) ve la línea, el robot mueva solo la rueda izquierda para corregir.</p>
+                                    <p>Unimos movimiento y lectura con la condición <code>if</code> ("Si pasa esto...").
+                                    </p>
+                                    <p>Hagamos que si el sensor derecho (3) ve la línea, el robot mueva solo la rueda
+                                        izquierda para corregir.</p>
                                 </div>
                             </div>
                         </div>
@@ -1428,7 +1605,7 @@ void loop() {
 }
 
 void loop() {
- if (digitalRead(3) == 1) { 
+ if (digitalRead(2) == 1) { 
   analogWrite(5, 0); 
   analogWrite(6, 0);
   
@@ -1453,12 +1630,16 @@ void loop() {
                                         <span
                                             class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
                                             5</span>
-                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Agregando el otro sensor</h2>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Agregando el otro
+                                            sensor</h2>
                                     </div>
                                 </div>
                                 <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                    <p>Ahora añadimos la condición para el sensor izquierdo (2) usando otra instrucción <code>if</code> separada.</p>
-                                    <p>¡Ojo! Más adelante veremos cómo evitar que los sensores se solapen y se confundan, pero por el momento usaremos sentencias separadas para cada uno.</p>
+                                    <p>Ahora añadimos la condición para el sensor izquierdo (2) usando otra instrucción
+                                        <code>if</code> separada.
+                                    </p>
+                                    <p>¡Ojo! Más adelante veremos cómo evitar que los sensores se solapen y se
+                                        confundan, pero por el momento usaremos sentencias separadas para cada uno.</p>
                                 </div>
                             </div>
                         </div>
@@ -1496,7 +1677,7 @@ void loop() {
 }
 
 void loop() {
- if (digitalRead(3) == 1) { 
+ if (digitalRead(2) == 1) { 
   analogWrite(5, 0); 
   analogWrite(6, 0);
   
@@ -1504,7 +1685,7 @@ void loop() {
   analogWrite(10, 0);
 }
 
- if (digitalRead(2) == 1) { 
+ if (digitalRead(3) == 1) { 
   analogWrite(5, 100); 
   analogWrite(6, 0);
   
@@ -1539,49 +1720,47 @@ void loop() {
                     </div>
 
                     <!-- Step 6 -->
-                            <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
-                                <div class="lg:w-1/2 order-2 lg:order-1">
-                                    <div class="sticky top-[100px] md:top-[120px] z-[5]">
-                                        <div class="flex items-center gap-3 mb-5">
-                                            <div
-                                                class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
-                                                <i data-lucide="save" size="22"></i>
-                                            </div>
-                                            <div>
-                                                <span
-                                                    class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
-                                                    6</span>
-                                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Uso de
-                                                    Variables</h2>
-                                            </div>
-                                        </div>
-                                        <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                            <p>Creamos "cajas" para guardar la velocidad al principio del código.</p>
-                                            <p>Así, si queremos ajustar el ritmo de competencia, solo cambiamos el valor
-                                                de <code>vel</code> en un solo lugar.</p>
-                                        </div>
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2 order-2 lg:order-1">
+                            <div class="sticky top-[100px] md:top-[120px] z-[5]">
+                                <div class="flex items-center gap-3 mb-5">
+                                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                        <i data-lucide="save" size="22"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
+                                            6</span>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Uso de
+                                            Variables</h2>
                                     </div>
                                 </div>
-                                <div class="lg:w-1/2 order-1 lg:order-2">
-                                    <div
-                                        class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
-                                        <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                                <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
+                                    <p>Creamos "cajas" para guardar la velocidad al principio del código.</p>
+                                    <p>Así, si queremos ajustar el ritmo de competencia, solo cambiamos el valor
+                                        de <code>vel</code> en un solo lugar.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 order-1 lg:order-2">
+                            <div
+                                class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
+                                <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                            </div>
+                            <div
+                                class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
+                                <div
+                                    class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                                    <div class="flex gap-1.5">
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
                                     </div>
-                                    <div
-                                        class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
-                                        <div
-                                            class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
-                                            <div class="flex gap-1.5">
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                            </div>
-                                            <button onclick="copyCode('code-paso6-v2', this)"
-                                                class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
-                                        </div>
-                                        <div
-                                            class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
-                                            <pre><code id="code-paso6-v2" class="language-cpp">int vel = 230;     // Velocidad para avanzar
+                                    <button onclick="copyCode('code-paso6-v2', this)"
+                                        class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
+                                </div>
+                                <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
+                                    <pre><code id="code-paso6-v2" class="language-cpp">int vel = 230;     // Velocidad para avanzar
 int velinv = 80;   // Velocidad para corregir/girar
 
 void loop() {
@@ -1591,57 +1770,61 @@ void loop() {
   }
   // ... resto del código usando 'vel' y 'velinv'
 }</code></pre>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Step 7 -->
-                            <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
-                                <div class="lg:w-1/2 order-2 lg:order-1">
-                                    <div class="sticky top-[100px] md:top-[120px] z-[5]">
-                                        <div class="flex items-center gap-3 mb-5">
-                                            <div
-                                                class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
-                                                <i data-lucide="settings" size="22"></i>
-                                            </div>
-                                            <div>
-                                                <span
-                                                    class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
-                                                    7</span>
-                                                <h2 class="text-2xl font-black text-slate-800 leading-tight">El Diseño
-                                                    (Editor de Robot)</h2>
-                                            </div>
-                                        </div>
-                                        <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                            <p>La forma física afecta el código. En la pestaña <strong>Editor de Robot</strong>, si ajustas la separación, abres nuevas posibilidades:</p>
-                                            <ul class="space-y-3 text-sm font-medium">
-                                                <li><span class="text-blue-600">•</span> <strong>Acercar los Sensores:</strong> Si los acercas para que ambos quepan dentro de la línea, se crea un nuevo estado principal donde <strong>ambos tocan la línea simultáneamente</strong>.</li>
-                                                <li>Ahora estar "centrado" significa que ambos leen <code>1</code>. Y puedes usar el operador lógico <code>&&</code> (Y) para programar este nuevo comportamiento base.</li>
-                                            </ul>
-                                        </div>
+                    <!-- Step 7 -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2 order-2 lg:order-1">
+                            <div class="sticky top-[100px] md:top-[120px] z-[5]">
+                                <div class="flex items-center gap-3 mb-5">
+                                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                        <i data-lucide="settings" size="22"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
+                                            7</span>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">El Diseño
+                                            (Editor de Robot)</h2>
                                     </div>
                                 </div>
-                                <div class="lg:w-1/2 order-1 lg:order-2">
-                                    <div
-                                        class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
-                                        <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                                <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
+                                    <p>La forma física afecta el código. En la pestaña <strong>Editor de Robot</strong>,
+                                        si ajustas la separación, abres nuevas posibilidades:</p>
+                                    <ul class="space-y-3 text-sm font-medium">
+                                        <li><span class="text-blue-600">•</span> <strong>Acercar los Sensores:</strong>
+                                            Si los acercas para que ambos quepan dentro de la línea, se crea un nuevo
+                                            estado principal donde <strong>ambos tocan la línea
+                                                simultáneamente</strong>.</li>
+                                        <li>Ahora estar "centrado" significa que ambos leen <code>1</code>. Y puedes
+                                            usar el operador lógico <code>&&</code> (Y) para programar este nuevo
+                                            comportamiento base.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 order-1 lg:order-2">
+                            <div
+                                class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
+                                <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                            </div>
+                            <div
+                                class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
+                                <div
+                                    class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                                    <div class="flex gap-1.5">
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
                                     </div>
-                                    <div
-                                        class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
-                                        <div
-                                            class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
-                                            <div class="flex gap-1.5">
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                            </div>
-                                            <button onclick="copyCode('code-paso7-v2', this)"
-                                                class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
-                                        </div>
-                                        <div
-                                            class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
-                                            <pre><code id="code-paso7-v2" class="language-cpp">int vel = 230;     // Velocidad para avanzar
+                                    <button onclick="copyCode('code-paso7-v2', this)"
+                                        class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
+                                </div>
+                                <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
+                                    <pre><code id="code-paso7-v2" class="language-cpp">int vel = 230;     // Velocidad para avanzar
 int velinv = 80;   // Velocidad para corregir
 
 void setup() {
@@ -1668,67 +1851,70 @@ void loop() {
     analogWrite(9, 0); analogWrite(10, velinv);
   }
 }</code></pre>
-                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 8 -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2 order-2 lg:order-1">
+                            <div class="sticky top-[100px] md:top-[120px] z-[5]">
+                                <div class="flex items-center gap-3 mb-5">
+                                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                        <i data-lucide="trophy" size="22"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
+                                            8</span>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Código
+                                            Maestro con Memoria</h2>
+                                    </div>
+                                </div>
+                                <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
+                                    <p>¿Qué pasa si el robot va muy rápido y <strong>ambos sensores se salen de la
+                                            línea</strong> al mismo tiempo en una curva pronunciada?</p>
+                                    <p>Al guardar el último movimiento en la variable <code>ultimoDir</code>, dotamos al
+                                        robot de "memoria". Esta memoria genera un nuevo bloque de estados de emergencia
+                                        (fuera de la línea), dándonos <strong>5 estados posibles</strong> en total:</p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li><strong>Centrado</strong> (ambos en la línea).</li>
+                                        <li><strong>Solo izquierdo</strong> o <strong>Solo derecho</strong> (pequeñas
+                                            correcciones).</li>
+                                        <li><strong>Fuera a la izquierda</strong> o <strong>Fuera a la derecha</strong>
+                                            (emergencia con memoria).</li>
+                                    </ul>
+                                    <p>Incluso podemos usar una nueva variable <code>velPico</code> para girar de forma
+                                        mucho más agresiva solo cuando estamos completamente fuera de la línea.</p>
+                                    <div class="bg-emerald-50 border-l-4 border-emerald-500 p-5 rounded-r-xl mt-6">
+                                        <p class="text-emerald-900 font-bold mb-1 italic text-sm">¡Nivel de
+                                            Competencia!</p>
+                                        <p class="text-emerald-800 text-sm leading-tight">Tu robot ahora tiene
+                                            memoria para afrontar las curvas más difíciles sin perderse.</p>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Step 8 -->
-                            <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
-                                <div class="lg:w-1/2 order-2 lg:order-1">
-                                    <div class="sticky top-[100px] md:top-[120px] z-[5]">
-                                        <div class="flex items-center gap-3 mb-5">
-                                            <div
-                                                class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
-                                                <i data-lucide="trophy" size="22"></i>
-                                            </div>
-                                            <div>
-                                                <span
-                                                    class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
-                                                    8</span>
-                                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Código
-                                                    Maestro con Memoria</h2>
-                                            </div>
-                                        </div>
-                                        <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                            <p>¿Qué pasa si el robot va muy rápido y <strong>ambos sensores se salen de la línea</strong> al mismo tiempo en una curva pronunciada?</p>
-                                            <p>Al guardar el último movimiento en la variable <code>ultimoDir</code>, dotamos al robot de "memoria". Esta memoria genera un nuevo bloque de estados de emergencia (fuera de la línea), dándonos <strong>5 estados posibles</strong> en total:</p>
-                                            <ul class="list-disc pl-5 space-y-1">
-                                                <li><strong>Centrado</strong> (ambos en la línea).</li>
-                                                <li><strong>Solo izquierdo</strong> o <strong>Solo derecho</strong> (pequeñas correcciones).</li>
-                                                <li><strong>Fuera a la izquierda</strong> o <strong>Fuera a la derecha</strong> (emergencia con memoria).</li>
-                                            </ul>
-                                            <p>Incluso podemos usar una nueva variable <code>velPico</code> para girar de forma mucho más agresiva solo cuando estamos completamente fuera de la línea.</p>
-                                            <div
-                                                class="bg-emerald-50 border-l-4 border-emerald-500 p-5 rounded-r-xl mt-6">
-                                                <p class="text-emerald-900 font-bold mb-1 italic text-sm">¡Nivel de
-                                                    Competencia!</p>
-                                                <p class="text-emerald-800 text-sm leading-tight">Tu robot ahora tiene
-                                                    memoria para afrontar las curvas más difíciles sin perderse.</p>
-                                            </div>
-                                        </div>
+                        </div>
+                        <div class="lg:w-1/2 order-1 lg:order-2">
+                            <div
+                                class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
+                                <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                            </div>
+                            <div
+                                class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
+                                <div
+                                    class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                                    <div class="flex gap-1.5">
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
                                     </div>
+                                    <button onclick="copyCode('code-paso9-v2', this)"
+                                        class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
                                 </div>
-                                <div class="lg:w-1/2 order-1 lg:order-2">
-                                    <div
-                                        class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
-                                        <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
-                                    </div>
-                                    <div
-                                        class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
-                                        <div
-                                            class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
-                                            <div class="flex gap-1.5">
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                            </div>
-                                            <button onclick="copyCode('code-paso9-v2', this)"
-                                                class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
-                                        </div>
-                                        <div
-                                            class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
-                                            <pre><code id="code-paso9-v2" class="language-cpp">int vel = 230;       // Velocidad para avanzar (Centrado)
+                                <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
+                                    <pre><code id="code-paso9-v2" class="language-cpp">int vel = 230;       // Velocidad para avanzar (Centrado)
 int velinv = 80;     // Velocidad para corrección suave (1 sensor)
 int velPico = 150;   // Velocidad extrema de rescate (salida completa)
 int ultimoDir = 2;   // 1: Izq, 2: Centro, 3: Der
@@ -1773,60 +1959,64 @@ void loop() {
     }
   }
 }</code></pre>
-                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 9 -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
+                        <div class="lg:w-1/2 order-2 lg:order-1">
+                            <div class="sticky top-[100px] md:top-[120px] z-[5]">
+                                <div class="flex items-center gap-3 mb-5">
+                                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                        <i data-lucide="package" size="22"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
+                                            9</span>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Uso de
+                                            Funciones</h2>
+                                    </div>
+                                </div>
+                                <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
+                                    <p>Como habrás notado, repetir bloques de <code>analogWrite</code> para cada estado
+                                        hace que el código sea muy largo y difícil de leer.</p>
+                                    <p>Podemos "agrupar" esas instrucciones creando nuestra propia función llamada
+                                        <code>motores(int velIzq, int velDer)</code>. En ella, si le enviamos una
+                                        velocidad positiva, el motor avanza. Si es negativa, retrocede.
+                                    </p>
+                                    <p>¡Observa cómo se "limpia" la función <code>loop</code>! Ahora es mucho más fácil
+                                        entender exactamente qué hace el robot en cada uno de los 5 estados.</p>
+                                    <div class="bg-emerald-50 border-l-4 border-emerald-500 p-5 rounded-r-xl mt-6">
+                                        <p class="text-emerald-900 font-bold mb-1 italic text-sm">¡Código Pro!</p>
+                                        <p class="text-emerald-800 text-sm leading-tight">Agrupar tareas repetitivas en
+                                            funciones (como <code>motores</code>) es el sello de un buen programador.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Step 9 -->
-                            <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
-                                <div class="lg:w-1/2 order-2 lg:order-1">
-                                    <div class="sticky top-[100px] md:top-[120px] z-[5]">
-                                        <div class="flex items-center gap-3 mb-5">
-                                            <div
-                                                class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
-                                                <i data-lucide="package" size="22"></i>
-                                            </div>
-                                            <div>
-                                                <span
-                                                    class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
-                                                    9</span>
-                                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Uso de
-                                                    Funciones</h2>
-                                            </div>
-                                        </div>
-                                        <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                            <p>Como habrás notado, repetir bloques de <code>analogWrite</code> para cada estado hace que el código sea muy largo y difícil de leer.</p>
-                                            <p>Podemos "agrupar" esas instrucciones creando nuestra propia función llamada <code>motores(int velIzq, int velDer)</code>. En ella, si le enviamos una velocidad positiva, el motor avanza. Si es negativa, retrocede.</p>
-                                            <p>¡Observa cómo se "limpia" la función <code>loop</code>! Ahora es mucho más fácil entender exactamente qué hace el robot en cada uno de los 5 estados.</p>
-                                            <div
-                                                class="bg-emerald-50 border-l-4 border-emerald-500 p-5 rounded-r-xl mt-6">
-                                                <p class="text-emerald-900 font-bold mb-1 italic text-sm">¡Código Pro!</p>
-                                                <p class="text-emerald-800 text-sm leading-tight">Agrupar tareas repetitivas en funciones (como <code>motores</code>) es el sello de un buen programador.</p>
-                                            </div>
-                                        </div>
+                        </div>
+                        <div class="lg:w-1/2 order-1 lg:order-2">
+                            <div
+                                class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
+                                <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                            </div>
+                            <div
+                                class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
+                                <div
+                                    class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                                    <div class="flex gap-1.5">
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
                                     </div>
+                                    <button onclick="copyCode('code-paso10-v2', this)"
+                                        class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
                                 </div>
-                                <div class="lg:w-1/2 order-1 lg:order-2">
-                                    <div
-                                        class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
-                                        <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
-                                    </div>
-                                    <div
-                                        class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
-                                        <div
-                                            class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
-                                            <div class="flex gap-1.5">
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                            </div>
-                                            <button onclick="copyCode('code-paso10-v2', this)"
-                                                class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
-                                        </div>
-                                        <div
-                                            class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
-                                            <pre><code id="code-paso10-v2" class="language-cpp">int vel = 230;       
+                                <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
+                                    <pre><code id="code-paso10-v2" class="language-cpp">int vel = 230;       
 int velinv = 80;     
 int velPico = 150;   
 int ultimoDir = 2;   // 1: Izq, 2: Centro, 3: Der
@@ -1881,59 +2071,69 @@ void loop() {
     }
   }
 }</code></pre>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Step 10 -->
-                            <div class="flex flex-col lg:flex-row gap-10 p-6">
-                                <div class="lg:w-1/2 order-2 lg:order-1">
-                                    <div class="sticky top-[100px] md:top-[120px] z-[5]">
-                                        <div class="flex items-center gap-3 mb-5">
-                                            <div
-                                                class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
-                                                <i data-lucide="crosshair" size="22"></i>
-                                            </div>
-                                            <div>
-                                                <span
-                                                    class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
-                                                    10</span>
-                                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Control PID (Avanzado)</h2>
-                                            </div>
-                                        </div>
-                                        <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                            <p>El control <strong>PID (Proporcional, Integral, Derivativo)</strong> es una fórmula matemática que calcula exactamente cuánta corrección necesita el robot, en lugar de usar velocidades fijas.</p>
-                                            <p><em>Nota: Para que un PID funcione de manera óptima, normalmente se necesita una "regleta" con más sensores (p.ej. 5 u 8) para medir un "gradiente" suave de qué tan lejos está la línea. Como ahora usamos solo 2, esto es una demostración didáctica de cómo se estructura la lógica.</em></p>
-                                            <ul class="list-disc pl-5 space-y-1">
-                                                <li><strong>P (Proporcional):</strong> Qué tan lejos de la línea estamos ahora (el error). Empuja más fuerte si estamos más lejos.</li>
-                                                <li><strong>I (Integral):</strong> Si llevamos mucho tiempo fuera por inercia, esta variable crece y ayuda a empujar aún más.</li>
-                                                <li><strong>D (Derivativo):</strong> Ve qué tan rápido cambia el error y sirve como un amortiguador, evitando que el robot oscile bruscamente de un lado a otro.</li>
-                                            </ul>
-                                            <p>En el código creamos nuestro propio "error numérico" artificial, el cual entra a la fórmula y produce el mágico <code>PID_value</code> que suma y resta potencia en cada rueda.</p>
-                                        </div>
+                    <!-- Step 10 -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6">
+                        <div class="lg:w-1/2 order-2 lg:order-1">
+                            <div class="sticky top-[100px] md:top-[120px] z-[5]">
+                                <div class="flex items-center gap-3 mb-5">
+                                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                        <i data-lucide="crosshair" size="22"></i>
+                                    </div>
+                                    <div>
+                                        <span
+                                            class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
+                                            10</span>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Control PID
+                                            (Avanzado)</h2>
                                     </div>
                                 </div>
-                                <div class="lg:w-1/2 order-1 lg:order-2">
-                                    <div
-                                        class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
-                                        <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                                <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
+                                    <p>El control <strong>PID (Proporcional, Integral, Derivativo)</strong> es una
+                                        fórmula matemática que calcula exactamente cuánta corrección necesita el robot,
+                                        en lugar de usar velocidades fijas.</p>
+                                    <p><em>Nota: Para que un PID funcione de manera óptima, normalmente se necesita una
+                                            "regleta" con más sensores (p.ej. 5 u 8) para medir un "gradiente" suave de
+                                            qué tan lejos está la línea. Como ahora usamos solo 2, esto es una
+                                            demostración didáctica de cómo se estructura la lógica.</em></p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li><strong>P (Proporcional):</strong> Qué tan lejos de la línea estamos ahora
+                                            (el error). Empuja más fuerte si estamos más lejos.</li>
+                                        <li><strong>I (Integral):</strong> Si llevamos mucho tiempo fuera por inercia,
+                                            esta variable crece y ayuda a empujar aún más.</li>
+                                        <li><strong>D (Derivativo):</strong> Ve qué tan rápido cambia el error y sirve
+                                            como un amortiguador, evitando que el robot oscile bruscamente de un lado a
+                                            otro.</li>
+                                    </ul>
+                                    <p>En el código creamos nuestro propio "error numérico" artificial, el cual entra a
+                                        la fórmula y produce el mágico <code>PID_value</code> que suma y resta potencia
+                                        en cada rueda.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 order-1 lg:order-2">
+                            <div
+                                class="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest ml-1">
+                                <i data-lucide="code" size="14"></i> Editor de Código - Monaco Light
+                            </div>
+                            <div
+                                class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
+                                <div
+                                    class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+                                    <div class="flex gap-1.5">
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <div class="w-2 h-2 rounded-full bg-slate-300"></div>
                                     </div>
-                                    <div
-                                        class="bg-[#fffffe] border border-slate-300 rounded-lg shadow-sm overflow-hidden h-full flex flex-col font-mono text-[13px] relative group">
-                                        <div
-                                            class="bg-[#f3f3f3] px-4 py-2 border-b border-slate-200 flex justify-between items-center">
-                                            <div class="flex gap-1.5">
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                                <div class="w-2 h-2 rounded-full bg-slate-300"></div>
-                                            </div>
-                                            <button onclick="copyCode('code-paso11-v2', this)"
-                                                class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
-                                        </div>
-                                        <div
-                                            class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
-                                            <pre><code id="code-paso11-v2" class="language-cpp">int velBase = 140;       
+                                    <button onclick="copyCode('code-paso11-v2', this)"
+                                        class="copy-btn text-slate-400 hover:text-blue-600 text-[10px] font-bold uppercase tracking-widest">Copiar</button>
+                                </div>
+                                <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
+                                    <pre><code id="code-paso11-v2" class="language-cpp">int velBase = 140;       
 int velMax = 255;        
 
 // Te recomiendo poner Ki en 0 para las primeras pruebas
@@ -2023,12 +2223,12 @@ void loop() {
 
   motores(velMotorIzq, velMotorDer);
 }</code></pre>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
-
                         </div>
+                    </div>
+
+                </div>
             </details>
 
 
@@ -2057,7 +2257,8 @@ void loop() {
                         <li><strong>Pines de Sensores:</strong> Asigna cada sensor al pin digital de tu Arduino.</li>
                         <li><strong>Tipo de Controlador (Driver):</strong>
                             <ul class="list-circle pl-6 mt-2">
-                                <li><strong>L298N (4 pines):</strong> Usa 4 pines (IN1-IN4) enviando señales PWM directamente, siempre que los puentes ENA/ENB estén colocados.</li>
+                                <li><strong>L298N (4 pines):</strong> Usa 4 pines (IN1-IN4) enviando señales PWM
+                                    directamente, siempre que los puentes ENA/ENB estén colocados.</li>
                                 <li><strong>MX1616:</strong> Usa solo 4 pines directamente con PWM.</li>
                                 <li><strong>ESC/Single:</strong> Para motores que solo requieren una señal PWM por lado.
                                 </li>
@@ -2110,10 +2311,15 @@ void loop() {
                     </ul>
 
                     <h3 class="text-2xl font-bold text-brand-dark mb-4">Paso 7: Ajuste y Solapamiento de Sensores</h3>
-                    <p>Al ajustar la <strong>Separación de Sensores</strong> en el Editor (Paso 1), puedes acercarlos lo suficiente para que sean menos anchos que la línea del circuito:</p>
+                    <p>Al ajustar la <strong>Separación de Sensores</strong> en el Editor (Paso 1), puedes acercarlos lo
+                        suficiente para que sean menos anchos que la línea del circuito:</p>
                     <ul class="list-disc pl-6 space-y-2 mb-4">
-                        <li><strong>Estado combinado:</strong> Esto crea un nuevo estado posible donde <strong>ambos sensores tocan la línea negra simultáneamente</strong>.</li>
-                        <li><strong>Actualización de Código:</strong> Si diseñas tu robot así, deberás actualizar la lógica en tu código para manejar ese nuevo escenario (por ejemplo, añadiendo un caso <code>if (digitalRead(2) == 1 && digitalRead(3) == 1)</code>).</li>
+                        <li><strong>Estado combinado:</strong> Esto crea un nuevo estado posible donde <strong>ambos
+                                sensores tocan la línea negra simultáneamente</strong>.</li>
+                        <li><strong>Actualización de Código:</strong> Si diseñas tu robot así, deberás actualizar la
+                            lógica en tu código para manejar ese nuevo escenario (por ejemplo, añadiendo un caso
+                            <code>if (digitalRead(2) == 1 && digitalRead(3) == 1)</code>).
+                        </li>
                     </ul>
                 </div>
             </details>
@@ -2193,66 +2399,93 @@ void loop() {
             <div class="max-w-7xl mx-auto p-6 lg:p-10">
                 <header class="mb-10 text-center">
                     <h1 class="text-4xl font-black text-slate-900 tracking-tight mb-3">Otras Herramientas</h1>
-                    <p class="text-lg text-slate-500">Recursos adicionales, simuladores y herramientas para potenciar tu diseño.</p>
+                    <p class="text-lg text-slate-500">Recursos adicionales, simuladores y herramientas para potenciar tu
+                        diseño.</p>
                 </header>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    
+
                     <!-- Simulador de Robot Esquiva Obstáculos -->
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
+                    <div
+                        class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
                         <div class="h-48 bg-slate-100 flex items-center justify-center relative overflow-hidden">
-                            <div class="absolute inset-0 bg-blue-600/5 group-hover:bg-blue-600/0 transition-colors z-10"></div>
-                            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800" alt="Simulador Robot" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500">
+                            <div
+                                class="absolute inset-0 bg-blue-600/5 group-hover:bg-blue-600/0 transition-colors z-10">
+                            </div>
+                            <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800"
+                                alt="Simulador Robot"
+                                class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500">
                         </div>
                         <div class="p-6 flex flex-col flex-grow">
-                            <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">Simulador de Robot Esquiva...</h2>
-                            <p class="text-slate-600 text-sm mb-6 flex-grow">Simulador de Robot Esquiva Obstáculos básico, te enseña nociones de colisión y evasión de obstáculos de manera interactiva.</p>
-                            <a href="https://guaroduino.github.io/RobotEsquivaObstaculosSim/" target="_blank" class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
+                            <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">Simulador de Robot
+                                Esquiva...</h2>
+                            <p class="text-slate-600 text-sm mb-6 flex-grow">Simulador de Robot Esquiva Obstáculos
+                                básico, te enseña nociones de colisión y evasión de obstáculos de manera interactiva.
+                            </p>
+                            <a href="https://guaroduino.github.io/RobotEsquivaObstaculosSim/" target="_blank"
+                                class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
                                 Abrir Enlace
                             </a>
                         </div>
                     </div>
 
                     <!-- Cadena de Palabras -->
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
+                    <div
+                        class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
                         <div class="h-48 bg-slate-50 flex items-center justify-center relative overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1546422904-90eab23c3d7e?auto=format&fit=crop&q=80&w=800" alt="Cadena de Palabras" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
+                            <img src="https://images.unsplash.com/photo-1546422904-90eab23c3d7e?auto=format&fit=crop&q=80&w=800"
+                                alt="Cadena de Palabras"
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90">
                         </div>
                         <div class="p-6 flex flex-col flex-grow">
                             <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">Cadena de Palabras</h2>
-                            <p class="text-slate-600 text-sm mb-6 flex-grow">Juego interactivo de encadenar palabras usando tu voz. Requiere uso de micrófono para el reconocimiento.</p>
-                            <a href="https://guaroduino.github.io/cadenadepalabras/" target="_blank" class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
+                            <p class="text-slate-600 text-sm mb-6 flex-grow">Juego interactivo de encadenar palabras
+                                usando tu voz. Requiere uso de micrófono para el reconocimiento.</p>
+                            <a href="https://guaroduino.github.io/cadenadepalabras/" target="_blank"
+                                class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
                                 Abrir Enlace
                             </a>
                         </div>
                     </div>
 
                     <!-- PhET -->
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
+                    <div
+                        class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
                         <div class="h-48 bg-teal-500 flex items-center justify-center p-6 relative overflow-hidden">
-                            <div class="w-24 h-24 bg-white rounded-2xl flex items-center justify-center font-black text-3xl shadow-lg text-amber-500 transform group-hover:scale-110 transition-transform duration-300">PhET</div>
+                            <div
+                                class="w-24 h-24 bg-white rounded-2xl flex items-center justify-center font-black text-3xl shadow-lg text-amber-500 transform group-hover:scale-110 transition-transform duration-300">
+                                PhET</div>
                         </div>
                         <div class="p-6 flex flex-col flex-grow">
-                            <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">Simulaciones Interactive Phet</h2>
-                            <p class="text-slate-600 text-sm mb-6 flex-grow">Aprovecha simulaciones interactivas de ciencias y matemáticas completamente gratuitas desarrolladas por el proyecto PhET.</p>
-                            <a href="https://phet.colorado.edu/es/" target="_blank" class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
+                            <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">Simulaciones Interactive
+                                Phet</h2>
+                            <p class="text-slate-600 text-sm mb-6 flex-grow">Aprovecha simulaciones interactivas de
+                                ciencias y matemáticas completamente gratuitas desarrolladas por el proyecto PhET.</p>
+                            <a href="https://phet.colorado.edu/es/" target="_blank"
+                                class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
                                 Abrir Enlace
                             </a>
                         </div>
                     </div>
 
                     <!-- TinkerCAD -->
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
+                    <div
+                        class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
                         <div class="h-48 bg-blue-600 flex items-center justify-center relative overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1620325867502-221ddb5b4e24?auto=format&fit=crop&q=80&w=800" alt="TinkerCAD" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500 mix-blend-overlay">
+                            <img src="https://images.unsplash.com/photo-1620325867502-221ddb5b4e24?auto=format&fit=crop&q=80&w=800"
+                                alt="TinkerCAD"
+                                class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500 mix-blend-overlay">
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="bg-white text-blue-600 font-bold px-4 py-2 rounded-lg shadow-md text-xl tracking-wider">Tinkercad</span>
+                                <span
+                                    class="bg-white text-blue-600 font-bold px-4 py-2 rounded-lg shadow-md text-xl tracking-wider">Tinkercad</span>
                             </div>
                         </div>
                         <div class="p-6 flex flex-col flex-grow">
                             <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">TinkerCAD</h2>
-                            <p class="text-slate-600 text-sm mb-6 flex-grow">Plataforma web amigable para explorar el diseño en 3D, la electrónica y la simulación de código por bloques o Arduino.</p>
-                            <a href="https://www.tinkercad.com/" target="_blank" class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
+                            <p class="text-slate-600 text-sm mb-6 flex-grow">Plataforma web amigable para explorar el
+                                diseño en 3D, la electrónica y la simulación de código por bloques o Arduino.</p>
+                            <a href="https://www.tinkercad.com/" target="_blank"
+                                class="block w-full py-3 px-4 bg-[#f4f7ff] hover:bg-blue-600 text-blue-700 hover:text-white font-semibold text-center rounded-xl border border-blue-100 transition-all shadow-sm">
                                 Abrir Enlace
                             </a>
                         </div>
