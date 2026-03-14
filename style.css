@@ -47,13 +47,13 @@ body {
     }
 }
 
-header {
+body > header {
     background-color: var(--surface-color);
     padding: var(--spacing-xs) var(--spacing-md);
     box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 50; /* Increased to stay above step headers */
     display: flex;
     justify-content: center;
 }

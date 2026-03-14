@@ -186,10 +186,13 @@ const arduinoAPI = {
             if (conns.driverType === 'l298n') {
                 const vIn1 = getPinEffectiveValue(conns.motorPins.leftIn1);
                 const vIn2 = getPinEffectiveValue(conns.motorPins.leftIn2);
-                const vEn = getPinEffectiveValue(conns.motorPins.leftEn);
+                let vEn = getPinEffectiveValue(conns.motorPins.leftEn);
+                if (!conns.motorPins.leftEn) vEn = 255; // Si no hay pin EN asignado, asumimos VCC (puente)
+
                 const vIn3 = getPinEffectiveValue(conns.motorPins.rightIn3);
                 const vIn4 = getPinEffectiveValue(conns.motorPins.rightIn4);
-                const vEnB = getPinEffectiveValue(conns.motorPins.rightEn);
+                let vEnB = getPinEffectiveValue(conns.motorPins.rightEn);
+                if (!conns.motorPins.rightEn) vEnB = 255; // Si no hay pin EN asignado, asumimos VCC (puente)
 
                 const diffL = vIn1 - vIn2;
                 const diffR = vIn3 - vIn4;
@@ -260,20 +263,17 @@ const arduinoAPI = {
 };
 
 // Define the custom code template
-const customCodeTemplate = `// Pines de Sensores (0 = LOW = Negro, 1 = HIGH = Blanco)
-const SENSOR_IZQ = A2;
-const SENSOR_CEN = A4;
-const SENSOR_DER = A3;
+const customCodeTemplate = `// Pines de Sensores (0 = LOW, 1 = HIGH)
+const SENSOR_IZQ = 2;
+const SENSOR_DER = 3;
 
 // Pines L298N Motor Izquierdo
-const IN1 = 11;
-const IN2 = 9;
-const ENA = 3;
+const IN1 = 5;
+const IN2 = 6;
 
 // Pines L298N Motor Derecho
-const IN3 = 10;
-const IN4 = 6;
-const ENB = 5;
+const IN3 = 9;
+const IN4 = 10;
 
 // Velocidad base
 const SPEED = 120;
@@ -283,49 +283,41 @@ void setup() {
     
     // Configurar Sensores
     pinMode(SENSOR_IZQ, INPUT);
-    pinMode(SENSOR_CEN, INPUT);
     pinMode(SENSOR_DER, INPUT);
 
     // Configurar Motores
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
-    pinMode(ENA, OUTPUT);
     pinMode(IN3, OUTPUT);
     pinMode(IN4, OUTPUT);
-    pinMode(ENB, OUTPUT);
     
     Serial.println("Robot Line Follower Listo.");
 }
 
 void loop() {
     int izq = digitalRead(SENSOR_IZQ);
-    int cen = digitalRead(SENSOR_CEN);
     int der = digitalRead(SENSOR_DER);
     
-    // Activar potencia en ambos motores
-    analogWrite(ENA, SPEED);
-    analogWrite(ENB, SPEED);
-    
-    // LOGICA DE SEGUIDOR DE LINEA (0 = LOW = Negra)
-    if (cen == LOW) {
-        // El centro está en la línea: Avanzar
-        digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-        digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+    // LOGICA DE SEGUIDOR DE LINEA BÁSICO
+    if (izq == 0 && der == 0) {
+        // La línea está en el centro: Avanzar
+        analogWrite(IN1, SPEED); analogWrite(IN2, 0);
+        analogWrite(IN3, SPEED); analogWrite(IN4, 0);
     }
-    else if (izq == LOW) {
-        // La línea está a la izquierda: Girar a la izquierda
-        digitalWrite(IN1, LOW);  digitalWrite(IN2, HIGH); // Invierte rueda izquierda
-        digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);  // Rueda derecha avanza
+    else if (izq == 1) {
+        // Sensor izquierdo detecta línea: Corregir a la izquierda
+        analogWrite(IN1, 0);     analogWrite(IN2, SPEED);
+        analogWrite(IN3, SPEED); analogWrite(IN4, 0);
     }
-    else if (der == LOW) {
-        // La línea está a la derecha: Girar a la derecha
-        digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);  // Rueda izquierda avanza
-        digitalWrite(IN3, LOW);  digitalWrite(IN4, HIGH); // Invierte rueda derecha
+    else if (der == 1) {
+        // Sensor derecho detecta línea: Corregir a la derecha
+        analogWrite(IN1, SPEED); analogWrite(IN2, 0);
+        analogWrite(IN3, 0);     analogWrite(IN4, SPEED);
     }
     else {
-        // Si pierde la línea (todos en HIGH = Blanco), detenerse
-        digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
-        digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+        // Detenerse por defecto
+        analogWrite(IN1, 0); analogWrite(IN2, 0);
+        analogWrite(IN3, 0); analogWrite(IN4, 0);
     }
 }`;
 /**

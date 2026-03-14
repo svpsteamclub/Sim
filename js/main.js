@@ -48,30 +48,27 @@ document.addEventListener('DOMContentLoaded', () => {
         comOffset_m: 0.0, tireGrip: 0.8,
         connections: {
             driverType: 'l298n',
-            sensorPins: { left: 'A1', center: 'A2', right: 'A3', farLeft: '', farRight: '' },
-            motorPins: { leftEn: '10', leftIn1: '3', leftIn2: '5', rightIn3: '6', rightIn4: '9', rightEn: '11', leftPWM: '', rightPWM: '' }
+            sensorPins: { left: '4', center: '3', right: '2', farLeft: '', farRight: '' },
+            motorPins: { leftEn: '', leftIn1: '5', leftIn2: '6', rightIn3: '9', rightIn4: '10', rightEn: '', leftPWM: '', rightPWM: '' }
         }
     };
 
     const DEMO_CODE = `// --- Configuración de Pines ---
-const int S_IZQ = A1;
-const int S_CEN = A2;
-const int S_DER = A3;
+// --- Pines de Sensores ---
+const int S_IZQ = 4;
+const int S_CEN = 3;
+const int S_DER = 2;
 
-// Motor Izquierdo
-const int ENA = 10; 
-const int IN1 = 3;
-const int IN2 = 5;
-
-// Motor Derecho
-const int ENB = 11; 
-const int IN3 = 6;
-const int IN4 = 9;
+// --- Pines de Motores ---
+const int IN1 = 5; // Motor Izq Adelante
+const int IN2 = 6; // Motor Izq Atrás
+const int IN3 = 9; // Motor Der Adelante
+const int IN4 = 10;// Motor Der Atrás
 
 // --- Variables de Control ---
-int vel = 230;
-int velinv = 80;
-int ultimoDir = 2; //1 izquierda, 2 centro, 3 derecha
+int velMax = 150;
+int velGiro = 80;     // Le dimos un valor para que el giro tenga fuerza
+int ultimoEstado = 0; // ¡NUEVO! Memoria: 0=Centro, 1=Izquierda, 2=Derecha
 
 void setup() {
   Serial.begin(9600);
@@ -79,8 +76,30 @@ void setup() {
   pinMode(S_CEN, INPUT);
   pinMode(S_DER, INPUT);
   
-  pinMode(ENA, OUTPUT); pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT); pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+  pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+}
+
+// ¡NUEVO! Función modular para controlar los motores
+// Esto limpia el loop y permite enviar velocidades negativas para dar reversa
+void motores(int velIzq, int velDer) {
+  // Motor Izquierdo
+  if (velIzq >= 0) {
+    analogWrite(IN1, velIzq); 
+    analogWrite(IN2, 0);
+  } else {
+    analogWrite(IN1, 0); 
+    analogWrite(IN2, -velIzq); // Invierte el giro
+  }
+
+  // Motor Derecho
+  if (velDer >= 0) {
+    analogWrite(IN3, velDer); 
+    analogWrite(IN4, 0);
+  } else {
+    analogWrite(IN3, 0); 
+    analogWrite(IN4, -velDer); // Invierte el giro
+  }
 }
 
 void loop() {
@@ -88,45 +107,39 @@ void loop() {
   int cen = digitalRead(S_CEN);
   int der = digitalRead(S_DER);
 
-  if (der && izq) { // Simplificado para simulación
-    analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    analogWrite(ENB, velinv); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-    ultimoDir = 3;
+  // Lógica: 1 = Línea Negra, 0 = Fondo Blanco
+
+  if (cen == 1) {
+    // La línea está en el centro: Avanzamos
+    motores(velMax, velMax);
+    ultimoEstado = 0; // Guardamos que estamos centrados
   }
-  else if (cen && izq) {
-    analogWrite(ENA, 40); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-    ultimoDir = 1;
+  else if (izq == 1) {
+    // La línea está a la izquierda: Giramos
+    // Usamos -velGiro para que la rueda interna vaya en reversa y el giro sea en su propio eje
+    motores(-velGiro, velMax); 
+    ultimoEstado = 1; // Guardamos que la línea se fue por la izquierda
   }
-  else if (cen && der) {
-    analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    analogWrite(ENB, 40); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-    ultimoDir = 3;
+  else if (der == 1) {
+    // La línea está a la derecha: Giramos
+    motores(velMax, -velGiro);
+    ultimoEstado = 2; // Guardamos que la línea se fue por la derecha
   }
-  else if (der) {
-    analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    analogWrite(ENB, velinv); digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
-    ultimoDir = 3;
+  else {
+    // ¡CASO CRÍTICO: Perdimos la línea (0, 0, 0)!
+    // Usamos la memoria (ultimoEstado) para buscarla hacia el último lado donde la vimos.
+    if (ultimoEstado == 1) {
+      motores(-velGiro, velMax); // Sigue buscando a la izquierda
+    } 
+    else if (ultimoEstado == 2) {
+      motores(velMax, -velGiro); // Sigue buscando a la derecha
+    } 
+    else {
+      motores(0, 0); // Si no sabemos nada, mejor frenar por seguridad
+    }
   }
-  else if (izq) {
-    analogWrite(ENA, velinv); digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
-    analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-    ultimoDir = 1;
-  }
-  else if (cen) {
-    analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-    ultimoDir = 2;
-  }
-  else if (!izq && !cen && !der && ultimoDir == 1) {
-    analogWrite(ENA, velinv); digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
-    analogWrite(ENB, vel); digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
-  }
-  else if (!izq && !cen && !der && ultimoDir == 3) {
-    analogWrite(ENA, vel); digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
-    analogWrite(ENB, velinv); digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
-  }
-  delay(5);
+  
+  delay(10); // Pequeña pausa de 10ms (100Hz) para estabilidad del bucle
 }`;
 
     // --- Main App Interface for modules ---
@@ -543,7 +556,7 @@ void loop() {
         }
 
         const confirmDemo = confirm(
-            "Se iniciará una simulación demostrativa con el Robot SLC SVP 2025 (3 sensores) y código Arduino precargado.\n\n" +
+            "Se iniciará una simulación demostrativa con un robot de 2 sensores y código Arduino precargado.\n\n" +
             "Tus diseños y códigos actuales en los otros paneles se conservarán intactos y volverán a cargarse automáticamente al terminar la prueba y presionar 'Iniciar'.\n\n" +
             "¿Continuar?"
         );

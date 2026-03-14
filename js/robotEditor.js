@@ -170,29 +170,29 @@ export function initRobotEditor(appInterface) {
         let html = '';
         if (type === 'l298n') {
             html = `
-                <div class="pin-row">
+                <div class="pin-row" style="display:none;">
                     <span><strong>Motor Izq.</strong> — ENA (PWM~):</span>
                     ${pinSelect('pinMotorLeftEn', '', true)}
                 </div>
                 <div class="pin-row">
-                    <span>IN1 (dirección):</span>
-                    ${pinSelect('pinMotorLeftIn1', '')}
+                    <span><strong>Motor Izq.</strong> — IN1 (PWM~):</span>
+                    ${pinSelect('pinMotorLeftIn1', '', true)}
                 </div>
                 <div class="pin-row">
-                    <span>IN2 (dirección):</span>
-                    ${pinSelect('pinMotorLeftIn2', '')}
+                    <span>IN2 (PWM~):</span>
+                    ${pinSelect('pinMotorLeftIn2', '', true)}
                 </div>
-                <div class="pin-row" style="margin-top:0.5em;">
+                <div class="pin-row" style="display:none; margin-top:0.5em;">
                     <span><strong>Motor Der.</strong> — ENB (PWM~):</span>
                     ${pinSelect('pinMotorRightEn', '', true)}
                 </div>
-                <div class="pin-row">
-                    <span>IN3 (dirección):</span>
-                    ${pinSelect('pinMotorRightIn3', '')}
+                <div class="pin-row" style="margin-top:0.5em;">
+                    <span><strong>Motor Der.</strong> — IN3 (PWM~):</span>
+                    ${pinSelect('pinMotorRightIn3', '', true)}
                 </div>
                 <div class="pin-row">
-                    <span>IN4 (dirección):</span>
-                    ${pinSelect('pinMotorRightIn4', '')}
+                    <span>IN4 (PWM~):</span>
+                    ${pinSelect('pinMotorRightIn4', '', true)}
                 </div>`;
         } else if (type === 'mx1616') {
             html = `
