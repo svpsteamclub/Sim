@@ -103,11 +103,29 @@ export function getDOMElements() {
     };
 }
 
+const tabScrollPositions = new Map();
+
 export function setupTabs() {
     const { tabButtons, tabContents } = getDOMElements();
+    
+    // Identificar la pestaña activa inicialmente
+    let currentActiveTab = null;
+    tabButtons.forEach(btn => {
+        if (btn.classList.contains('active')) {
+            currentActiveTab = btn.dataset.tab;
+        }
+    });
+
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetTab = button.dataset.tab;
+            
+            if (currentActiveTab === targetTab) return;
+
+            // Guardar el scroll de la pestaña actual antes de cambiar
+            if (currentActiveTab) {
+                tabScrollPositions.set(currentActiveTab, window.scrollY);
+            }
 
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
@@ -118,6 +136,17 @@ export function setupTabs() {
                 } else {
                     content.classList.remove('active');
                 }
+            });
+
+            currentActiveTab = targetTab;
+
+            // Restaurar el scroll de la nueva pestaña
+            // requestAnimationFrame ayuda a asegurar que el DOM se haya actualizado y el navegador pueda hacer scroll
+            requestAnimationFrame(() => {
+                window.scrollTo({
+                    top: tabScrollPositions.get(targetTab) || 0,
+                    behavior: 'instant'
+                });
             });
         });
     });
