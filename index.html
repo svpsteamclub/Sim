@@ -1390,7 +1390,7 @@ void loop() {
                                 </div>
                                 <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
                                     <p>Unimos movimiento y lectura con la condición <code>if</code> ("Si pasa esto...").</p>
-                                    <p><strong>Para esta guía, asumimos que los sensores están lo suficientemente separados</strong> para que la línea quede en medio. Por tanto, el robot avanza cuando ninguno de los dos sensores toque la línea negra (es decir, ambos leen 0).</p>
+                                    <p>Hagamos que si el sensor derecho (3) ve la línea, el robot mueva solo la rueda izquierda para corregir.</p>
                                 </div>
                             </div>
                         </div>
@@ -1428,12 +1428,13 @@ void loop() {
 }
 
 void loop() {
-  // SI la línea está en medio (ambos sensores fuera de la línea, ven 0)
-  if (digitalRead(2) == 0 && digitalRead(3) == 0) {
-    // ...entonces avanzamos
-    analogWrite(5, 100); analogWrite(6, 0);
-    analogWrite(9, 100); analogWrite(10, 0);
-  }
+ if (digitalRead(3) == 1) { 
+  analogWrite(5, 0); 
+  analogWrite(6, 0);
+  
+  analogWrite(9, 100); 
+  analogWrite(10, 0);
+}
 }</code></pre>
                                 </div>
                             </div>
@@ -1452,13 +1453,12 @@ void loop() {
                                         <span
                                             class="text-blue-500 font-bold text-[10px] uppercase tracking-[0.2em]">Paso
                                             5</span>
-                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Corrigiendo con
-                                            else if</h2>
+                                        <h2 class="text-2xl font-black text-slate-800 leading-tight">Agregando el otro sensor</h2>
                                     </div>
                                 </div>
                                 <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
-                                    <p>Como los sensores están separados, solo uno de ellos tocará la línea cuando haya una curva. Si la pista hace una curva, usamos <code>else if</code> ("si no pasó lo anterior, prueba esto").</p>
-                                    <p>Es mucho más eficiente: en cuanto el robot encuentra qué hacer, ignora el resto de instrucciones.</p>
+                                    <p>Ahora añadimos la condición para el sensor izquierdo (2) usando otra instrucción <code>if</code> separada.</p>
+                                    <p>¡Ojo! Más adelante veremos cómo evitar que los sensores se solapen y se confundan, pero por el momento usaremos sentencias separadas para cada uno.</p>
                                 </div>
                             </div>
                         </div>
@@ -1496,21 +1496,21 @@ void loop() {
 }
 
 void loop() {
-  if (digitalRead(2) == 0 && digitalRead(3) == 0) {
-    // Avanzar (línea en medio)
-    analogWrite(5, 100); analogWrite(6, 0);
-    analogWrite(9, 100); analogWrite(10, 0);
-  }
-  else if (digitalRead(2) == 1) {
-    // Corregir hacia la izquierda
-    analogWrite(5, 0); analogWrite(6, 80);
-    analogWrite(9, 100); analogWrite(10, 0);
-  }
-  else if (digitalRead(3) == 1) {
-    // Corregir hacia la derecha
-    analogWrite(5, 100); analogWrite(6, 0);
-    analogWrite(9, 0); analogWrite(10, 80);
-  }
+ if (digitalRead(3) == 1) { 
+  analogWrite(5, 0); 
+  analogWrite(6, 0);
+  
+  analogWrite(9, 100); 
+  analogWrite(10, 0);
+}
+
+ if (digitalRead(2) == 1) { 
+  analogWrite(5, 100); 
+  analogWrite(6, 0);
+  
+  analogWrite(9, 0); 
+  analogWrite(10, 0);
+}
 }</code></pre>
                                 </div>
                             </div>
