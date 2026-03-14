@@ -24,8 +24,6 @@
 
 html,
 body {
-    height: 100vh;
-    overflow: hidden;
     overscroll-behavior-y: contain;
     touch-action: manipulation;
 }
@@ -37,6 +35,7 @@ body {
     line-height: 1.5;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
     background: #fff;
     overscroll-behavior: none;
 }
@@ -212,7 +211,6 @@ main {
     width: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* Important for flex children to scroll */
 }
 
 .tab-content {
@@ -223,8 +221,6 @@ main {
     box-shadow: var(--shadow-md);
     margin-top: 0;
     flex-grow: 1;
-    overflow-y: auto; /* Independent scroll */
-    min-height: 0; /* Important for flex children to scroll */
 }
 
 .tab-content.active {
