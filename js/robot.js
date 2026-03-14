@@ -265,7 +265,7 @@ export class Robot {
         let positions = {};
         if (count === 2) {
             // left/right only
-            const ySpread = spread;
+            const ySpread = spread / 2; // Fixed: spread is the distance BETWEEN sensors
             const x = this.x_m + offset * cosA;
             const y = this.y_m + offset * sinA;
             positions.left = {
