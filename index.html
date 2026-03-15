@@ -232,6 +232,12 @@
             text-shadow: none !important;
         }
 
+        /* Ensure all tokens are dark by default */
+        .monaco-light-theme .token,
+        #guia .token {
+            color: #1a1a1a !important;
+        }
+
         .monaco-light-theme .token.keyword,
         #guia .token.keyword {
             color: #0000ff !important;
@@ -270,12 +276,29 @@
         }
 
         .monaco-light-theme .token.constant,
-        #guia .token.constant {
+        .monaco-light-theme .token.macro,
+        .monaco-light-theme .token.entity,
+        .monaco-light-theme .token.atrule,
+        .monaco-light-theme .token.important,
+        .monaco-light-theme .token.variable,
+        .monaco-light-theme .token.property,
+        .monaco-light-theme .token.symbol,
+        #guia .token.constant,
+        #guia .token.macro,
+        #guia .token.entity,
+        #guia .token.atrule,
+        #guia .token.important,
+        #guia .token.variable,
+        #guia .token.property,
+        #guia .token.symbol {
             color: #003080 !important;
+            font-weight: bold !important;
         }
 
         .monaco-light-theme .token.class-name,
-        #guia .token.class-name {
+        .monaco-light-theme .token.parameter,
+        #guia .token.class-name,
+        #guia .token.parameter {
             color: #267f99 !important;
         }
 
@@ -1007,7 +1030,7 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
             </details>
 
             <details>
-                <summary>Conexiones Físicas: Robot 2 Sensores + L298N</summary>
+                <summary>Robot Sigue Lineas Minimo</summary>
                 <div class="details-content space-y-12 bg-[#fcfdfe] p-0">
                     <!-- Header Section -->
                     <header class="bg-white border-b border-slate-200 py-16 px-6">
@@ -1015,24 +1038,66 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             <div
                                 class="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
                                 <span class="w-8 h-[2px] bg-blue-600"></span>
-                                GUÍA DE HARDWARE
+                                GUÍA DE HARDWARE COMPLETA
                             </div>
                             <h1
                                 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
                                 <span
                                     class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
-                                    Conexiones Físicas
+                                    Robot Sigue Líneas Mínimo
                                 </span>
                             </h1>
-                            <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
-                                En esta guía aprenderás a conectar correctamente los componentes electrónicos de tu
-                                robot seguidor de línea SLC (2 sensores), utilizando un controlador L298N con lógica de
-                                4 pines (con puentes ENA/ENB activados) y un Arduino.
-                            </p>
+                            <div class="space-y-6 text-lg text-slate-600 w-full leading-relaxed font-medium">
+                                <p>
+                                    Este robot representa el <strong>mínimo viable</strong> que se puede fabricar para
+                                    cumplir con la tarea de seguir una línea de forma autónoma. Es el punto de partida
+                                    ideal para estudiantes y entusiastas de la robótica.
+                                </p>
+                                <p>
+                                    Utiliza los componentes más usuales y accesibles del mercado: los clásicos
+                                    <strong>motores DC con caja reductora y ruedas amarillas</strong>, el driver de
+                                    potencia <strong>L298N</strong>, un <strong>Arduino UNO</strong> equipado con un
+                                    <strong>sensor shield v5</strong> para facilitar las conexiones, <strong>2 sensores
+                                        TCRT5000</strong> para la detección de línea y se alimenta mediante <strong>dos
+                                        baterías 18650</strong> de alta descarga.
+                                </p>
+                            </div>
                         </div>
                     </header>
 
-                    <!-- General Diagram -->
+                    <!-- Chassis and Hardware Section -->
+                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 bg-slate-50/30">
+                        <div class="lg:w-1/2">
+                            <div class="flex items-center gap-3 mb-5">
+                                <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-100">
+                                    <i data-lucide="frame" size="22"></i>
+                                </div>
+                                <h2 class="text-2xl font-black text-slate-800 leading-tight">Chasis y Estructura</h2>
+                            </div>
+                            <div class="space-y-4 text-slate-600">
+                                <p>
+                                    La base de nuestro robot es un <strong>chasis de acrílico</strong> cortado con
+                                    precisión láser, el cual proporciona una estructura rígida y ligera para montar
+                                    todos los componentes.
+                                </p>
+                                <p>
+                                    El ensamblaje se completa con piezas de <strong>metal y tornillería</strong>
+                                    estándar (tornillos M3, espaciadores), asegurando que los motores y sensores queden
+                                    alineados correctamente para un desempeño óptimo en la pista.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 flex flex-col items-center">
+                            <img src="assets/images/robot.jpg" alt="Ilustración del Robot Completo"
+                                class="rounded-2xl border border-slate-200 shadow-md w-full h-auto transform hover:scale-[1.02] transition-transform duration-300">
+                            <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
+                                <i data-lucide="zoom-in" class="w-3 h-3"></i>
+                                Robot terminado listo para competir
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout and Connections -->
                     <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100">
                         <div class="lg:w-1/2">
                             <div class="flex items-center gap-3 mb-5">
@@ -1242,6 +1307,53 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
                                 Clic para ampliar
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evolution and Generalization Section -->
+                    <div
+                        class="bg-slate-900 border border-slate-800 rounded-2xl p-8 mb-6 mx-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <i data-lucide="refresh-cw" size="120" class="text-white"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <h3 class="text-3xl font-black text-white mb-6 tracking-tight">Evolución y Versatilidad</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-300">
+                                <div class="space-y-4">
+                                    <h4 class="text-blue-400 font-bold flex items-center gap-2">
+                                        <i data-lucide="cpu" size="18"></i> Electrónica Flexible
+                                    </h4>
+                                    <p class="text-sm leading-relaxed">
+                                        La lógica de programación que aprenderás aquí es <strong>universal</strong>. Es
+                                        compatible con otros motores DC, drivers más compactos (como el
+                                        <strong>mx1616</strong>) y otras placas como <strong>Arduino NANO</strong> o
+                                        <strong>MEGA</strong>.
+                                    </p>
+                                    <p class="text-sm leading-relaxed">
+                                        Puedes escalar este diseño agregando <strong>más sensores</strong> (4, 5 o más)
+                                        para mejorar la precisión, simplemente añadiendo más casos lógicos a tu
+                                        algoritmo.
+                                    </p>
+                                </div>
+                                <div class="space-y-4">
+                                    <h4 class="text-indigo-400 font-bold flex items-center gap-2">
+                                        <i data-lucide="printer" size="18"></i> Fabricación Adaptable
+                                    </h4>
+                                    <p class="text-sm leading-relaxed">
+                                        Si bien este robot usa acrílico, podrías fabricar el chasis usando
+                                        <strong>impresión 3D</strong> u otras técnicas para lograr geometrías más
+                                        complejas o aerodinámicas.
+                                    </p>
+                                    <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl">
+                                        <p class="text-blue-200 text-sm italic font-medium">
+                                            💡 <strong>Propósito del Simulador:</strong> La idea principal es que puedas
+                                            <strong>probar distintas geometrías</strong>, pesos y posiciones de sensores
+                                            virtualmente antes de pasar a la fabricación física, ahorrando tiempo y
+                                            materiales.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1876,7 +1988,7 @@ void loop() {
                                 <div class="text-slate-600 leading-relaxed space-y-4 text-[15px]">
                                     <p>Unimos movimiento y lectura con la condición <code>if</code> ("Si pasa esto...").
                                     </p>
-                                    <p>Hagamos que si el sensor derecho (3) ve la línea, el robot mueva solo la rueda
+                                    <p>Hagamos que si el sensor izquierdo (2) ve la línea, el robot mueva solo la rueda
                                         izquierda para corregir.</p>
                                 </div>
                             </div>
