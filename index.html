@@ -3499,7 +3499,9 @@ void loop() {
         // Función para copiar código de la Guía
         function copyCode(elementId, button) {
             const codeElement = document.getElementById(elementId);
-            const textToCopy = codeElement.innerText;
+            // textContent es mejor para texto plano que innerText, que puede incluir estilos de visualización
+            // trim() elimina espacios innecesarios al inicio y final que a veces incluyen los pre/code
+            const textToCopy = codeElement.textContent.trim();
 
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = button.innerHTML;
