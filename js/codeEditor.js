@@ -162,6 +162,19 @@ const arduinoAPI = {
             }
         }
 
+        if (value > 255) {
+            if (!_warnedPins.has(pin + "_pwm_high")) {
+                ArduinoSerial.println(`❌ ERROR: analogWrite(${pin}, ${value}) - El valor excede el límite máximo de 255.`);
+                _warnedPins.add(pin + "_pwm_high");
+            }
+        } else if (value < 0) {
+            // AnalogWrite standard doesn't typically use negative values, though our current code clamps them
+            if (!_warnedPins.has(pin + "_pwm_low")) {
+                ArduinoSerial.println(`❌ ERROR: analogWrite(${pin}, ${value}) - El valor no puede ser negativo.`);
+                _warnedPins.add(pin + "_pwm_low");
+            }
+        }
+
         const pwmValue = Math.max(-255, Math.min(255, Math.round(value)));
 
         // Update the tracked PWM for the specific pin dynamically
