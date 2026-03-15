@@ -8,7 +8,7 @@
 
     <!-- Dependencias para la nueva pestaña Guía (Tailwind primero para que style.css pueda sobreescribir) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;600&display=swap"
         rel="stylesheet">
@@ -224,87 +224,83 @@
             font-style: italic;
         }
 
-        /* Monaco Light Theme Overrides for Prism */
-        .monaco-light-theme,
-        #guia pre[class*="language-"] {
+        /* High Contrast Light Theme for Prism in Guide */
+        #guia pre[class*="language-"],
+        #guia code[class*="language-"] {
             background-color: #ffffff !important;
-            color: #000000 !important;
+            color: #1a1a1a !important;
             text-shadow: none !important;
         }
 
-        /* Ensure all tokens are dark by default */
-        .monaco-light-theme .token,
+        /* Default for all tokens - Ensure they are visible */
         #guia .token {
             color: #1a1a1a !important;
+            opacity: 1 !important;
+            text-shadow: none !important;
+            background: none !important;
         }
 
-        .monaco-light-theme .token.keyword,
-        #guia .token.keyword {
+        /* Keywords: void, int, if, else, etc. */
+        #guia .token.keyword,
+        #guia .token.boolean,
+        #guia .token.selector {
             color: #0000ff !important;
-            font-weight: normal !important;
-        }
-
-        .monaco-light-theme .token.function,
-        #guia .token.function {
-            color: #267f99 !important;
-        }
-
-        .monaco-light-theme .token.number,
-        #guia .token.number {
-            color: #098658 !important;
-        }
-
-        .monaco-light-theme .token.string,
-        #guia .token.string {
-            color: #a31515 !important;
-        }
-
-        .monaco-light-theme .token.comment,
-        #guia .token.comment {
-            color: #008000 !important;
-            font-style: normal !important;
-        }
-
-        .monaco-light-theme .token.operator,
-        #guia .token.operator {
-            color: #000000 !important;
-        }
-
-        .monaco-light-theme .token.punctuation,
-        #guia .token.punctuation {
-            color: #000000 !important;
-        }
-
-        .monaco-light-theme .token.constant,
-        .monaco-light-theme .token.macro,
-        .monaco-light-theme .token.entity,
-        .monaco-light-theme .token.atrule,
-        .monaco-light-theme .token.important,
-        .monaco-light-theme .token.variable,
-        .monaco-light-theme .token.property,
-        .monaco-light-theme .token.symbol,
-        #guia .token.constant,
-        #guia .token.macro,
-        #guia .token.entity,
-        #guia .token.atrule,
-        #guia .token.important,
-        #guia .token.variable,
-        #guia .token.property,
-        #guia .token.symbol {
-            color: #003080 !important;
             font-weight: bold !important;
         }
 
-        .monaco-light-theme .token.class-name,
-        .monaco-light-theme .token.parameter,
-        #guia .token.class-name,
-        #guia .token.parameter {
+        /* Functions: setup, loop, pinMode, etc. */
+        #guia .token.function,
+        #guia .token.attr-name {
             color: #267f99 !important;
+            font-weight: 500 !important;
         }
 
-        .monaco-light-theme .token.boolean,
-        #guia .token.boolean {
-            color: #0000ff !important;
+        /* Comments: // ... */
+        #guia .token.comment,
+        #guia .token.prolog,
+        #guia .token.doctype,
+        #guia .token.cdata {
+            color: #008000 !important;
+            font-style: italic !important;
+        }
+
+        /* Numbers and Strings */
+        #guia .token.number { color: #098658 !important; }
+        #guia .token.string,
+        #guia .token.char,
+        #guia .token.attr-value { color: #a31515 !important; }
+
+        /* Constants & Critical Tokens: INPUT, OUTPUT, HIGH, LOW, Serial, etc. */
+        #guia .token.constant,
+        #guia .token.macro,
+        #guia .token.builtin,
+        #guia .token.important,
+        #guia .token.symbol,
+        #guia .token.variable,
+        #guia .token.property,
+        #guia .token.namespace,
+        #guia .token.entity,
+        #guia .token.atrule,
+        #guia .token.tag {
+            color: #003080 !important;
+            font-weight: 800 !important;
+            opacity: 1 !important;
+        }
+
+        /* Classes, types and Serial */
+        #guia .token.class-name,
+        #guia .token.type,
+        #guia .token.parameter,
+        #guia .token.regex {
+            color: #267f99 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Punctuation and Operators */
+        #guia .token.punctuation,
+        #guia .token.operator {
+            color: #393a34 !important;
+            font-weight: normal !important;
         }
     </style>
 </head>
