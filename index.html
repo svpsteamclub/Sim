@@ -547,9 +547,8 @@
                             <code>digitalRead(pin)</code>:
                         </p>
                         <ul style="margin-top:0">
-                            <li><b>Robot de 2 Sensores:</b> <code>pin 2</code> (Izquierdo) y <code>pin 4</code>
+                            <li><b>Robot de 2 Sensores:</b> <code>pin 2</code> (Izquierdo) y <code>pin 3</code>
                                 (Derecho)</li>
-                            <li><b>Robot de 2 Sensores:</b> <code>pin 2</code> (Izq.), <code>pin 3</code> (Der.)</li>
                             <li><b>Robot de 4 Sensores:</b> <code>pin 5</code> (Extremo Izq.), <code>pin 2</code>
                                 (Izq.), <code>pin 4</code> (Der.), <code>pin 6</code> (Extremo Der.)</li>
                             <li><b>Robot de 5 Sensores:</b> <code>pin 5</code>, <code>pin 2</code>, <code>pin 3</code>,
@@ -1087,15 +1086,15 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                         <tr>
                                             <td class="px-4 py-3 font-medium text-rose-600">Baterías (+ / -)</td>
                                             <td class="px-4 py-3 font-medium">Conector Arduino</td>
-                                            <td class="px-4 py-3 text-rose-700 font-bold">L298N Entr. 12V / Negativo</td>
+                                            <td class="px-4 py-3 text-rose-700 font-bold">L298N Entr. 12V / Negativo
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         <div class="lg:w-1/2 flex flex-col items-center">
-                            <img src="assets/images/ComponentesConectados.jpg"
-                                alt="Esquema de Componentes Conectados"
+                            <img src="assets/images/ComponentesConectados.jpg" alt="Esquema de Componentes Conectados"
                                 class="rounded-2xl border border-slate-200 shadow-sm w-full h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
@@ -1118,13 +1117,14 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                     digitales del Arduino. No olvides alimentar todos los sensores con 5V y GND.</p>
                                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-4">
                                     <i data-lucide="alert-triangle" class="text-amber-600 shrink-0"></i>
-                                    <p class="text-amber-800 text-sm italic">Verifica que el lado de los sensores coincida con los pines; en el código que usaremos el <b>izquierdo va en el pin 2</b> y el <b>derecho en el pin 3</b>. ¡Compruébalo en la realidad!</p>
+                                    <p class="text-amber-800 text-sm italic">Verifica que el lado de los sensores
+                                        coincida con los pines; en el código que usaremos el <b>izquierdo va en el pin
+                                            2</b> y el <b>derecho en el pin 3</b>. ¡Compruébalo en la realidad!</p>
                                 </div>
                             </div>
                         </div>
                         <div class="lg:w-1/2 lg:order-1 flex flex-col items-center">
-                            <img src="assets/images/TCRT5000Conex.jpg"
-                                alt="Conexión de Sensores TCRT5000"
+                            <img src="assets/images/TCRT5000Conex.jpg" alt="Conexión de Sensores TCRT5000"
                                 class="rounded-2xl border border-slate-200 shadow-sm w-full h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
@@ -1174,8 +1174,7 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             </div>
                         </div>
                         <div class="lg:w-1/2 flex flex-col items-center">
-                            <img src="assets/images/L298nConex.jpg"
-                                alt="Conexión L298N"
+                            <img src="assets/images/L298nConex.jpg" alt="Conexión L298N"
                                 class="rounded-2xl border border-slate-200 shadow-sm w-full h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
@@ -1205,8 +1204,7 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             </div>
                         </div>
                         <div class="lg:w-1/2 lg:order-1 flex flex-col items-center">
-                            <img src="assets/images/EnergiaConex.jpg"
-                                alt="Esquema de Energía"
+                            <img src="assets/images/EnergiaConex.jpg" alt="Esquema de Energía"
                                 class="rounded-2xl border border-slate-200 shadow-sm w-full h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
@@ -1227,17 +1225,19 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             <p class="text-slate-600 mb-6">Conecta los cables de los motores a las borneras de salida
                                 del L298N. Si el motor gira en sentido contrario, simplemente invierte sus dos cables.
                             </p>
-                             <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4">
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4">
                                 <i data-lucide="info" class="text-blue-600 shrink-0"></i>
                                 <div class="space-y-2">
-                                    <p class="text-blue-800 text-sm">Recuerda que el <b>Motor A</b> suele ser el izquierdo y el <b>Motor B</b> el derecho.</p>
-                                    <p class="text-blue-800 text-sm italic font-medium"><b>Atención:</b> Deja los cables de los motores accesibles. Si al probarlo el robot gira al revés, deberás invertir la posición de los cables en la bornera.</p>
+                                    <p class="text-blue-800 text-sm">Recuerda que el <b>Motor A</b> suele ser el
+                                        izquierdo y el <b>Motor B</b> el derecho.</p>
+                                    <p class="text-blue-800 text-sm italic font-medium"><b>Atención:</b> Deja los cables
+                                        de los motores accesibles. Si al probarlo el robot gira al revés, deberás
+                                        invertir la posición de los cables en la bornera.</p>
                                 </div>
                             </div>
                         </div>
                         <div class="lg:w-1/2 flex flex-col items-center">
-                            <img src="assets/images/MotoresConex.jpg"
-                                alt="Conexión de Motores"
+                            <img src="assets/images/MotoresConex.jpg" alt="Conexión de Motores"
                                 class="rounded-2xl border border-slate-200 shadow-sm w-full h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
@@ -1258,11 +1258,11 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 sistema nervioso y muscular conectado. Ahora es momento de cargar el código y verlo
                                 cobrar vida.</p>
                             <div class="flex flex-col items-center">
-                                <img src="assets/images/robot.jpg"
-                                    alt="Robot Finalizado"
+                                <img src="assets/images/robot.jpg" alt="Robot Finalizado"
                                     class="rounded-3xl w-full max-w-md h-auto shadow-2xl shadow-emerald-200/50"
                                     style="mix-blend-mode: multiply;">
-                                <div class="mt-4 text-xs text-emerald-600/60 flex items-center gap-1 font-medium bg-white/50 px-3 py-1 rounded-full border border-emerald-100">
+                                <div
+                                    class="mt-4 text-xs text-emerald-600/60 flex items-center gap-1 font-medium bg-white/50 px-3 py-1 rounded-full border border-emerald-100">
                                     <i data-lucide="zoom-in" class="w-3 h-3"></i>
                                     Clic para ampliar
                                 </div>
@@ -1278,17 +1278,21 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <!-- Header Section -->
                     <header class="bg-white border-b border-slate-200 py-16 px-6">
                         <div class="w-full mx-auto">
-                            <div class="flex items-center gap-2 text-teal-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
+                            <div
+                                class="flex items-center gap-2 text-teal-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">
                                 <span class="w-8 h-[2px] bg-teal-600"></span>
                                 GUÍA DE HARDWARE
                             </div>
-                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-500">
+                            <h1
+                                class="text-4xl md:text-6xl font-black text-slate-900 mb-8 tracking-tighter leading-none">
+                                <span
+                                    class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-500">
                                     Cargando código a la Placa
                                 </span>
                             </h1>
                             <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
-                                Una vez que tu robot está conectado físicamente, el siguiente paso es "darle vida" cargando el programa desde tu computadora a la placa Arduino.
+                                Una vez que tu robot está conectado físicamente, el siguiente paso es "darle vida"
+                                cargando el programa desde tu computadora a la placa Arduino.
                             </p>
                         </div>
                     </header>
@@ -1302,10 +1306,14 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">Preparación Necesaria</h2>
                             </div>
-                            <p class="text-slate-600 mb-6">Antes de empezar, asegúrate de tener todo lo necesario instalado en tu computadora:</p>
+                            <p class="text-slate-600 mb-6">Antes de empezar, asegúrate de tener todo lo necesario
+                                instalado en tu computadora:</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <a href="https://ingtelecto.com/como-instalar-el-ide-de-arduino-y-configuraciones/" target="_blank" class="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-500 transition-colors shadow-sm group">
-                                    <div class="bg-teal-50 p-3 rounded-lg text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+                                <a href="https://ingtelecto.com/como-instalar-el-ide-de-arduino-y-configuraciones/"
+                                    target="_blank"
+                                    class="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-500 transition-colors shadow-sm group">
+                                    <div
+                                        class="bg-teal-50 p-3 rounded-lg text-teal-600 group-hover:bg-teal-600 group-hover:text-white transition-colors">
                                         <i data-lucide="external-link" size="20"></i>
                                     </div>
                                     <div>
@@ -1313,8 +1321,11 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                         <p class="text-xs text-slate-500">Guía paso a paso de instalación.</p>
                                     </div>
                                 </a>
-                                <a href="https://ingtelecto.com/como-instalar-el-driver-ch340-en-arduino/" target="_blank" class="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-500 transition-colors shadow-sm group">
-                                    <div class="bg-indigo-50 p-3 rounded-lg text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <a href="https://ingtelecto.com/como-instalar-el-driver-ch340-en-arduino/"
+                                    target="_blank"
+                                    class="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 hover:border-teal-500 transition-colors shadow-sm group">
+                                    <div
+                                        class="bg-indigo-50 p-3 rounded-lg text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                         <i data-lucide="shield-check" size="20"></i>
                                     </div>
                                     <div>
@@ -1335,21 +1346,26 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">1. Abrir el IDE</h2>
                             </div>
-                            <p class="text-slate-600 mb-4">Busca el icono de <strong>Arduino IDE</strong> en tu escritorio o menú de inicio y lánzalo.</p>
+                            <p class="text-slate-600 mb-4">Busca el icono de <strong>Arduino IDE</strong> en tu
+                                escritorio o menú de inicio y lánzalo.</p>
                             <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl flex gap-4">
                                 <i data-lucide="info" class="text-teal-600 shrink-0"></i>
-                                <p class="text-teal-800 text-sm italic">Debería verse como el icono que se muestra a la derecha en Windows.</p>
+                                <p class="text-teal-800 text-sm italic">Debería verse como el icono que se muestra a la
+                                    derecha en Windows.</p>
                             </div>
                         </div>
                         <div class="lg:w-1/2 flex justify-center">
-                            <img src="assets/images/iconoArduinoIDE.jpg" alt="Icono de Arduino IDE" class="rounded-2xl border border-slate-200 shadow-md max-w-[200px]">
+                            <img src="assets/images/iconoArduinoIDE.jpg" alt="Icono de Arduino IDE"
+                                class="rounded-2xl border border-slate-200 shadow-md max-w-[200px]">
                         </div>
                     </div>
 
                     <!-- Step 2: Paste Code -->
-                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 items-center bg-slate-50">
+                    <div
+                        class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 items-center bg-slate-50">
                         <div class="lg:w-1/2 flex flex-col justify-center order-2 lg:order-1 items-center">
-                            <img src="assets/images/arduinoIDEwindow.jpg" alt="Ventana de Arduino IDE" class="rounded-2xl border border-slate-200 shadow-md w-full h-auto">
+                            <img src="assets/images/arduinoIDEwindow.jpg" alt="Ventana de Arduino IDE"
+                                class="rounded-2xl border border-slate-200 shadow-md w-full h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
                                 Clic para ampliar
@@ -1362,10 +1378,12 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">2. Preparar el Código</h2>
                             </div>
-                            <p class="text-slate-600 mb-4">Copia el código desde el simulador y pégalo en el editor de Arduino IDE.</p>
+                            <p class="text-slate-600 mb-4">Copia el código desde el simulador y pégalo en el editor de
+                                Arduino IDE.</p>
                             <ul class="list-disc pl-5 space-y-2 text-slate-600">
                                 <li>Borra cualquier código que aparezca por defecto en la ventana nueva.</li>
-                                <li>Usa <strong>Ctrl + V</strong> o haz <strong>clic derecho y selecciona Pegar</strong>.</li>
+                                <li>Usa <strong>Ctrl + V</strong> o haz <strong>clic derecho y selecciona
+                                        Pegar</strong>.</li>
                             </ul>
                         </div>
                     </div>
@@ -1382,12 +1400,16 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                             <div class="space-y-6">
                                 <div>
                                     <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">A</span>
+                                        <span
+                                            class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">A</span>
                                         Seleccionar Puerto
                                     </h4>
-                                    <p class="text-sm text-slate-600 mb-3">Conecta tu Arduino al USB. En el menú superior, verás un desplegable donde aparecerá el puerto <strong>COM</strong> seguido de un número.</p>
+                                    <p class="text-sm text-slate-600 mb-3">Conecta tu Arduino al USB. En el menú
+                                        superior, verás un desplegable donde aparecerá el puerto <strong>COM</strong>
+                                        seguido de un número.</p>
                                     <div class="flex flex-col items-center">
-                                        <img src="assets/images/IDEPortSelectionDropdown.jpg" alt="Selección de Puerto" class="rounded-xl border border-slate-200 shadow-sm w-[60%]">
+                                        <img src="assets/images/IDEPortSelectionDropdown.jpg" alt="Selección de Puerto"
+                                            class="rounded-xl border border-slate-200 shadow-sm w-[60%]">
                                         <div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
                                             <i data-lucide="zoom-in" class="w-2.5 h-2.5"></i>
                                             Clic para ampliar
@@ -1396,12 +1418,16 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">B</span>
+                                        <span
+                                            class="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">B</span>
                                         Seleccionar Modelo
                                     </h4>
-                                    <p class="text-sm text-slate-600 mb-3">Busca tu modelo de tarjeta (<strong>Arduino UNO</strong>, <strong>NANO</strong> o <strong>MEGA</strong>) y selecciónalo.</p>
+                                    <p class="text-sm text-slate-600 mb-3">Busca tu modelo de tarjeta (<strong>Arduino
+                                            UNO</strong>, <strong>NANO</strong> o <strong>MEGA</strong>) y selecciónalo.
+                                    </p>
                                     <div class="flex flex-col items-center">
-                                        <img src="assets/images/BoardSelection.jpg" alt="Selección de Tarjeta" class="rounded-xl border border-slate-200 shadow-sm w-[60%]">
+                                        <img src="assets/images/BoardSelection.jpg" alt="Selección de Tarjeta"
+                                            class="rounded-xl border border-slate-200 shadow-sm w-[60%]">
                                         <div class="mt-2 text-[10px] text-slate-400 flex items-center gap-1">
                                             <i data-lucide="zoom-in" class="w-2.5 h-2.5"></i>
                                             Clic para ampliar
@@ -1416,15 +1442,18 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                     <i data-lucide="alert-circle" size="18"></i>
                                     Consejo Pro
                                 </h4>
-                                <p class="text-sm text-amber-700">Si no aparece ningún puerto COM, desconecta y vuelve a conectar el cable USB o verifica si instalaste el driver CH340.</p>
+                                <p class="text-sm text-amber-700">Si no aparece ningún puerto COM, desconecta y vuelve a
+                                    conectar el cable USB o verifica si instalaste el driver CH340.</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Step 4: Upload -->
-                    <div class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 items-center bg-slate-50">
+                    <div
+                        class="flex flex-col lg:flex-row gap-10 p-6 border-b border-slate-100 items-center bg-slate-50">
                         <div class="lg:w-1/2 flex flex-col justify-center order-2 lg:order-1 items-center">
-                            <img src="assets/images/uploadSketch.jpg" alt="Botón Subir" class="rounded-2xl border border-slate-200 shadow-md w-full max-w-lg h-auto">
+                            <img src="assets/images/uploadSketch.jpg" alt="Botón Subir"
+                                class="rounded-2xl border border-slate-200 shadow-md w-full max-w-lg h-auto">
                             <div class="mt-2 text-xs text-slate-400 flex items-center gap-1">
                                 <i data-lucide="zoom-in" class="w-3 h-3"></i>
                                 Clic para ampliar
@@ -1437,20 +1466,26 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <h2 class="text-2xl font-black text-slate-800 leading-tight">4. Cargar Código</h2>
                             </div>
-                            <p class="text-slate-600 mb-6">Estamos listos para enviar el programa a la memoria de la placa.</p>
+                            <p class="text-slate-600 mb-6">Estamos listos para enviar el programa a la memoria de la
+                                placa.</p>
                             <div class="space-y-4">
                                 <div class="flex gap-4">
-                                    <div class="bg-teal-100 text-teal-700 w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold">1</div>
+                                    <div
+                                        class="bg-teal-100 text-teal-700 w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold">
+                                        1</div>
                                     <div>
                                         <h5 class="font-bold text-slate-800">Verificar</h5>
                                         <p class="text-sm text-slate-500 italic">El botón del ✓ revisa errores.</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4">
-                                    <div class="bg-indigo-100 text-indigo-700 w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold">2</div>
+                                    <div
+                                        class="bg-indigo-100 text-indigo-700 w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-bold">
+                                        2</div>
                                     <div>
                                         <h5 class="font-bold text-slate-800">Subir (Upload)</h5>
-                                        <p class="text-sm text-slate-500 italic">El botón de la ➜ compila y envía el código.</p>
+                                        <p class="text-sm text-slate-500 italic">El botón de la ➜ compila y envía el
+                                            código.</p>
                                     </div>
                                 </div>
                             </div>
@@ -1461,30 +1496,38 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                     <div class="p-6 pb-20">
                         <div class="w-full text-center mb-8">
                             <h2 class="text-3xl font-black text-slate-800 leading-tight">¿Algo salió mal?</h2>
-                            <p class="text-slate-500 mt-2 text-lg">No te preocupes, aquí están las soluciones más comunes.</p>
+                            <p class="text-slate-500 mt-2 text-lg">No te preocupes, aquí están las soluciones más
+                                comunes.</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
                                 <h4 class="font-bold text-rose-600 mb-3 flex items-center gap-2">
                                     <i data-lucide="alert-octagon" size="20"></i> Error de Puerto
                                 </h4>
-                                <p class="text-sm text-slate-600 leading-relaxed">Arduino IDE dice "Error al abrir el puerto serie". Verifica que el cable esté bien conectado y que hayas seleccionado el COM correcto en el menú.</p>
+                                <p class="text-sm text-slate-600 leading-relaxed">Arduino IDE dice "Error al abrir el
+                                    puerto serie". Verifica que el cable esté bien conectado y que hayas seleccionado el
+                                    COM correcto en el menú.</p>
                             </div>
                             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
                                 <h4 class="font-bold text-rose-600 mb-3 flex items-center gap-2">
                                     <i data-lucide="alert-octagon" size="20"></i> Tarjeta no responde
                                 </h4>
-                                <p class="text-sm text-slate-600 leading-relaxed">Asegúrate de haber seleccionado el modelo exacto (UNO, NANO, etc.). Si usas un NANO, a veces necesitas cambiar el "Processor" a "ATmega328P (Old Bootloader)".</p>
+                                <p class="text-sm text-slate-600 leading-relaxed">Asegúrate de haber seleccionado el
+                                    modelo exacto (UNO, NANO, etc.). Si usas un NANO, a veces necesitas cambiar el
+                                    "Processor" a "ATmega328P (Old Bootloader)".</p>
                             </div>
                             <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
                                 <h4 class="font-bold text-rose-600 mb-3 flex items-center gap-2">
                                     <i data-lucide="alert-octagon" size="20"></i> El robot no se mueve
                                 </h4>
-                                <p class="text-sm text-slate-600 leading-relaxed">Si la carga fue exitosa pero el robot no se mueve, revisa el interruptor de encendido de tus baterías y las conexiones del L298N.</p>
+                                <p class="text-sm text-slate-600 leading-relaxed">Si la carga fue exitosa pero el robot
+                                    no se mueve, revisa el interruptor de encendido de tus baterías y las conexiones del
+                                    L298N.</p>
                             </div>
                         </div>
                         <div class="mt-8 text-center">
-                            <a href="https://www.wexterhome.com/proyectos-con-arduino/como-subir-un-programa-a-arduino/" target="_blank" class="text-teal-600 font-bold hover:underline">
+                            <a href="https://www.wexterhome.com/proyectos-con-arduino/como-subir-un-programa-a-arduino/"
+                                target="_blank" class="text-teal-600 font-bold hover:underline">
                                 Ver guía completa de resolución de problemas →
                             </a>
                         </div>
@@ -1517,8 +1560,31 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                     funciona igual para otros sensores solo ajustando los casos y pines.
                                 </p>
                             </div>
+                            <div class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-6 mb-8 shadow-lg transform hover:scale-[1.01] transition-transform cursor-pointer border-2 border-amber-400 group"
+                                onclick="document.querySelector('[data-tab=\'robot-editor\']').click(); document.getElementById('loadExampleRobotButton').click();">
+                                <div class="flex items-center gap-4">
+                                    <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm animate-pulse">
+                                        <i data-lucide="sparkles" class="text-white w-8 h-8"></i>
+                                    </div>
+                                    <div class="flex-grow">
+                                        <h3 class="text-white font-black text-xl mb-1 tracking-tight">¡Prueba esta guía
+                                            de inmediato!</h3>
+                                        <p class="text-amber-50 text-sm font-medium leading-normal">
+                                            Haz clic aquí para <strong>cargar automáticamente el robot de
+                                                ejemplo</strong> en el editor y comenzar a seguir esta guía paso a paso.
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="hidden md:flex bg-white/10 px-4 py-2 rounded-lg border border-white/20 items-center gap-2 group-hover:bg-white/20 transition-colors">
+                                        <span class="text-white font-bold text-xs uppercase tracking-widest">Cargar
+                                            Robot</span>
+                                        <i data-lucide="arrow-right" class="text-white w-4 h-4"></i>
+                                    </div>
+                                </div>
+                            </div>
+
                             <p class="text-lg text-slate-500 w-full leading-relaxed font-medium">
-                                ¡Bienvenidos, equipo del <strong>SVP Steam Club</strong>! Vamos a programar paso a paso.
+                                Vamos a programar paso a paso.
                                 No basta con copiar; entenderemos cada línea para ser campeones.
                             </p>
                         </div>
@@ -1570,11 +1636,10 @@ analogWrite(9, 100);  // Avanza motor Derecho (IN3 = 9)
                                 </div>
                                 <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
                                     <pre class="monaco-light-theme" style="background-color: white;"><code id="code-paso1-v2" class="language-cpp">void setup() {
-  // Estos son los "músculos" (Motores L298N)
-  pinMode(5, OUTPUT); // Motor Izquierdo
-  pinMode(6, OUTPUT); // Motor Izquierdo
-  pinMode(9, OUTPUT); // Motor Derecho
-  pinMode(10, OUTPUT); // Motor Derecho
+  pinMode(5, OUTPUT); // Motor Izquierdo (IN1)
+  pinMode(6, OUTPUT); // Motor Izquierdo (IN2)
+  pinMode(9, OUTPUT); // Motor Derecho (IN3)
+  pinMode(10, OUTPUT); // Motor Derecho (IN4)
   
   // Estos son los "sentidos" (Sensores infrarrojos)
   pinMode(2, INPUT); // Sensor Izquierdo
@@ -1695,11 +1760,10 @@ void loop() {
                                 </div>
                                 <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
                                     <pre><code id="code-paso2-v2" class="language-cpp">void setup() {
-  // Estos son los "músculos" (Motores L298N)
-  pinMode(5, OUTPUT); // Motor Izquierdo
-  pinMode(6, OUTPUT); // Motor Izquierdo
-  pinMode(9, OUTPUT); // Motor Derecho
-  pinMode(10, OUTPUT); // Motor Derecho
+  pinMode(5, OUTPUT); // Motor Izquierdo (IN1)
+  pinMode(6, OUTPUT); // Motor Izquierdo (IN2)
+  pinMode(9, OUTPUT); // Motor Derecho (IN3)
+  pinMode(10, OUTPUT); // Motor Derecho (IN4)
   
   // Estos son los "sentidos" (Sensores infrarrojos)
   pinMode(2, INPUT); // Sensor Izquierdo
@@ -1766,11 +1830,10 @@ void loop() {
                                 </div>
                                 <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
                                     <pre><code id="code-paso3-v2" class="language-cpp">void setup() {
-  // Estos son los "músculos" (Motores L298N)
-  pinMode(5, OUTPUT); // Motor Izquierdo
-  pinMode(6, OUTPUT); // Motor Izquierdo
-  pinMode(9, OUTPUT); // Motor Derecho
-  pinMode(10, OUTPUT); // Motor Derecho
+  pinMode(5, OUTPUT); // Motor Izquierdo (IN1)
+  pinMode(6, OUTPUT); // Motor Izquierdo (IN2)
+  pinMode(9, OUTPUT); // Motor Derecho (IN3)
+  pinMode(10, OUTPUT); // Motor Derecho (IN4)
   
   // Estos son los "sentidos" (Sensores infrarrojos)
   pinMode(2, INPUT); // Sensor Izquierdo
@@ -1837,11 +1900,10 @@ void loop() {
                                 </div>
                                 <div class="p-6 overflow-x-auto leading-relaxed bg-white h-full monaco-light-theme">
                                     <pre><code id="code-paso4-v2" class="language-cpp">void setup() {
-  // Estos son los "músculos" (Motores L298N)
-  pinMode(5, OUTPUT); // Motor Izquierdo
-  pinMode(6, OUTPUT); // Motor Izquierdo
-  pinMode(9, OUTPUT); // Motor Derecho
-  pinMode(10, OUTPUT); // Motor Derecho
+  pinMode(5, OUTPUT); // Motor Izquierdo (IN1)
+  pinMode(6, OUTPUT); // Motor Izquierdo (IN2)
+  pinMode(9, OUTPUT); // Motor Derecho (IN3)
+  pinMode(10, OUTPUT); // Motor Derecho (IN4)
   
   // Estos son los "sentidos" (Sensores infrarrojos)
   pinMode(2, INPUT); // Sensor Izquierdo
@@ -2741,15 +2803,20 @@ void loop() {
                     <!-- Arduino Mentor IA -->
                     <div
                         class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all flex flex-col border border-slate-200 group">
-                        <div class="h-48 bg-gradient-to-r from-teal-400 to-emerald-500 flex items-center justify-center p-6 relative overflow-hidden">
-                            <i data-lucide="bot" class="w-20 h-20 text-white opacity-90 group-hover:scale-110 transition-transform duration-500"></i>
+                        <div
+                            class="h-48 bg-gradient-to-r from-teal-400 to-emerald-500 flex items-center justify-center p-6 relative overflow-hidden">
+                            <i data-lucide="bot"
+                                class="w-20 h-20 text-white opacity-90 group-hover:scale-110 transition-transform duration-500"></i>
                             <div class="absolute inset-x-0 bottom-4 flex items-end justify-center">
-                                <span class="bg-white text-emerald-600 font-bold px-3 py-1 rounded shadow-md text-sm uppercase tracking-wide">Asistente IA</span>
+                                <span
+                                    class="bg-white text-emerald-600 font-bold px-3 py-1 rounded shadow-md text-sm uppercase tracking-wide">Asistente
+                                    IA</span>
                             </div>
                         </div>
                         <div class="p-6 flex flex-col flex-grow">
                             <h2 class="text-xl font-bold text-slate-800 mb-2 leading-tight">Arduino Mentor IA</h2>
-                            <p class="text-slate-600 text-sm mb-6 flex-grow">Un asistente virtual potenciado por inteligencia artificial para resolver tus dudas de cÃ³digo y electrÃ³nica.</p>
+                            <p class="text-slate-600 text-sm mb-6 flex-grow">Un asistente virtual potenciado por
+                                inteligencia artificial para resolver tus dudas de cÃ³digo y electrÃ³nica.</p>
                             <a href="https://arduino-mentor-171318529587.us-west1.run.app/" target="_blank"
                                 class="block w-full py-3 px-4 bg-[#f4fffc] hover:bg-emerald-600 text-emerald-700 hover:text-white font-semibold text-center rounded-xl border border-emerald-100 transition-all shadow-sm">
                                 Hablar con el Mentor
