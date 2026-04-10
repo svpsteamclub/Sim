@@ -136,6 +136,11 @@ const arduinoAPI = {
 
         return val;
     },
+    analogRead: (pin) => {
+        // Aprovechamos la lógica de digitalRead pero retornamos 750 (negro) o 250 (blanco)
+        let digitalVal = arduinoAPI.digitalRead(pin);
+        return digitalVal === 1 ? 750 : 250;
+    },
     // Add digitalWrite for completeness, as some use it for full forward/reverse on L298N
     digitalWrite: (pin, value) => {
         arduinoAPI.analogWrite(pin, value === arduinoAPI.HIGH ? 255 : 0);
