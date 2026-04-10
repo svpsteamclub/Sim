@@ -92,7 +92,7 @@ const arduinoAPI = {
         const resolveUIPin = (uiVal) => {
             if (typeof uiVal === 'string' && uiVal.startsWith('A')) {
                 const num = parseInt(uiVal.substring(1));
-                return 14 + num; // Map A0-A5 to 14-19
+                return 14 + num; // Map A0-A7 to 14-21
             }
             return parseInt(uiVal);
         }
@@ -254,7 +254,7 @@ const arduinoAPI = {
     LOW: 0,
     INPUT: "INPUT",
     OUTPUT: "OUTPUT",
-    A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19, // Standard Arduino Uno mapping
+    A0: 14, A1: 15, A2: 16, A3: 17, A4: 18, A5: 19, A6: 20, A7: 21, // Standard Arduino Uno mapping
     // Arduino math functions (global in C++, but need Math.* in JS)
     abs: (x) => Math.abs(x),
     min: (a, b) => Math.min(a, b),

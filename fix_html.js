@@ -1,11 +1,1 @@
-const fs = require('fs');
-let html = fs.readFileSync('index.html', 'utf8');
-const searchStr = '<div class="editor-help"';
-const closingBracket = html.indexOf('>', html.indexOf(searchStr));
-if (closingBracket !== -1) {
-    const toReplace = html.substring(html.indexOf(searchStr), closingBracket + 1);
-    console.log("Replacing:", toReplace);
-    html = html.replace(toReplace, '<div class="editor-help max-w-5xl mx-auto w-full">');
-    fs.writeFileSync('index.html', html);
-    console.log("Done");
-}
+const fs = require("fs"); let html = fs.readFileSync("index.html", "utf8"); html = html.replace(/<option value="A5">A5 — Analógico \/ I2C SCL<\/option>/g, `<option value="A5">A5 — Analógico / I2C SCL</option>\n                                <option value="A6">A6 — Analógico</option>\n                                <option value="A7">A7 — Analógico</option>`); fs.writeFileSync("index.html", html);
