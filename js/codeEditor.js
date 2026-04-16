@@ -137,9 +137,10 @@ const arduinoAPI = {
         return val;
     },
     analogRead: (pin) => {
-        // Aprovechamos la lógica de digitalRead pero retornamos 750 (negro) o 250 (blanco)
+        // En muchos robots reales, la lectura analógica de la línea (negro) da un valor bajo, 
+        // y el fondo (blanco) da un valor alto (inversor). Ajustamos para coincidir con tu lógica (< umbral).
         let digitalVal = arduinoAPI.digitalRead(pin);
-        return digitalVal === 1 ? 750 : 250;
+        return digitalVal === 1 ? 250 : 750;
     },
     // Add digitalWrite for completeness, as some use it for full forward/reverse on L298N
     digitalWrite: (pin, value) => {
